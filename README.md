@@ -12,9 +12,10 @@ Right now, you need to install it using developer mode. I plan to put this in th
 
 > :warning: If an error is shown after loading, this is due to soon deprecation of manifest v2. The extension will still work as of now. Manifest will be updated soon.
 
-When visiting a user profile on other Mastodon instances, the follow button will now redirect you to your home instance.
 ## Setup
 - Click the extension icon to set your Mastadon instance (like "infosec.exchange").
+
+When visiting a user profile on other Mastodon instances, the follow button will now redirect you to your home instance. The redirection is shortly indicated in the follow button itself. Info modals are blocked because they are not needed due to redirection.
 
 
 
