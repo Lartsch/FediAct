@@ -1,5 +1,5 @@
 # FediFollow-Chrome
-A Chrome extension that simplifies following Fediverse users on other instances than your own by automatically redirecting you to your instance when pressing a follow button. Should work for other Chromium browsers too, as well as Kiwi browser on Android. It was tested with about 20 instances and supports different instance layouts/designs.
+A Chrome extension that simplifies following Fediverse/Mastodon users on other instances than your own by automatically redirecting you to your instance when pressing a follow button. Should work for other Chromium browsers too, as well as Kiwi browser on Android. It was tested with about 20 instances and supports different instance layouts/designs.
 
 I made this since I could only find a working extension for Firefox, that does the same (Simplified Federation).
 
