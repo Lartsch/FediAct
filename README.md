@@ -16,3 +16,5 @@ Right now, you need to install it using developer mode. I plan to put this in th
 
 ## Todos
 - Update to manifest v3
+- Review if permissions in current manifest are actually needed like that
+- If I find myself to be bored, probably more
