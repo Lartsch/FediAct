@@ -1,8 +1,8 @@
 {
   "name": "FediFollow",
   "version": "0.0.1",
-  "description": "Simplifies following Fediverse user on other instances than your own. You need to set your instance and need to be logged in to it. Built by: Github @lartsch, Fediverse lartsch@infosec.exchange",
-  "manifest_version": 2,
+  "description": "Simplifies following Fediverse user on other instances than your own. Visit https://github.com/lartsch/FediFollow-Chrome for more.",
+  "manifest_version": 3,
   "content_scripts": [
 	{
 		"matches": ["*://*/*"],
@@ -11,16 +11,14 @@
 	}
   ],
   "permissions": [
-    "https://*/*",
-    "http://*/*",
-    "tabs",
-	"storage"
+	"storage",
+	"tabs"
   ],
-  "background":
-  {
-	"scripts": ["lib/jquery-3.6.1.min.js"]
-  },
-  "browser_action":
+  "host_permissions": [
+    "https://*/*",
+    "http://*/*"
+  ],
+  "action":
   {
 	"default_popup": "popup.html",
 	"default_icon": "icon/48.png",
