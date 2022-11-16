@@ -57,8 +57,6 @@ function processButton() {
 							$(found).text("Redirecting...");
 							// timeout 1000ms to make it possible to notice the redirection indication
 							setTimeout(function() {
-								// build the new url from home instance, user handle and current domain name
-								var request;
 								// if more than 1 @, we have a domain
 								if ((handle.match(/@/g) || []).length > 1) {
 									// but if its our own...
@@ -67,10 +65,10 @@ function processButton() {
 										handle = "@"+ handle.split("@")[1];
 									}
 									// request string
-									request = 'https://'+instance+'/'+handle, '_blank';
+									var request = 'https://'+instance+'/'+handle;
 								} else {
 									// with only 1 @, we have a local handle and need to append to domain
-									request = 'https://'+instance+'/'+handle+'@'+document.domain, '_blank';
+									var request = 'https://'+instance+'/'+handle+'@'+document.domain;
 								}
 								// open the window
 								var win = window.open(request, '_blank');
