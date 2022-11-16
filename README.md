@@ -10,7 +10,7 @@ Right now, you need to install it using developer mode. I plan to put this in th
 3. Click the "Load unpacked" button and then select the folder of the unpacked extension (should be "FediFollow-Chrome-main").
     + If you have a "Load ZIP" option you can also directly load the downloaded zip file
 
-> :warning: If an error is shown after loading, this is due to soon deprecation of manifest v2. The extension will still work as of now. Manifest will be updated soon.
+> :warning: For reasons unknown to me, Edge showed weird errors after importing clicking the "issues" link, but the errors made no sense and the extension still worked fine.
 
 ## Setup
 - Click the extension icon to set your Mastadon instance (like "infosec.exchange").
