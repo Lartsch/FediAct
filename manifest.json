@@ -1,0 +1,32 @@
+{
+  "name": "FediFollow",
+  "version": "0.0.1",
+  "description": "Simplifies following Fediverse user on other instances than your own. You need to set your instance and need to be logged in to it. Built by: Github @lartsch, Fediverse lartsch@infosec.exchange",
+  "manifest_version": 2,
+  "content_scripts": [
+	{
+		"matches": ["*://*/*"],
+		"js": ["lib/jquery-3.6.1.min.js","inject.js"],
+		"run_at": "document_start"
+	}
+  ],
+  "permissions": [
+    "https://*/*",
+    "http://*/*",
+    "tabs",
+	"storage"
+  ],
+  "background":
+  {
+	"scripts": ["lib/jquery-3.6.1.min.js"]
+  },
+  "browser_action":
+  {
+	"default_popup": "popup.html",
+	"default_icon": "icon/48.png",
+	"default_title": "Home instance setting"
+  },
+  "icons": {
+    "48": "icon/48.png"
+  }
+}

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  </head>
+  <body>
+   <div id="mhi-wrapper">
+    <div id="mhi-containers">
+	  <form id="homeinstance">
+		<label for="homeinstance">Mastodon home instance:</label><br>
+		<input type="text" id="homeinstance" name="homeinstance" placeholder="mastodon.social">
+		<label for="alert">Alert on redirect:</label><br>
+		<input type="checkbox" id="alert" name="alert"><br><br>
+		<input type="submit" value="Submit">
+		<span id="indicator" style="display:none">Settings saved!</span>
+	  </form>
+    </div>
+   </div>
+   <script src="lib/jquery-3.6.1.min.js"></script>
+   <script src="popup.js"></script>
+  </body>
+</html>
