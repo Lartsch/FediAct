@@ -18,5 +18,6 @@ Right now, you need to install it using developer mode. The extension is already
 When visiting a user profile on other Mastodon instances, the follow button will now redirect you to your home instance. The redirection is shortly indicated in the follow button itself. Info modals are blocked because they are not needed due to redirection.
 
 ## Todos
+- Publish to Chrome Webstore (in progress, currently in review by Google)
 - Review if permissions in current manifest are actually needed like that
 - If I find myself to be bored, probably more
