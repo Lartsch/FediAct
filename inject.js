@@ -58,12 +58,22 @@ function processButton() {
 							// timeout 1000ms to make it possible to notice the redirection indication
 							setTimeout(function() {
 								// build the new url from home instance, user handle and current domain name
-								// and open the url
-								if ((handle.match(/@/g) || []).length > 1)
-									var win = window.open('https://'+instance+'/'+handle, '_blank');
-								else {
-									var win = window.open('https://'+instance+'/'+handle+'@'+document.domain, '_blank');
+								var request;
+								// if more than 1 @, we have a domain
+								if ((handle.match(/@/g) || []).length > 1) {
+									// but if its our own...
+									if (handle.includes(instance)) {
+										// ...then we need to remove it
+										handle = "@"+ handle.split("@")[1];
+									}
+									// request string
+									request = 'https://'+instance+'/'+handle, '_blank';
+								} else {
+									// with only 1 @, we have a local handle and need to append to domain
+									request = 'https://'+instance+'/'+handle+'@'+document.domain, '_blank';
 								}
+								// open the window
+								var win = window.open(request, '_blank');
 								// focus the new tab if open was successfull
 								if (win) {
 									win.focus();
