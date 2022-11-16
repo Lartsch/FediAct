@@ -19,5 +19,6 @@ When visiting a user profile on other Mastodon instances, the follow button will
 
 ## Todos
 - Publish to Chrome Webstore (in progress, currently in review by Google)
+- Implement blacklist / whitelist for domains / instances
 - Review if permissions in current manifest are actually needed like that
 - If I find myself to be bored, probably more
