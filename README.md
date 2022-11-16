@@ -8,6 +8,7 @@ Right now, you need to install it using developer mode. I plan to put this in th
 1. Download this repository as ZIP or the current release ZIP file and extract it somewhere.
 2. Go to your Chrome extension page and enable developer mode.
 3. Click the "Load unpacked" button and then select the folder of the unpacked extension (should be "FediFollow-Chrome-main").
+    + If you have a "Load ZIP" option you can also directly load the downloaded zip file
 
 ## Setup
 - Click the extension icon to set your Mastadon instance (like "infosec.exchange").
