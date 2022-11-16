@@ -54,10 +54,6 @@ function processButton() {
 		$(document).ready(function() {
 			// check if we are on a mastodon site with a handle in url
 			if (($("head").text().includes("mastodon") || $("head").text().includes("Mastodon") || $("div#mastodon").length) && window.location.href.includes("@")) {
-				for (const selector of buttonPaths) {
-					$(selector).attr("target","_self");
-					$(selector).attr("href","#");
-				}
 				// wait until follow button appears
 				waitForEl(buttonPaths, function(found) {
 					// grab the user handle
@@ -67,6 +63,7 @@ function processButton() {
 						// setup the button click listener
 						$(found).click(function(e) {
 							e.preventDefault();
+							e.stopImmediatePropagation();
 							// wait until overlay apepars, then click in top left corner to close it (see comment above)
 							waitForEl(["div.modal-root div.modal-root__overlay"], function(foundoverlay) {
 								click(0,0);
