@@ -29,23 +29,6 @@ function extractHandle(url) {
   return match.groups.handle
 } 
 
-// found no other way to close one kind of modal
-// using .delete() will result in an an app error, .hide() does work but still blocks the interface, removing the class "-with-modals--active" also doesnt work
-// so we use this function to simulate a click in the top left corner to close the modal
-function click(x,y){
-    var ev = document.createEvent("MouseEvent");
-    var el = document.elementFromPoint(x,y);
-    ev.initMouseEvent(
-        "click",
-        true /* bubble */, true /* cancelable */,
-        window, null,
-        x, y, 0, 0, /* coordinates */
-        false, false, false, false, /* modifier keys */
-        0 /*left*/, null
-    );
-    el.dispatchEvent(ev);
-}
-
 // main function to listen for the follow button pressed and open a new tab with the home instance
 function processButton() {
 	// is this site on our home instance?
@@ -64,10 +47,6 @@ function processButton() {
 						$(found).click(function(e) {
 							e.preventDefault();
 							e.stopImmediatePropagation();
-							// wait until overlay apepars, then click in top left corner to close it (see comment above)
-							waitForEl(["div.modal-root div.modal-root__overlay"], function(foundoverlay) {
-								click(0,0);
-							});
 							// check the alert setting and show it if set
 							if (showAlert) {
 								alert("Redirecting to "+instance);
