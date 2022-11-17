@@ -14,7 +14,7 @@ Right now, you need to install it using developer mode. The extension is already
 
 ## Setup
 - Required: Click the extension icon to set your Mastadon instance (like "infosec.exchange")
-- Optional: Set the mode (all sites with blacklist (default) / no sites but those on whitelist)
+- Optional: Set the mode (all sites except those on blacklist (default) / no sites but those on whitelist)
 - Optional: Add domain names to the blacklist/whitelist textarea, one per line, for ex.
   ```
   mastadon.social
