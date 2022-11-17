@@ -4,6 +4,7 @@ var currentVal_alert;
 var currentVal_mode;
 var currentVal_whitelist;
 var currentVal_blacklist;
+var currentVal_target;
 
 // this performs loading the settings into the popup, reacting to changes and saving changes
 function popupTasks() {
@@ -20,6 +21,9 @@ function popupTasks() {
 				// we only set the mode if we have an actual value. otherwise the default should be left.
 		if (currentVal_mode) {
 			$("select#mode").val(currentVal_mode);
+		}
+		if (currentVal_target) {
+			$("select#target").val(currentVal_target);
 		}
 				// both containers are hidden by default
 		if ($("select#mode").val() == "whitelist") {
@@ -45,12 +49,15 @@ function popupTasks() {
 			var newVal_mode = $("select#mode").val();
 			var newVal_whitelist = $("textarea#whitelist_content").val();
 			var newVal_blacklist = $("textarea#blacklist_content").val();
+			var newVal_target = $("select#target").val();
 			chrome.storage.local.set({fedifollow_homeinstance: newVal_instance}, function() {
 				chrome.storage.local.set({fedifollow_alert: newVal_alert}, function() {
 					chrome.storage.local.set({fedifollow_mode: newVal_mode}, function() {
 						chrome.storage.local.set({fedifollow_whitelist: newVal_whitelist}, function() {
 							chrome.storage.local.set({fedifollow_blacklist: newVal_blacklist}, function() {
-								$("span#indicator").show();
+								chrome.storage.local.set({fedifollow_target: newVal_target}, function() {
+									$("span#indicator").show();
+								});
 							});
 						});
 					});
@@ -71,7 +78,10 @@ chrome.storage.local.get(['fedifollow_homeinstance'], function(fetchedData) {
 				currentVal_whitelist = fetchedData.fedifollow_whitelist;
 				chrome.storage.local.get(['fedifollow_blacklist'], function(fetchedData) {
 					currentVal_blacklist = fetchedData.fedifollow_blacklist;
-					popupTasks()
+					chrome.storage.local.get(['fedifollow_target'], function(fetchedData) {
+						currentVal_target = fetchedData.fedifollow_target;
+						popupTasks()
+					});
 				});
 			});
 		});
