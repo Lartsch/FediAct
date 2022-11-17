@@ -11,11 +11,11 @@ Right now, you need to install it using developer mode. The extension is already
     + If you have a "Load ZIP" option you can also directly load the downloaded zip file
 
 ## Setup
-- Required: Click the extension icon to set your Mastadon instance (like "infosec.exchange")
+- Required: Click the extension icon to set your Mastodon instance (like "infosec.exchange")
 - Optional: Set the mode (all sites except those on blacklist (default) / no sites but those on whitelist)
 - Optional: Add domain names to the blacklist/whitelist textarea, one per line, for ex.
   ```
-  mastadon.social
+  mastodon.social
   bbq.snoot.com
   ```
 - Required: Hit "Submit" to update your settings
