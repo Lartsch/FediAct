@@ -4,7 +4,7 @@ A Chrome extension that simplifies following Fediverse/Mastodon users on other i
 I made this since I could only find a working extension for Firefox, that does the same (Simplified Federation).
 
 > **Note**
-> This worked with all instances tested, but I know there are some instances that use custom layouts/flavours or chose to hide the follow button when not logged in. So please be aware, that this extension can fail in some cases.
+> This worked with all instances tested, but I know there are some instances that use custom layouts/flavours or chose to hide the follow button when not logged in. Also, element identifiers might change over time so the extension needs to be updated. So please be aware, that this extension can fail in some cases. Feel free to submit pull requests.
 
 ## Installation
 Right now, you need to install it using developer mode. The extension is already submitted for review by Google, so it shouldn't be long until you can install it from the Chrome Webstore.
