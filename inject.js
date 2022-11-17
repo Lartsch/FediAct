@@ -2,7 +2,6 @@
 var buttonPaths = ["div.account__header button.logo-button","div.public-account-header a.logo-button"];
 var domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/;
 var handleRegex = /^(?:https?:\/\/(www\.)?.*\..*?\/)(?<handle>@\w+(?:@\w+\.\w+)?)(?:\/?.*|\z)$/;
-var target = "_blank";
 var enableConsoleLog = true;
 var logPrepend = "[FediFollow]";
 var maxElementWaitFactor = 200; // x 100ms for total time
@@ -13,6 +12,7 @@ var showAlert;
 var mode;
 var whitelist;
 var blacklist;
+var target;
 
 // wrapper to prepend to log messages
 function log(text) {
@@ -198,6 +198,9 @@ function checkSettings() {
 	if ($.inArray(mode, ["blacklist","whitelist"]) < 0) {
 		mode = "blacklist";
 	}
+	if ($.inArray(target, ["_blank","_self"]) < 0) {
+		target = "_blank";
+	}
 	if (mode == "whitelist") {
 		// if in whitelist mode and the cleaned whitelist is empty, return false
 		whitelist = processDomainList(whitelist);
@@ -228,16 +231,19 @@ function run() {
 					// blacklist
 					chrome.storage.local.get(['fedifollow_blacklist'], function(fetchedData) {
 						blacklist = fetchedData.fedifollow_blacklist;
-						if (checkSettings()) {
-								// check if the current URL should be processed
-							if (checkSite()) {
-								// ... run the actual script (once for the start and then in a loop depending on url changes)
-								processSite();
-								urlChangeLoop();
-							} else {
-								log("Will not process this URL.")
+						chrome.storage.local.get(['fedifollow_target'], function(fetchedData) {
+							target = fetchedData.fedifollow_target;
+							if (checkSettings()) {
+									// check if the current URL should be processed
+								if (checkSite()) {
+									// ... run the actual script (once for the start and then in a loop depending on url changes)
+									processSite();
+									urlChangeLoop();
+								} else {
+									log("Will not process this URL.")
+								}
 							}
-						}
+						});
 					});
 				});		
 			});
