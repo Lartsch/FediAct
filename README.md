@@ -13,7 +13,14 @@ Right now, you need to install it using developer mode. The extension is already
 > :warning: For reasons unknown to me, Edge showed weird errors after importing & clicking the "issues" link, but the errors made no sense and the extension still worked fine.
 
 ## Setup
-- Click the extension icon to set your Mastadon instance (like "infosec.exchange").
+- Required: Click the extension icon to set your Mastadon instance (like "infosec.exchange")
+- Optional: Set the mode (all sites with blacklist (default) / no sites but those on whitelist)
+- Optional: Add domain names to the blacklist/whitelist textarea, one per line, for ex.
+  ```
+  mastadon.social
+  bbq.snoot.com
+  ```
+- Required: Hit "Submit" to update your settings
 
 When visiting a user profile on other Mastodon instances, the follow button will now redirect you to your home instance. The redirection is shortly indicated in the follow button itself. Info modals are blocked because they are not needed due to redirection.
 
