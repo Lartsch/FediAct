@@ -1,21 +1,40 @@
 <!DOCTYPE html>
 <html>
   <head>
+		<style>
+			.hide {
+				display: none;
+			}
+		</style>
   </head>
   <body>
    <div id="mhi-wrapper">
     <div id="mhi-containers">
-	  <form id="homeinstance">
-		<label for="homeinstance">Mastodon home instance:</label><br>
-		<input type="text" id="homeinstance" name="homeinstance" placeholder="mastodon.social"><br>
-		<label for="alert">Alert on redirect:</label><br>
-		<input type="checkbox" id="alert" name="alert"><br><br>
-		<input type="submit" value="Submit">
-		<span id="indicator" style="display:none">Settings saved!</span>
-	  </form>
+			<form id="fedifollow-settings">
+				<label for="homeinstance">Mastodon home instance:</label><br>
+				<input type="text" id="homeinstance" name="homeinstance" placeholder="mastodon.social"><br>
+				<label for="alert">Alert on redirect:</label><br>
+				<input type="checkbox" id="alert" name="alert"><br>
+				<label for="mode">Mode:</label><br>
+				<select name="mode" id="mode" selected="blacklist">
+					<option id="blacklist" value="blacklist">All (with blacklist)</option>
+					<option id="whitelist" value="whitelist">Whitelist</option>
+				</select><br>
+				<div class="hide" id="blacklist_input">
+					<label for="blacklist_content">Blacklist (one per line):</label><br>
+					<textarea id="blacklist_content" name="blacklist_content" placeholder="mastodon.social&#10;infosec.exchange"></textarea><br>
+				</div>
+				<div class="hide" id="whitelist_input">
+					<label for="whitelist_content">Whitelist (one per line):</label><br>
+					<textarea id="whitelist_content" name="whitelist_content" placeholder="mastodon.social&#10;infosec.exchange"></textarea><br>
+				</div><br>
+				<input type="submit" value="Submit">
+				<span id="indicator" style="display:none">Settings saved!</span>
+			</form>
     </div>
    </div>
    <script src="lib/jquery-3.6.1.min.js"></script>
+	 <script src="lib/chrome-local-storage-api.js"></script>
    <script src="popup.js"></script>
   </body>
 </html>
