@@ -30,6 +30,6 @@ The whitelist mode is especially useful if you do not want the extension to run 
 
 ## Todos
 - Publish to Chrome Webstore (in progress, currently in review by Google)
-- Implement blacklist / whitelist for domains / instances so the scripts do not have to run on all sites
+- Add feature to indicate if you are already following a user when browsing his profile on another instance (this requires calls to the home instance, will look into it soon)
 - Review if permissions in current manifest are actually needed like that
 - If I find myself to be bored, probably more
