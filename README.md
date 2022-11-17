@@ -24,6 +24,10 @@ Right now, you need to install it using developer mode. The extension is already
 
 When visiting a user profile on other Mastodon instances, the follow button will now redirect you to your home instance. The redirection is shortly indicated in the follow button itself. Info modals are blocked because they are not needed due to redirection.
 
+## Screenshots
+![Extension Popup](https://github.com/lartsch/FediFollow-Chrome/blob/main/img/screenshot1.PNG?raw=true)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+![Redirect Indication](https://github.com/lartsch/FediFollow-Chrome/blob/main/img/screenshot2.PNG?raw=true)
+
 ## Todos
 - Publish to Chrome Webstore (in progress, currently in review by Google)
 - Implement blacklist / whitelist for domains / instances so the scripts do not have to run on all sites
