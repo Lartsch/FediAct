@@ -215,7 +215,7 @@ function checkSettings() {
 function run() {
 	// get the extension setting for the users' Mastadon home instance
 	chrome.storage.local.get(['fedifollow_homeinstance'], function(fetchedData) {
-		instance = fetchedData.fedifollow_homeinstance;
+		instance = fetchedData.fedifollow_homeinstance.trim();
 		// and alert setting
 		chrome.storage.local.get(['fedifollow_alert'], function(fetchedData) {
 			showAlert = fetchedData.fedifollow_alert;
