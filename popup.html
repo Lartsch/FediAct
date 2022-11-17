@@ -15,6 +15,11 @@
 				<input type="text" id="homeinstance" name="homeinstance" placeholder="mastodon.social"><br>
 				<label for="alert">Alert on redirect:</label><br>
 				<input type="checkbox" id="alert" name="alert"><br>
+				<label for="target">Open in:</label><br>
+				<select name="target" id="target" selected="_blank">
+					<option id="target_blank" value="_blank">New tab</option>
+					<option id="target_self" value="_self">Same tab</option>
+				</select><br>
 				<label for="mode">Mode:</label><br>
 				<select name="mode" id="mode" selected="blacklist">
 					<option id="blacklist" value="blacklist">All (with blacklist)</option>
