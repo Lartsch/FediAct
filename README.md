@@ -10,8 +10,6 @@ Right now, you need to install it using developer mode. The extension is already
 3. Click the "Load unpacked" button and then select the folder of the unpacked extension (should be "FediFollow-Chrome-main").
     + If you have a "Load ZIP" option you can also directly load the downloaded zip file
 
-> :warning: For reasons unknown to me, Edge showed weird errors after importing & clicking the "issues" link, but the errors made no sense and the extension still worked fine.
-
 ## Setup
 - Required: Click the extension icon to set your Mastadon instance (like "infosec.exchange")
 - Optional: Set the mode (all sites except those on blacklist (default) / no sites but those on whitelist)
