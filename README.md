@@ -35,7 +35,8 @@ Right now, you need to install it using developer mode. The extension is already
 ![Extension Popup](https://github.com/lartsch/FediFollow-Chrome/blob/main/img/screenshot1.PNG?raw=true)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 ![Redirect Indication](https://github.com/lartsch/FediFollow-Chrome/blob/main/img/screenshot2.PNG?raw=true)
 
-## Todos
+## Todos / Planned features 
+- Add support for post interactions
 - Publish to Chrome Webstore (in progress, currently in review by Google)
 - Find additional layouts/flavours to add identifiers for
 - Support for profiles views with follow button disabled
