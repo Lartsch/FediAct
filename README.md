@@ -1,10 +1,11 @@
-# FediFollow-Chrome
+# FediFollow
 A Chrome extension that simplifies following Mastodon users on other instances than your own by automatically redirecting you to your instance when pressing a follow button. The redirection is shortly indicated in the follow button itself and additional modals are blocked. Should work for other Chromium browsers too, as well as Kiwi browser on Android. It was tested with about 20 instances and supports different instance layouts/flavours.
 
 I made this since I could only find a working extension for Firefox, that does the same (Simplified Federation).
 
 ## Installation
-Right now, you need to install it using developer mode. The extension is already submitted for review by Google, so it shouldn't be long until you can install it from the Chrome Webstore.
+Right now, this needs to be installed in debugging / developer mode. Soon it will be available on Chrome Webstore / Firefox addon store.
+### Chrome
 1. Clone this repo or download it as ZIP (in this case, extract it somewhere).
 2. Go to your Chrome extension page and enable developer mode.
 3. Click the "Load unpacked" button and then select the folder of the unpacked extension (should be "FediFollow-Chrome-main").
