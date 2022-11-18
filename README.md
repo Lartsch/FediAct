@@ -54,5 +54,5 @@ Right now, this needs to be installed in debugging / developer mode. Soon it wil
 - Add support for Firefox (DONE)
 - Add support for whitelist/blacklist (DONE)
 - Add feature to indicate if you are already following a user when browsing his profile on another instance (this requires calls to the home instance, will look into it soon)
-- Review if permissions in current manifest are actually needed like that
+- Review if permissions in current manifest are actually needed like that (DONE)
 - If I find myself to be bored, probably more
