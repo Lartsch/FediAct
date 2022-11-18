@@ -5,11 +5,15 @@ I made this since I could only find a working extension for Firefox, that does t
 
 ## Installation
 Right now, this needs to be installed in debugging / developer mode. Soon it will be available on Chrome Webstore / Firefox addon store.
+1. Clone this repo or download it as ZIP (in this case, extract it somewhere)
 ### Chrome
-1. Clone this repo or download it as ZIP (in this case, extract it somewhere).
-2. Go to your Chrome extension page and enable developer mode.
-3. Click the "Load unpacked" button and then select the folder of the unpacked extension (should be "FediFollow-Chrome-main").
-    + If you have a "Load ZIP" option you can also directly load the downloaded zip file
+2. Go to your Chrome extension page (URL: chrome://extensions) and enable developer mode
+3. Click the "Load unpacked" button and then select the folder of the unpacked extension (should be "FediFollow-Chrome-main")
+    + If you have a "Load ZIP" option you can also directly load the downloaded ZIP file
+### Firefox
+2. Open the debugging page (URL: about:debugging)
+3. Select "This Firefox"
+4. Click the "Load Temporary Add-on" button and then select the firefox.zip file in the folder you extracted earlier
 
 ## Setup
 - Required: Click the extension icon to set your Mastodon instance
