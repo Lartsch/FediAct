@@ -27,7 +27,7 @@ Right now, this needs to be installed in debugging / developer mode. Soon it wil
   ```
 - Required: Hit "Submit" to update your settings
 
-> **Additional usage notes**
+> **Note**
 > 1. Currently supports different flavours of Mastodon 4
 > 2. If the redirect is not working, you most likely are not logged in on your home instance
 > 3. The whitelist mode can be useful if you do not want the extension to run basic checks on every site (since it needs to determine if it is a Mastodon site). Not sure if the blacklist feature is good for anything but I still included it.
