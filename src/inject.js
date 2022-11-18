@@ -1,7 +1,8 @@
 // prep
 const buttonPaths = ["div.account__header button.logo-button","div.public-account-header a.logo-button"];
+const namePaths = ["div.account__header div.account__header__tabs__name small","div.public-account-header div.public-account-header__tabs__name small"]
 const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/;
-const handleRegex = /^(?:https?:\/\/(www\.)?.*\..*?\/)(?<handle>@\w+(?:@\w+\.\w+)?)(?:\/?.*|\z)$/;
+const handleRegex = /^(?:https?:\/\/(www\.)?.*\..*?\/)(?<handle>@\w+(?:@\w+\.\w+)?)\/?$/;
 const enableConsoleLog = true;
 const logPrepend = "[FediFollow]";
 const maxElementWaitFactor = 200; // x 100ms for total time
@@ -54,17 +55,16 @@ var waitForEl = function(counter, selectors, callback) {
 	}
 };
 
-// extract handle from any mastodon url
-var extractHandle = function(url, callback) {
-  // regex with named match group
-  var match = url.match(handleRegex);
-	match = match.groups.handle
-	// check if match is valid
-	ats = (match.match(/@/g) || []).length;
-	if (!(match == null) && ats >= 1 && ats <= 2) {
-		// return the named match group
-		callback(match);
+// extract handle from elements
+function extractHandle(selectors) {
+	// check all of the selectors
+	for (const selector of selectors) {
+		// if found
+		if ($(selector).length) {
+			return $(selector).text().trim();
+		}
 	}
+	return false;
 }
 
 function processDomainList(newLineList) {
@@ -122,66 +122,66 @@ function runWithSettings(settings) {
 	// main function to listen for the follow button pressed and open a new tab with the home instance
 	function processSite() {
 		// check if we have a handle in the url
-		if (window.location.href.includes("@")) {
-			// grab the user handle
-			extractHandle(window.location.href, function(handle) {	
-				// if we got one...
-				if (handle) {
-					// wait until follow button appears (document is already ready, but most content is loaded afterwards)
-					waitForEl(0, buttonPaths, function(found) {
-						if (found) {
-							// setup the button click listener
-							$(found).click(function(e) {
-								// prevent default action and other handlers
-								e.preventDefault();
-								e.stopImmediatePropagation();
-								// check the alert setting and show it if set
-								if (settings.fedifollow_alert) {
-									alert("Redirecting to "+settings.fedifollow_homeinstance);
+		if (handleRegex.test(window.location.href)) {
+			// wait until follow button appears (document is already ready, but most content is loaded afterwards)
+			waitForEl(0, buttonPaths, function(found) {
+				if (found) {
+					var handle = extractHandle(namePaths);
+					if (handle) {
+						// setup the button click listener
+						$(found).click(function(e) {
+							// prevent default action and other handlers
+							e.preventDefault();
+							e.stopImmediatePropagation();
+							// check the alert setting and show it if set
+							if (settings.fedifollow_alert) {
+								alert("Redirecting to "+settings.fedifollow_homeinstance);
+							}
+							// backup the button text
+							var originaltext = $(found).text();
+							// replace the button text to indicate redirection
+							$(found).text("Redirecting...");
+							// timeout 1000ms to make it possible to notice the redirection indication
+							setTimeout(function() {
+								// if more than 1 @, we have a domain in the handle
+								if ((handle.match(/@/g) || []).length > 1) {
+									// but if its our own...
+									if (handle.includes(settings.fedifollow_homeinstance)) {
+										// ...then we need to remove it
+										handle = "@"+ handle.split("@")[1];
+									}
+									// request string
+									var request = 'https://'+settings.fedifollow_homeinstance+'/'+handle;
+								} else {
+									// with only 1 @, we have a local handle and need to append the domain
+									// this should in fact not happen since the account-header should always include the full handle, not local only, unlike the URL
+									// in some cases, appending the full domain (including subdomains) will not work
+									// since some instances run on a subdomain but do not use the subdomain for user handles (ex. mastodon.pub.solar)
+									var request = 'https://'+settings.fedifollow_homeinstance+'/'+handle+'@'+document.domain;
 								}
-								// backup the button text
-								var originaltext = $(found).text();
-								// replace the button text to indicate redirection
-								$(found).text("Redirecting...");
-								// timeout 1000ms to make it possible to notice the redirection indication
-								setTimeout(function() {
-									// if more than 1 @, we have a domain in the handle
-									if ((handle.match(/@/g) || []).length > 1) {
-										// but if its our own...
-										if (handle.includes(settings.fedifollow_homeinstance)) {
-											// ...then we need to remove it
-											handle = "@"+ handle.split("@")[1];
-										}
-										// request string
-										var request = 'https://'+settings.fedifollow_homeinstance+'/'+handle;
-									} else {
-										// with only 1 @, we have a local handle and need to append the domain
-										var request = 'https://'+settings.fedifollow_homeinstance+'/'+handle+'@'+document.domain;
-									}
-									// open the window
-									var win = window.open(request, settings.fedifollow_target);
-									log("Redirected to " + request)
-									// focus the new tab if open was successfull
-									if (win) {
-										win.focus();
-									} else {
-										// otherwise notify user...
-										log('Could not open new window. Please allow popups for this website.');
-									}
-									// restore original button text
-									$(found).text(originaltext);
-								}, 1000);
-							});
-						} else {
-							log("Could not find any follow button.");
-						}
-					});
+								// open the window
+								var win = window.open(request, settings.fedifollow_target);
+								log("Redirected to " + request)
+								// focus the new tab if open was successfull
+								if (win) {
+									win.focus();
+								} else {
+									// otherwise notify user...
+									log('Could not open new window. Please allow popups for this website.');
+								}
+								// restore original button text
+								$(found).text(originaltext);
+							}, 1000);
+						});
+					} else {
+						log("Could not find a user handle.");
+					}
 				} else {
-					log("Could not find a handle.");
+					log("Could not find any follow button.");
 				}
 			});
 		} else {
-			log("No handle in this URL.");
+			log("Not a profile URL.");
 		}
 	}
 
