@@ -34,7 +34,6 @@ Right now, this needs to be installed in debugging / developer mode. Soon it wil
 >     - Instance chose to hide the follow button when not logged in (not supported yet)
 >     - It's not a Mastodon instance (not supported yet)
 >     - Element identifiers might change over time (extension needs to be updated)
->     - Some instances run on a subdomain but do not use the subdomain for user handles (not supported yet)
 >     - Sometime, even if the handle is correct, a direct redirect to your instance can result in the page loading forever. This seems to be some caching issue / your instance has never seen this user. You need to copy the complete handle into the search in this case and open the profile from there. After that, the redirect will work like usual, since your instance has loaded the user once.
 >
 > So please be aware, that this extension can fail in some cases. Feel free to submit pull requests / issues.
@@ -44,7 +43,6 @@ Right now, this needs to be installed in debugging / developer mode. Soon it wil
 ![Redirect Indication](https://github.com/lartsch/FediFollow-Chrome/blob/main/img/screenshot2.PNG?raw=true)
 
 ## Todos / Planned features 
-- Fix some rare cases where an instance runs on a subdomain but the handle uses the domain without subdomain (need to get the handle directly from the profile instead of URL)
 - Add support for post interactions
 - Add support for other implementations (Plemora, GNU Social, ...)
 - Publish to Chrome Webstore (IN PROGRESS)
@@ -52,6 +50,7 @@ Right now, this needs to be installed in debugging / developer mode. Soon it wil
 - Find additional layouts/flavours to add identifiers for
 - Support for profiles views with follow button disabled
 - Add support for Firefox (DONE)
+- Fix some rare cases where an instance runs on a subdomain but the handle uses the domain without subdomain (need to get the handle directly from the profile instead of URL) (DONE)
 - Add support for whitelist/blacklist (DONE)
 - Add feature to indicate if you are already following a user when browsing his profile on another instance (this requires calls to the home instance, will look into it soon)
 - Review if permissions in current manifest are actually needed like that (DONE)
