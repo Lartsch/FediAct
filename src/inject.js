@@ -18,6 +18,9 @@ var settings = {
 	fedifollow_target: "_blank"
 }
 
+// fix for cross-browser storage api compatibility
+var browser, chrome;
+
 // wrappers to prepend to log messages
 function log(text) {
 	if (enableConsoleLog) {
@@ -240,9 +243,4 @@ function runWithSettings(settings) {
 
 }
 
-function loadSettings() {
-	const waitForSettings = (chrome || browser).storage.local.get(settings);
-	waitForSettings.then(runWithSettings, logerr);
-}
-
-loadSettings();
+(browser || chrome).storage.local.get(settings).then(runWithSettings, logerr);

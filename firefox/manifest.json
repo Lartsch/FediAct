@@ -2,7 +2,7 @@
   "name": "FediFollow",
   "version": "0.1.0",
   "description": "Simplifies following Fediverse user on other instances than your own. Visit https://github.com/lartsch/FediFollow-Chrome for more.",
-  "manifest_version": 3,
+  "manifest_version": 2,
   "content_scripts": [
 	{
 		"matches": ["*://*/*"],
@@ -11,17 +11,15 @@
 	}
   ],
   "permissions": [
-	"storage"
-  ],
-  "host_permissions": [
+	  "storage",
     "https://*/*",
     "http://*/*"
   ],
-  "action":
+  "browser_action":
   {
-	"default_popup": "src/popup.html",
-	"default_icon": "src/icon/48.png",
-	"default_title": "FediFollow settings"
+	  "default_popup": "src/popup.html",
+	  "default_icon": "src/icon/48.png",
+	  "default_title": "FediFollow settings"
   },
   "icons": {
     "48": "src/icon/48.png"

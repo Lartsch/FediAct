@@ -9,6 +9,9 @@ var settings = {
 	fedifollow_target: "_blank"
 }
 
+// fix for cross-browser storage api compatibility
+var browser, chrome;
+
 function onError(error){
 	console.error(`[FediFollow] Error: ${error}`)
 }
@@ -32,7 +35,7 @@ function popupTasks(settings) {
 		settings.fedifollow_blacklist = $("textarea#blacklist_content").val();
 		settings.fedifollow_target = $("select#target").val();
 		// write to storage
-		const waitForSaved = (chrome || browser).storage.local.set(settings);
+		const waitForSaved = (browser || chrome).storage.local.set(settings);
 		// show saved indicator after successful save
 		waitForSaved.then(showConfirmation(), onError);
 	}
@@ -77,5 +80,4 @@ function popupTasks(settings) {
 
 }
 
-const waitForSettings = (chrome || browser).storage.local.get(settings);
-waitForSettings.then(popupTasks, onError);
+(browser || chrome).storage.local.get(settings).then(popupTasks, onError);

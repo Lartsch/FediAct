@@ -39,12 +39,14 @@ Right now, you need to install it using developer mode. The extension is already
 ![Redirect Indication](https://github.com/lartsch/FediFollow-Chrome/blob/main/img/screenshot2.PNG?raw=true)
 
 ## Todos / Planned features 
-- Add support for Firefox
+- Fix some rare cases where an instance runs on a subdomain but the handle uses the domain without subdomain (need to get the handle directly from the profile instead of URL)
 - Add support for post interactions
 - Add support for other implementations (Plemora, GNU Social, ...)
-- Publish to Chrome Webstore (in progress, currently in review by Google)
+- Publish to Chrome Webstore (IN PROGRESS)
 - Find additional layouts/flavours to add identifiers for
 - Support for profiles views with follow button disabled
+- Add support for Firefox (DONE)
+- Add support for whitelist/blacklist (DONE)
 - Add feature to indicate if you are already following a user when browsing his profile on another instance (this requires calls to the home instance, will look into it soon)
 - Review if permissions in current manifest are actually needed like that
 - If I find myself to be bored, probably more
