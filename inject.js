@@ -1,10 +1,10 @@
 // prep
-var buttonPaths = ["div.account__header button.logo-button","div.public-account-header a.logo-button"];
-var domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/;
-var handleRegex = /^(?:https?:\/\/(www\.)?.*\..*?\/)(?<handle>@\w+(?:@\w+\.\w+)?)(?:\/?.*|\z)$/;
-var enableConsoleLog = true;
-var logPrepend = "[FediFollow]";
-var maxElementWaitFactor = 200; // x 100ms for total time
+const buttonPaths = ["div.account__header button.logo-button","div.public-account-header a.logo-button"];
+const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/;
+const handleRegex = /^(?:https?:\/\/(www\.)?.*\..*?\/)(?<handle>@\w+(?:@\w+\.\w+)?)(?:\/?.*|\z)$/;
+const enableConsoleLog = true;
+const logPrepend = "[FediFollow]";
+const maxElementWaitFactor = 200; // x 100ms for total time
 
 var lastUrl = window.location.href;
 var instance;
