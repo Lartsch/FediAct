@@ -7,7 +7,7 @@ I made this since I could only find a working extension for Firefox, that does t
 Right now, you need to install it using developer mode. The extension is already submitted for review by Google, so it shouldn't be long until you can install it from the Chrome Webstore.
 1. Clone this repo or download it as ZIP (in this case, extract it somewhere).
 2. Go to your Chrome extension page and enable developer mode.
-3. Click the "Load unpacked" button and then select the "src" folder of the unpacked extension.
+3. Click the "Load unpacked" button and then select the folder of the unpacked extension (should be "FediFollow-Chrome-main").
     + If you have a "Load ZIP" option you can also directly load the downloaded zip file
 
 ## Setup
