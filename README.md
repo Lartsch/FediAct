@@ -1,5 +1,5 @@
 # FediFollow-Chrome
-A Chrome extension that simplifies following Fediverse/Mastodon users on other instances than your own by automatically redirecting you to your instance when pressing a follow button. The redirection is shortly indicated in the follow button itself and additional modals are blocked. Should work for other Chromium browsers too, as well as Kiwi browser on Android. It was tested with about 20 instances and supports different instance layouts/flavours.
+A Chrome extension that simplifies following Mastodon users on other instances than your own by automatically redirecting you to your instance when pressing a follow button. The redirection is shortly indicated in the follow button itself and additional modals are blocked. Should work for other Chromium browsers too, as well as Kiwi browser on Android. It was tested with about 20 instances and supports different instance layouts/flavours.
 
 I made this since I could only find a working extension for Firefox, that does the same (Simplified Federation).
 
@@ -22,11 +22,14 @@ Right now, you need to install it using developer mode. The extension is already
   ```
 - Required: Hit "Submit" to update your settings
 
-> **Note**
-> 1. The whitelist mode can be useful if you do not want the extension to run basic checks on every site (since it needs to determine if it is a Mastodon site). Not sure if the blacklist feature is good for anything but I still included it.
-> 2. It can have several reasons why a particular instance might not work:
+> **Additional usage notes**
+> 1. Currently supports different flavours of Mastodon 4
+> 2. If the redirect is not working, you most likely are not logged in on your home instance
+> 3. The whitelist mode can be useful if you do not want the extension to run basic checks on every site (since it needs to determine if it is a Mastodon site). Not sure if the blacklist feature is good for anything but I still included it.
+> 4. It can have several reasons why a particular instance might not work:
 >     - There are instances that use custom layouts/flavours (additional identifiers need to be added to extension)
 >     - Instance chose to hide the follow button when not logged in (not supported yet)
+>     - It's not a Mastodon instance (not supported yet)
 >     - Element identifiers might change over time (extension needs to be updated)
 >
 > So please be aware, that this extension can fail in some cases. Feel free to submit pull requests / issues.
@@ -36,7 +39,9 @@ Right now, you need to install it using developer mode. The extension is already
 ![Redirect Indication](https://github.com/lartsch/FediFollow-Chrome/blob/main/img/screenshot2.PNG?raw=true)
 
 ## Todos / Planned features 
+- Add support for Firefox
 - Add support for post interactions
+- Add support for other implementations (Plemora, GNU Social, ...)
 - Publish to Chrome Webstore (in progress, currently in review by Google)
 - Find additional layouts/flavours to add identifiers for
 - Support for profiles views with follow button disabled
