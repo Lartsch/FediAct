@@ -29,12 +29,13 @@ Right now, this needs to be installed in debugging / developer mode. Soon it wil
 > 1. Currently supports different flavours of Mastodon 4
 > 2. If the redirect is not working, you most likely are not logged in on your home instance
 > 3. The whitelist mode can be useful if you do not want the extension to run basic checks on every site (since it needs to determine if it is a Mastodon site). Not sure if the blacklist feature is good for anything but I still included it.
-> 4. It can have several reasons why a particular instance might not work:
+> 4. It can have several reasons why a redirection/instance might not work:
 >     - There are instances that use custom layouts/flavours (additional identifiers need to be added to extension)
 >     - Instance chose to hide the follow button when not logged in (not supported yet)
 >     - It's not a Mastodon instance (not supported yet)
 >     - Element identifiers might change over time (extension needs to be updated)
 >     - Some instances run on a subdomain but do not use the subdomain for user handles (not supported yet)
+>     - Sometime, even if the handle is correct, a direct redirect to your instance can result in the page loading forever. This seems to be some caching issue / your instance has never seen this user. You need to copy the complete handle into the search in this case and open the profile from there. After that, the redirect will work like usual, since your instance has loaded the user once.
 >
 > So please be aware, that this extension can fail in some cases. Feel free to submit pull requests / issues.
 
