@@ -50,7 +50,7 @@ Right now, this needs to be installed in debugging / developer mode. Soon it wil
 - Find additional layouts/flavours to add identifiers for
 - Support for profiles views with follow button disabled
 - Add support for Firefox (DONE)
-- Fix some rare cases where an instance runs on a subdomain but the handle uses the domain without subdomain (need to get the handle directly from the profile instead of URL) (DONE)
+- Fix some rare cases where an instance runs on a subdomain but the handle uses the domain without subdomain (need to get the handle directly from the profile instead of URL + domain name) (DONE)
 - Add support for whitelist/blacklist (DONE)
 - Add feature to indicate if you are already following a user when browsing his profile on another instance (this requires calls to the home instance, will look into it soon)
 - Review if permissions in current manifest are actually needed like that (DONE)
