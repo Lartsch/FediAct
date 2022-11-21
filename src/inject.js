@@ -1,11 +1,12 @@
 // prep
 const followButtonPaths = ["div.account__header button.logo-button","div.public-account-header a.logo-button"];
-const tootButtonsPaths = ["div.status__action-bar button:not(.disabled)"];
+const tootButtonsPaths = ["div.status__action-bar button:not(.disabled)","div.detailed-status__action-bar button:not(.disabled)"];
 const tokenPaths = ["head script#initial-state"];
 const appHolderPaths = ["body > div.app-holder"]
 const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/;
 const profileRegex = /^(?:https?:\/\/(www\.)?.*\..*?\/)(?<handle>@\w+(?:@\w+\.\w+)?)\/?$/;
 const tootsRegex = /^(?:https?:\/\/(www\.)?.*\..*?)(\/explore|\/public|\/public\/local|\d+)$/;
+const tootRegex = /^(?:https?:\/\/(www\.)?.*\..*?\/)(?<handle>@\w+(?:@\w+\.\w+)?)\/\d+\/?$/;
 const enableConsoleLog = true;
 const logPrepend = "[FediFollow]";
 const maxElementWaitFactor = 200; // x 100ms for total time
@@ -240,9 +241,14 @@ async function processToots() {
 					e.preventDefault();
 					e.stopImmediatePropagation();
 					// extract the toot id from the closest article element
-					var closestToodId = $(e.target).closest("div.status").attr("data-id").replace(/[^0-9]/gi,'');
-					if (closestToodId) {
-						var requestUrl = location.protocol + '//' + location.host + statusApi+"/"+closestToodId;
+					var closestTootId;
+					if ($(e.target).closest("div.status").attr("data-id")) {
+						closestTootId = $(e.target).closest("div.status").attr("data-id").replace(/[^0-9]/gi,'');
+					} else if (tootRegex.test(window.location.href.split("?")[0])) {
+						closestTootId = window.location.href.split("/")[4];
+					}
+					if (closestTootId) {
+						var requestUrl = location.protocol + '//' + location.host + statusApi+"/"+closestTootId;
 						// call status API to get correct author handle
 						var response = await makeRequest("GET", requestUrl, null);
 						if (response) {
@@ -250,13 +256,13 @@ async function processToots() {
 							if (user) {
 								// prepend @ and build searchstring
 								var handle = "@" + user;
-								var searchstring = location.protocol + '//' + location.host + '/' + handle + "/" + closestToodId;
+								var searchstring = location.protocol + '//' + location.host + '/' + handle + "/" + closestTootId;
 								// redirect to home instance
 								redirectToHomeInstance(searchstring);
 							}
 						}
 					} else {
-						log("Could not find toot ID")
+						log("Could not find toot ID");
 					}
 				});
 			} else {
