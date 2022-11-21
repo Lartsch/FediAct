@@ -1,5 +1,7 @@
 # FediFollow
-A Chrome/Firefox extension that simplifies following Mastodon users on other instances than your own by automatically redirecting you to your instance when pressing a follow button. The redirection is shortly indicated in the follow button itself and additional modals are blocked. Should work for other Chromium browsers too, as well as Kiwi browser on Android. It was tested with about 20 instances and supports different instance layouts/flavours. There are cases where it might fail (see notes and todos below). Additional features are planned.
+A Chrome/Firefox extension that simplifies following and post interactions on other instances than your own by intelligently redirecting you to your instance and utilizing the local API to resolve the content.
+
+Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi browser on Android. Currently only Mastodon in different flavors is supported as far as I tested. Additional support will be added in the future.
 
 ## Installation
 Right now, this needs to be installed in debugging / developer mode. Soon it will be available on Chrome Webstore / Firefox addon store.
@@ -34,7 +36,7 @@ Right now, this needs to be installed in debugging / developer mode. Soon it wil
 >     - Instance chose to hide the follow button when not logged in (not supported yet)
 >     - It's not a Mastodon instance (not supported yet)
 >     - Element identifiers might change over time (extension needs to be updated)
->     - Sometime, even if the handle is correct, a direct redirect to your instance can result in the page loading forever. This seems to be some caching issue / your instance has never seen this user. You need to copy the complete handle into the search in this case and open the profile from there. After that, the redirect will work like usual, since your instance has loaded the user once.
+>     - Instance has turned off public API endpoints or changed to custom paths (not sure if this is even possible)
 >
 > So please be aware, that this extension can fail in some cases. Feel free to submit pull requests / issues.
 
@@ -43,10 +45,10 @@ Right now, this needs to be installed in debugging / developer mode. Soon it wil
 ![Redirect Indication](https://github.com/lartsch/FediFollow-Chrome/blob/main/img/screenshot2.PNG?raw=true)
 
 ## Todos / Planned features 
-- Add support for post interactions
+- Add support for post interactions (DONE)
 - Add support for other implementations (Plemora, GNU Social, ...)
 - Publish to Chrome Webstore (IN PROGRESS)
-- Publish to Firefox addon store
+- Publish to Firefox addon store (IN PROGRESS)
 - Find additional layouts/flavours to add identifiers for
 - Support for profiles views with follow button disabled
 - Add support for Firefox (DONE)
