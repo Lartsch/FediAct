@@ -42,9 +42,10 @@ Right now, this needs to be installed in debugging / developer mode. Soon it wil
 >
 > So please be aware, that this extension can fail in some cases. Feel free to submit pull requests / issues.
 
-## Screenshots
+## Screenshots / GIFs
 ![Extension Popup](https://github.com/lartsch/FediFollow-Chrome/blob/main/img/screenshot1.PNG?raw=true)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-![Redirect Indication](https://github.com/lartsch/FediFollow-Chrome/blob/main/img/screenshot2.PNG?raw=true)
+![Follow Redirect](https://github.com/lartsch/FediFollow-Chrome/blob/main/img/follow-interaction.gif?raw=true)
+![Follow Redirect](https://github.com/lartsch/FediFollow-Chrome/blob/main/img/post-interaction.gif?raw=true)
 
 ## Todos / Planned features 
 - Add support for post interactions (DONE)
