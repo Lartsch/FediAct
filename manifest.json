@@ -1,7 +1,7 @@
 {
   "name": "FediFollow",
-  "version": "0.1.0",
-  "description": "Simplifies following Fediverse user on other instances than your own. Visit https://github.com/lartsch/FediFollow-Chrome for more.",
+  "version": "0.3.0",
+  "description": "Simplifies interactions on other  Mastodoninstances than your own. Visit https://github.com/lartsch/FediFollow-Chrome for more.",
   "manifest_version": 3,
   "content_scripts": [
 	{
