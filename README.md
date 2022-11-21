@@ -3,6 +3,8 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 
 Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi browser on Android. Currently only Mastodon in different flavors is supported as far as I tested. Additional support will be added in the future.
 
+**Important**: Your data will never leave your machine by using this addon.
+
 ## Installation
 Right now, this needs to be installed in debugging / developer mode. Soon it will be available on Chrome Webstore / Firefox addon store.
 1. Clone this repo or download it as ZIP (in this case, extract it somewhere)
