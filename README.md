@@ -50,6 +50,7 @@ Right now, this needs to be installed in debugging / developer mode. Soon it wil
 
 ## Todos / Planned features 
 - Add support for post interactions (DONE)
+- Support executing the intended action after redirect
 - Add support for other implementations (Plemora, GNU Social, ...)
 - Publish to Chrome Webstore (IN PROGRESS)
 - Publish to Firefox addon store (IN PROGRESS)
