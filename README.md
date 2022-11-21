@@ -26,10 +26,10 @@ Right now, this needs to be installed in debugging / developer mode. Soon it wil
 - Required: Hit "Submit" to update your settings
 
 > **Note**
-> 1. Currently supports different flavours of Mastodon 4
-> 2. If the redirect is not working, you most likely are not logged in on your home instance
-> 3. The whitelist mode can be useful if you do not want the extension to run basic checks on every site (since it needs to determine if it is a Mastodon site). Not sure if the blacklist feature is good for anything but I still included it.
-> 4. It can have several reasons why a redirection/instance might not work:
+> 1. Currently supports different flavours of Mastodon 4 (3 should work too)
+> 2. The whitelist mode can be useful if you do not want the extension to run basic checks on every site (since it needs to determine if it is a Mastodon site). Not sure if the blacklist feature is good for anything but I still included it.
+> 3. It can have several reasons why a redirection/instance might not work:
+>     - You are not logged in to your home instance
 >     - There are instances that use custom layouts/flavours (additional identifiers need to be added to extension)
 >     - Instance chose to hide the follow button when not logged in (not supported yet)
 >     - It's not a Mastodon instance (not supported yet)
