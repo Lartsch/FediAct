@@ -240,7 +240,7 @@ async function processToots() {
 					e.preventDefault();
 					e.stopImmediatePropagation();
 					// extract the toot id from the closest article element
-					var closestToodId = $(e.target).closest("article").attr("data-id").replace(/[^0-9]/gi,'');
+					var closestToodId = $(e.target).closest("div.status").attr("data-id").replace(/[^0-9]/gi,'');
 					if (closestToodId) {
 						var requestUrl = location.protocol + '//' + location.host + statusApi+"/"+closestToodId;
 						// call status API to get correct author handle
