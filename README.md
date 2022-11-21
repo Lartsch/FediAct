@@ -39,6 +39,7 @@ Right now, this needs to be installed in debugging / developer mode. Soon it wil
 >     - It's not a Mastodon instance (not supported yet)
 >     - Element identifiers might change over time (extension needs to be updated)
 >     - Instance has turned off public API endpoints or changed to custom paths (not sure if this is even possible)
+>     - Instance has disabled external resolving (working on a fix)
 >
 > So please be aware, that this extension can fail in some cases. Feel free to submit pull requests / issues.
 
