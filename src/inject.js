@@ -327,7 +327,7 @@ function processFollow() {
 						}
 					}
 					if (handleDomain && handle) {
-						var requestUrl = location.protocol + "//" + location.host + searchApi + "/?q=" + encodeURIComponent(handleDomain) + "&resolve=false&limit=10";
+						var requestUrl = location.protocol + "//" + location.host + searchApi + "/?q=" + encodeURIComponent(handle+"@"+handleDomain) + "&resolve=false&limit=10";
 						var response = await makeRequest("GET", requestUrl, null);
 						var result;
 						if (response) {
@@ -347,13 +347,12 @@ function processFollow() {
 							setTimeout(function() {
 								redirectToHomeInstance(redirectUrl);
 								// restore original button text
-								$(found).text(originaltext);
+								$(found).html(originaltext);
 							}, 1000);
 						} else {
 							log("Could not get instance URL from API search, attempting raw redirect.")
 							// replace the button text to indicate redirection
 							$(found).text("Redirecting...");
-							var redirectUrl = result + "/" + handle;
 							// timeout 1000ms to make it possible to notice the redirection indication
 							setTimeout(function() {
 								redirectToHomeInstance(window.location.href);
