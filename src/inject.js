@@ -275,21 +275,23 @@ async function processToots() {
 						closestTootId = window.location.href.split("/")[4];
 					}
 					// if we have a toot id and NOT already redirected (see first check above)
-					if (closestTootId && !redirected) {
-						var requestUrl = location.protocol + '//' + location.host + statusApi+"/"+closestTootId;
-						// call status API to get correct author handle
-						var response = await makeRequest("GET", requestUrl, null);
-						if (response) {
-							var postUri = JSON.parse(response).url.replace("/activity/","").replace("/activity","");
-							if (postUri) {
-								// redirect to home instance
-								redirectToHomeInstance(postUri);
-							} else {
-								log("Could not find post url.")
+					if (!redirected) {
+						if (closestTootId) {
+							var requestUrl = location.protocol + '//' + location.host + statusApi+"/"+closestTootId;
+							// call status API to get correct author handle
+							var response = await makeRequest("GET", requestUrl, null);
+							if (response) {
+								var postUri = JSON.parse(response).url.replace("/activity/","").replace("/activity","");
+								if (postUri) {
+									// redirect to home instance
+									redirectToHomeInstance(postUri);
+								} else {
+									log("Could not find post url.")
+								}
 							}
+						} else {
+							log("Could not find toot ID (or already redirected.)");
 						}
-					} else {
-						log("Could not find toot ID (or already redirected.)");
 					}
 				});
 			} else {
