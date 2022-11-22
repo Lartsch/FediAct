@@ -165,7 +165,7 @@ async function processHomeInstance() {
 					if (token) {
 						// update notification div
 						$('div#fedifollow').text("Resolving search...");
-						var requestUrl = location.protocol + '//' + location.host + searchApi + "/?q="+fediParamValue+"&resolve=true&limit=10";
+						var requestUrl = location.protocol + '//' + location.hostname + searchApi + "/?q="+fediParamValue+"&resolve=true&limit=10";
 						var headers = {"Authorization":"Bearer "+token,};
 						// api request: search endpoint, resolve search string locally (best support for edge cases (for ex. where subdomain does not equal the handle domain) and prevents uncached profile issue)
 						var response = await makeRequest("GET", requestUrl, headers);
@@ -179,7 +179,7 @@ async function processHomeInstance() {
 								if (matches.groups.handle && matches.groups.handledomain) {
 									$('div#fedifollow').text("Failed, trying domain swap...");
 									var searchstring = encodeURIComponent("https://" + matches.groups.handledomain + "/" + matches.groups.handle);
-									var requestUrl = location.protocol + '//' + location.host + searchApi + "/?q="+searchstring+"&resolve=true&limit=10";
+									var requestUrl = location.protocol + '//' + location.hostname + searchApi + "/?q="+searchstring+"&resolve=true&limit=10";
 									response = await makeRequest("GET", requestUrl, headers);
 									response = JSON.parse(response);
 								}
@@ -188,7 +188,18 @@ async function processHomeInstance() {
 							var redirect = false;
 							// if we got an account but no statuses, redirect to profile (first result)
 							if (response.accounts.length && !response.statuses.length) {
-								var redirect = "https://" + settings.fedifollow_homeinstance + "/@" + response.accounts[0].acct;
+								var redirect = location.protocol + "//" + location.hostname + "/@" + response.accounts[0].acct;
+								$('div#fedifollow').text("Success! Attempting to follow...");
+								var requestUrl = location.protocol + "//" + location.hostname + "/api/v1/accounts/" + response.accounts[0].id + "/follow";
+								var responseFollow = await makeRequest("POST",requestUrl,headers);
+								if (responseFollow) {
+									responseFollow = JSON.parse(responseFollow);
+									if (responseFollow.following || responseFollow.requested) {
+										$('div#fedifollow').text("Success! Redirecting...");
+									} else {
+										$('div#fedifollow').text("Auto-follow failed. Redirecting...");
+									}
+								}
 							} else if (!response.accounts.length && response.statuses.length) {
 								// if statuses but no accounts, redirect to status (first result)
 								var status = response.statuses[0]
@@ -196,12 +207,11 @@ async function processHomeInstance() {
 									"id": status.id,
 									"account": status.account.acct
 								}
-								var redirect = "https://" + settings.fedifollow_homeinstance + "/@" + statusData.account + "/" + statusData.id;
+								var redirect = location.protocol + "//" + location.hostname + "/@" + statusData.account + "/" + statusData.id;
+								$('div#fedifollow').text("Success! Redirecting...");
 							}
 							// if we got a redirect url...
 							if (redirect) {
-								// update notification div
-								$('div#fedifollow').text("Match! Redirecting...")
 								// open the url in current tab
 								var win = window.open(redirect, "_self");
 								log("Redirected to " + redirect)
@@ -277,7 +287,7 @@ async function processToots() {
 					// if we have a toot id and NOT already redirected (see first check above)
 					if (!redirected) {
 						if (closestTootId) {
-							var requestUrl = location.protocol + '//' + location.host + statusApi+"/"+closestTootId;
+							var requestUrl = location.protocol + '//' + location.hostname + statusApi+"/"+closestTootId;
 							// call status API to get correct author handle
 							var response = await makeRequest("GET", requestUrl, null);
 							if (response) {
@@ -327,7 +337,7 @@ function processFollow() {
 						}
 					}
 					if (handleDomain && handle) {
-						var requestUrl = location.protocol + "//" + location.host + searchApi + "/?q=" + encodeURIComponent(handle+"@"+handleDomain) + "&resolve=false&limit=10";
+						var requestUrl = location.protocol + "//" + location.hostname + searchApi + "/?q=" + encodeURIComponent(handle+"@"+handleDomain) + "&resolve=false&limit=10";
 						var response = await makeRequest("GET", requestUrl, null);
 						var result;
 						if (response) {
@@ -425,7 +435,7 @@ function checkSettings() {
 // this will also be the function for whitelist/blacklist feature
 async function checkSite(callback) {
 	// is this site on our home instance?
-	if (location.host == settings.fedifollow_homeinstance) {
+	if (location.hostname == settings.fedifollow_homeinstance) {
 		// do we have a fedifollow param?
 		fediParamValue = getUrlParameter(fediParamName);
 		if (fediParamValue) {
@@ -439,19 +449,19 @@ async function checkSite(callback) {
 	// are we in whitelist mode?
 	if (settings.fedifollow_mode == "whitelist") {
 		// if so, check if site is NOT in whitelist
-		if ($.inArray(location.host, settings.fedifollow_whitelist) < 0) {
+		if ($.inArray(location.hostname, settings.fedifollow_whitelist) < 0) {
 			log("Current site is not in whitelist.");
 			return false;
 		}
 	} else {
 		// otherwise we are in blacklist mode, so check if site is on blacklist
-		if ($.inArray(location.host, settings.fedifollow_blacklist) > -1) {
+		if ($.inArray(location.hostname, settings.fedifollow_blacklist) > -1) {
 			log("Current site is in blacklist.");
 			return false;
 		}
 	}
 	// last check - and probably the most accurate to determine if it actually is mastadon
-	var requestUrl = location.protocol + '//' + location.host + instanceApi;
+	var requestUrl = location.protocol + '//' + location.hostname + instanceApi;
 	// call instance api to confirm its mastodon and get normalized handle uri
 	var response = await makeRequest("GET", requestUrl, null);
 	if (response) {
