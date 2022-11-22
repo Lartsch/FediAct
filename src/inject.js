@@ -4,9 +4,10 @@ const tootButtonsPaths = ["div.status__action-bar button:not(.disabled)","div.de
 const tokenPaths = ["head script#initial-state"];
 const appHolderPaths = ["body > div.app-holder"]
 const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/;
-const profileRegex = /^(?:https?:\/\/(www\.)?.*\..*?\/)(?<handle>@\w+(?:@\w+\.\w+)?)\/?$/;
+const profileRegex = /^(?:https?:\/\/(www\.)?.*\..*?\/)(?<handle>@\w+(?:@[\w-]+\.\w+)?)\/?$/;
 const tootsRegex = /^(?:https?:\/\/(www\.)?.*\..*?)(\/explore|\/public|\/public\/local|\d+)$/;
-const tootRegex = /^(?:https?:\/\/(www\.)?.*\..*?\/)(?<handle>@\w+(?:@\w+\.\w+)?)\/\d+\/?$/;
+const tootRegex = /^(?:https?:\/\/(www\.)?.*\..*?\/)(?<handle>@\w+(?:@[\w-]+\.\w+)?)\/\d+\/?$/;
+const handleDomainRegex = /^.*(?<handle>@\w+)@(?<handledomain>[\w-]+\.\w+)\/?$/;
 const enableConsoleLog = true;
 const logPrepend = "[FediFollow]";
 const maxElementWaitFactor = 200; // x 100ms for total time
@@ -169,6 +170,17 @@ async function processHomeInstance() {
 						var response = await makeRequest("GET", requestUrl, headers);
 						if (response) {
 							response = JSON.parse(response);
+							var decodedParam = decodeURIComponent(fediParamValue);
+							if (!response.accounts.length && !response.statuses.length && handleDomainRegex.test(decodedParam)) {
+								var matches = decodedParam.match(handleDomainRegex);
+								if (matches.groups.handle && matches.groups.handledomain) {
+									$('div#fedifollow').text("Failed, trying domain swap...");
+									var searchstring = encodeURIComponent("https://" + matches.groups.handledomain + "/" + matches.groups.handle);
+									var requestUrl = location.protocol + '//' + location.host + searchApi + "/?q="+searchstring+"&resolve=true&limit=10";
+									response = await makeRequest("GET", requestUrl, headers);
+									response = JSON.parse(response);
+								}
+							}
 							// set to false initially
 							var redirect = false;
 							// if we got an account but no statuses, redirect to profile (first result)
