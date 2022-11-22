@@ -257,17 +257,25 @@ async function processToots() {
 					e.stopImmediatePropagation();
 					// extract the toot id from the closest article element
 					var closestTootId;
-					if ($(e.target).closest("div.status").attr("data-id")) {
+					// first check if there is an <a> sibling with the actual post URL (easiest and fastest)
+					if ($(this).siblings("a.status__relative-time").attr("href")) {
+						var redirected = true;
+						redirectToHomeInstance($(this).siblings("a.status__relative-time").attr("href"));
+					} else if ($(e.target).closest("div.status").attr("data-id")) {
+						// no? then check if there is a closest div.status with the ID in data-id attribute
 						closestTootId = $(e.target).closest("div.status").attr("data-id").replace(/[^0-9]/gi,'');
 					} else if ($(e.target).closest("article").attr("data-id")) {
+						// no? then check if there is a closest <article> element with the ID in data-id attribute
 						closestTootId = $(e.target).closest("article").attr("data-id").replace(/[^0-9]/gi,'');
-					} else if (tootRegex.test(window.location.href.split("?")[0])) {
-						closestTootId = window.location.href.split("/")[4];
 					} else if (this.href) {
-						// mastodon 3?
+						// no? then this is probably mastodon 3 and we have the ID in the href of the clicked link
 						closestTootId = this.href.split("?")[0].split("/")[4];
+					} else if (tootRegex.test(window.location.href.split("?")[0])) {
+						// no? then this is probably the detailed view of a post, so we can extract the ID from the URL
+						closestTootId = window.location.href.split("/")[4];
 					}
-					if (closestTootId) {
+					// if we have a toot id and NOT already redirected (see first check above)
+					if (closestTootId && !redirected) {
 						var requestUrl = location.protocol + '//' + location.host + statusApi+"/"+closestTootId;
 						// call status API to get correct author handle
 						var response = await makeRequest("GET", requestUrl, null);
@@ -281,7 +289,7 @@ async function processToots() {
 							}
 						}
 					} else {
-						log("Could not find toot ID");
+						log("Could not find toot ID (or already redirected.)");
 					}
 				});
 			} else {
