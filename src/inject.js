@@ -16,6 +16,7 @@ const instanceApi = "/api/v1/instance";
 const statusApi = "/api/v1/statuses";
 const searchApi = "/api/v2/search"
 const fediParamName = "fedifollow";
+const fediParamActionName = "fediaction";
 
 var lastUrl = window.location.href;
 
@@ -30,7 +31,7 @@ var settingsDefaults = {
 }
 
 // fix for cross-browser storage api compatibility and other public vars
-var browser, chrome, instanceUri, fediParamValue, settings;
+var browser, chrome, instanceUri, fediParamValue, fediParamActionValue, settings;
 
 // wrappers to prepend to log messages
 function log(text) {
@@ -131,9 +132,12 @@ var getUrlParameter = function getUrlParameter(sParam) {
     return false;
 };
 
-function redirectToHomeInstance(searchString) {
+function redirectToHomeInstance(searchString, action) {
 	// open the window
 	var url = "https://" + settings.fedifollow_homeinstance + "/?" + fediParamName + "=" + encodeURIComponent(searchString);
+	if (action) {
+		url = url + "&" + fediParamActionName + "=" + action;
+	}
 	log("Redirecting to " + url);
 	if (settings.fedifollow_alert) {
 		alert("Redirecting to "+url);
@@ -164,7 +168,7 @@ async function processHomeInstance() {
 					var token = JSON.parse($(found).text()).meta.access_token;
 					if (token) {
 						// update notification div
-						$('div#fedifollow').text("Resolving search...");
+						$('div#fedifollow').html("<p>Resolving search...</p>");
 						var requestUrl = location.protocol + '//' + location.hostname + searchApi + "/?q="+fediParamValue+"&resolve=true&limit=10";
 						var headers = {"Authorization":"Bearer "+token,};
 						// api request: search endpoint, resolve search string locally (best support for edge cases (for ex. where subdomain does not equal the handle domain) and prevents uncached profile issue)
@@ -177,7 +181,7 @@ async function processHomeInstance() {
 							if (!response.accounts.length && !response.statuses.length && handleExtractRegex.test(decodedParam)) {
 								var matches = decodedParam.match(handleExtractRegex);
 								if (matches.groups.handle && matches.groups.handledomain) {
-									$('div#fedifollow').text("Failed, trying domain swap...");
+									$('div#fedifollow').append("<p>Failed, trying domain swap...</p>");
 									var searchstring = encodeURIComponent("https://" + matches.groups.handledomain + "/" + matches.groups.handle);
 									var requestUrl = location.protocol + '//' + location.hostname + searchApi + "/?q="+searchstring+"&resolve=true&limit=10";
 									response = await makeRequest("GET", requestUrl, headers);
@@ -189,29 +193,47 @@ async function processHomeInstance() {
 							// if we got an account but no statuses, redirect to profile (first result)
 							if (response.accounts.length && !response.statuses.length) {
 								var redirect = location.protocol + "//" + location.hostname + "/@" + response.accounts[0].acct;
-								$('div#fedifollow').text("Success! Attempting to follow...");
+								$('div#fedifollow').append("<p>Success!</p>");
+								$('div#fedifollow').append("<p>Attempting to follow...</p>");
 								var requestUrl = location.protocol + "//" + location.hostname + "/api/v1/accounts/" + response.accounts[0].id + "/follow";
 								var responseFollow = await makeRequest("POST",requestUrl,headers);
 								if (responseFollow) {
 									responseFollow = JSON.parse(responseFollow);
 									if (responseFollow.following || responseFollow.requested) {
-										$('div#fedifollow').text("Success! Redirecting...");
+										$('div#fedifollow').append("<p>Success!</p>");
 									} else {
-										$('div#fedifollow').text("Auto-follow failed. Redirecting...");
+										$('div#fedifollow').append("<p>Auto-follow failed.</p>");
 									}
 								}
 							} else if (!response.accounts.length && response.statuses.length) {
+								$('div#fedifollow').append("<p>Success!</p>");
 								// if statuses but no accounts, redirect to status (first result)
-								var status = response.statuses[0]
+								var status = response.statuses[0];
 								var statusData = {
 									"id": status.id,
 									"account": status.account.acct
 								}
 								var redirect = location.protocol + "//" + location.hostname + "/@" + statusData.account + "/" + statusData.id;
-								$('div#fedifollow').text("Success! Redirecting...");
+								if (fediParamActionValue == "boost" || fediParamActionValue == "favourite") {
+									$('div#fedifollow').append("<p>Attempting to " + fediParamActionValue + "...</p>");
+									var actionRequest = location.protocol + "//" + location.hostname + "/api/v1/statuses/" + statusData.id + "/";
+									if (fediParamActionValue == "boost") {
+										actionRequest = actionRequest + "reblog";
+									} else {
+										actionRequest = actionRequest + "favourite";
+									}
+									var actionResponse = await makeRequest("POST", actionRequest, headers);
+									if (actionResponse) {
+										actionResponse = JSON.parse(actionResponse);
+										if (actionResponse.reblogged || actionResponse.favourited) {
+											$('div#fedifollow').append("<p>Success!<p>");
+										}
+									}
+								}
 							}
 							// if we got a redirect url...
 							if (redirect) {
+								$('div#fedifollow').append("<p>Redirecting...</p>");
 								// open the url in current tab
 								var win = window.open(redirect, "_self");
 								log("Redirected to " + redirect)
@@ -265,12 +287,19 @@ async function processToots() {
 					// prevent default and immediate propagation
 					e.preventDefault();
 					e.stopImmediatePropagation();
+					// determine action
+					var action;
+					if ($(this).children("i.fa-retweet").length) {
+						action = "boost";
+					} else if ($(this).children("i.fa-star").length) {
+						action = "favourite";
+					}
 					// extract the toot id from the closest article element
 					var closestTootId;
 					// first check if there is an <a> sibling with the actual post URL (easiest and fastest)
 					if ($(this).siblings("a.status__relative-time").attr("href")) {
 						var redirected = true;
-						redirectToHomeInstance($(this).siblings("a.status__relative-time").attr("href"));
+						redirectToHomeInstance($(this).siblings("a.status__relative-time").attr("href"), action);
 					} else if ($(e.target).closest("div.status").attr("data-id")) {
 						// no? then check if there is a closest div.status with the ID in data-id attribute
 						closestTootId = $(e.target).closest("div.status").attr("data-id").replace(/[^0-9]/gi,'');
@@ -294,7 +323,7 @@ async function processToots() {
 								var postUri = JSON.parse(response).url.replace("/activity/","").replace("/activity","");
 								if (postUri) {
 									// redirect to home instance
-									redirectToHomeInstance(postUri);
+									redirectToHomeInstance(postUri, action);
 								} else {
 									log("Could not find post url.")
 								}
@@ -355,7 +384,7 @@ function processFollow() {
 							var redirectUrl = result + "/" + handle;
 							// timeout 1000ms to make it possible to notice the redirection indication
 							setTimeout(function() {
-								redirectToHomeInstance(redirectUrl);
+								redirectToHomeInstance(redirectUrl, null);
 								// restore original button text
 								$(found).html(originaltext);
 							}, 1000);
@@ -365,7 +394,7 @@ function processFollow() {
 							$(found).text("Redirecting...");
 							// timeout 1000ms to make it possible to notice the redirection indication
 							setTimeout(function() {
-								redirectToHomeInstance(window.location.href);
+								redirectToHomeInstance(window.location.href, null);
 								// restore original button text
 								$(found).html(originaltext);
 							}, 1000);
@@ -438,6 +467,8 @@ async function checkSite(callback) {
 	if (location.hostname == settings.fedifollow_homeinstance) {
 		// do we have a fedifollow param?
 		fediParamValue = getUrlParameter(fediParamName);
+		fediParamActionValue = getUrlParameter(fediParamActionName);
+		log(fediParamActionValue)
 		if (fediParamValue) {
 			// if so, run home mode
 			return "home";
