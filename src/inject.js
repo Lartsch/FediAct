@@ -301,7 +301,13 @@ async function processToots() {
 					// first check if there is an <a> sibling with the actual post URL (easiest and fastest)
 					if ($(this).siblings("a.status__relative-time").attr("href")) {
 						var redirected = true;
-						redirectToHomeInstance($(this).siblings("a.status__relative-time").attr("href"), action);
+						var link = (this).siblings("a.status__relative-time").attr("href");
+						if (~link.indexOf("type=reblog")) {
+							action = "boost";
+						} else if (~link.indexOf("type=favourite")) {
+							action = "favourite";
+						}
+						redirectToHomeInstance(link, action);
 					} else if ($(e.target).closest("div.status").attr("data-id")) {
 						// no? then check if there is a closest div.status with the ID in data-id attribute
 						closestTootId = $(e.target).closest("div.status").attr("data-id").replace(/[^0-9]/gi,'');
