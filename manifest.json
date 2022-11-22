@@ -1,7 +1,7 @@
 {
   "name": "FediFollow",
   "version": "0.4.0",
-  "description": "Simplifies interactions on other  Mastodoninstances than your own. Visit https://github.com/lartsch/FediFollow-Chrome for more.",
+  "description": "Simplifies interactions on other Mastodon instances than your own. Visit https://github.com/lartsch/FediFollow-Chrome for more.",
   "manifest_version": 3,
   "content_scripts": [
 	{
