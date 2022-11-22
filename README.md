@@ -24,9 +24,9 @@ Right now, this needs to be installed in debugging / developer mode. Soon it wil
 3. Select "This Firefox"
 4. Click the "Load Temporary Add-on" button and then select the downloaded Firefox ZIP file
 
+## Setup
 **You might need to allow popups if your browser asks for it.**
 
-## Setup
 - Required: Click the extension icon to set your Mastodon instance
   - Only set the domain name (like "infosec.exchange") without http/https or URL)
 - Optional: Change whether to redirect in current or new tab
