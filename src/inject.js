@@ -1,9 +1,9 @@
 // prep
 const followButtonPaths = ["div.account__header button.logo-button","div.public-account-header a.logo-button"];
-const tootButtonsPaths = ["div.status__action-bar button:not(.disabled)","div.detailed-status__action-bar button:not(.disabled)"];
+const tootButtonsPaths = ["div.status__action-bar button:not(.disabled)","div.detailed-status__action-bar button:not(.disabled)","div.status__action-bar a.modal-button","a.detailed-status__link"];
 const tokenPaths = ["head script#initial-state"];
-const appHolderPaths = ["body > div.app-holder"]
-const profileNamePaths = ["div.account__header__tabs__name small"]
+const appHolderPaths = ["body > div.app-holder", "body > div.public-layout"];
+const profileNamePaths = ["div.account__header__tabs__name small", "div.public-account-header__tabs__name small"];
 const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/;
 const profileRegex = /^(?:https?:\/\/(www\.)?.*\..*?\/)(?<handle>@\w+(?:@[\w-]+\.\w+)?)\/?$/;
 const tootsRegex = /^(?:https?:\/\/(www\.)?.*\..*?)(\/explore|\/public|\/public\/local|\d+)$/;
@@ -261,6 +261,9 @@ async function processToots() {
 						closestTootId = $(e.target).closest("div.status").attr("data-id").replace(/[^0-9]/gi,'');
 					} else if (tootRegex.test(window.location.href.split("?")[0])) {
 						closestTootId = window.location.href.split("/")[4];
+					} else if (this.href) {
+						// mastodon 3?
+						closestTootId = this.href.split("?")[0].split("/")[4];
 					}
 					if (closestTootId) {
 						var requestUrl = location.protocol + '//' + location.host + statusApi+"/"+closestTootId;
