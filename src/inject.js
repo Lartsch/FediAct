@@ -179,15 +179,19 @@ async function processHomeInstance() {
 						var response = await makeRequest("GET", requestUrl, headers);
 						if (response) {
 							response = JSON.parse(response);
+							// decode for additional checks
 							var decodedParam = decodeURIComponent(fediParamValue);
 							// if we got no data (failed resolve) we can at least try to resolve a user by swapping the domain in case we got a domain in the handle
-							// this does not work for resolving post IDs
+							// this does not work for resolving post IDs so we check against the handle regex
 							if (!response.accounts.length && !response.statuses.length && handleExtractRegex.test(decodedParam)) {
+								// get matches
 								var matches = decodedParam.match(handleExtractRegex);
 								if (matches.groups.handle && matches.groups.handledomain) {
+									// we got handle + handledomain, so try to put the handle domain as host for this fallback (not guaranteed to resolve)
 									$('div#fedifollow').append("<p>Failed, trying domain swap...</p>");
 									var searchstring = encodeURIComponent("https://" + matches.groups.handledomain + "/" + matches.groups.handle);
 									var requestUrl = location.protocol + '//' + location.hostname + searchApi + "/?q="+searchstring+"&resolve=true&limit=10";
+									// update response var
 									response = await makeRequest("GET", requestUrl, headers);
 									response = JSON.parse(response);
 								}
@@ -196,12 +200,16 @@ async function processHomeInstance() {
 							var redirect = false;
 							// if we got an account but no statuses, redirect to profile (first result)
 							if (response.accounts.length && !response.statuses.length) {
+								// build redirect url
 								var redirect = location.protocol + "//" + location.hostname + "/@" + response.accounts[0].acct;
 								$('div#fedifollow').append("<p>Success!</p>");
+								// if auto actions are enbaled...
 								if (settings.fedifollow_autoaction) {
 									$('div#fedifollow').append("<p>Attempting auto-follow...</p>");
+									// build follow post request
 									var requestUrl = location.protocol + "//" + location.hostname + "/api/v1/accounts/" + response.accounts[0].id + "/follow";
 									var responseFollow = await makeRequest("POST",requestUrl,headers);
+									// check if it worked (it is ignored if the user was already followed)
 									if (responseFollow) {
 										responseFollow = JSON.parse(responseFollow);
 										if (responseFollow.following || responseFollow.requested) {
@@ -219,9 +227,12 @@ async function processHomeInstance() {
 									"id": status.id,
 									"account": status.account.acct
 								}
+								// build redirect url
 								var redirect = location.protocol + "//" + location.hostname + "/@" + statusData.account + "/" + statusData.id;
+								// if autoactions enabled and fediParamValue is okay...
 								if (settings.fedifollow_autoaction && (fediParamActionValue == "boost" || fediParamActionValue == "favourite")) {
 									$('div#fedifollow').append("<p>Attempting auto-" + fediParamActionValue + "...</p>");
+									// build favourite/boost post request
 									var actionRequest = location.protocol + "//" + location.hostname + "/api/v1/statuses/" + statusData.id + "/";
 									if (fediParamActionValue == "boost") {
 										actionRequest = actionRequest + "reblog";
@@ -229,6 +240,7 @@ async function processHomeInstance() {
 										actionRequest = actionRequest + "favourite";
 									}
 									var actionResponse = await makeRequest("POST", actionRequest, headers);
+									// check if it worked (it is ignored if the post was already fav'ed / boosted)
 									if (actionResponse) {
 										actionResponse = JSON.parse(actionResponse);
 										if (actionResponse.reblogged || actionResponse.favourited) {
