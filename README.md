@@ -13,19 +13,19 @@ Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi 
 
 ## Installation
 Right now, this needs to be installed in debugging / developer mode. Soon it will be available on Chrome Webstore / Firefox addon store.
-1. Clone this repo or download it as ZIP (in this case, extract it somewhere - you can also use the release files)
+1. Download the [latest release](https://github.com/Lartsch/FediFollow-Chrome/releases/latest) for your browser (chrome or firefox)
 ### Chrome
-2. Go to your Chrome extension page (URL: chrome://extensions) and enable developer mode
-3. Click the "Load unpacked" button and then select the folder of the unpacked extension (should be "FediFollow-Chrome-main")
-    + If you have a "Load ZIP" option you can also directly load the downloaded ZIP file
+2. Unzip the downloaded file somewhere
+3. Go to your Chrome extension page (URL: chrome://extensions) and enable developer mode
+4. Click the "Load unpacked" button and then select the unzipped folder (should be "fedifollow-X.X.X-chrome")
 ### Firefox
 2. Open the debugging page (URL: about:debugging)
 3. Select "This Firefox"
-4. Click the "Load Temporary Add-on" button and then select the firefox.zip file in the folder you extracted earlier
-
-**You might need to allow popups if your browser asks for it.**
+4. Click the "Load Temporary Add-on" button and then select the downloaded Firefox ZIP file
 
 ## Setup
+**You might need to allow popups if your browser asks for it.**
+
 - Required: Click the extension icon to set your Mastodon instance
   - Only set the domain name (like "infosec.exchange") without http/https or URL)
 - Optional: Change whether to redirect in current or new tab
