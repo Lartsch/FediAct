@@ -290,7 +290,7 @@ async function processToots() {
 								}
 							}
 						} else {
-							log("Could not find toot ID (or already redirected.)");
+							log("Could not find toot ID.");
 						}
 					}
 				});
