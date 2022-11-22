@@ -5,6 +5,11 @@ Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi 
 
 **Important**: Your data will never leave your machine by using this addon.
 
+  * [Installation](#installation)
+  * [Setup](#setup)
+  * [Screenshots / GIFs](#screenshots--gifs)
+  * [Todos / Planned features](#todos--planned-features)
+
 ## Installation
 Right now, this needs to be installed in debugging / developer mode. Soon it will be available on Chrome Webstore / Firefox addon store.
 1. Clone this repo or download it as ZIP (in this case, extract it somewhere - you can also use the release files)
