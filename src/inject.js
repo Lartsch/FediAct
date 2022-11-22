@@ -311,7 +311,7 @@ function processFollow() {
 							handle = handleDomainMatches.groups.handle;
 						}
 					}
-					if (handleDomain) {
+					if (handleDomain && handle) {
 						var requestUrl = location.protocol + "//" + location.host + searchApi + "/?q=" + encodeURIComponent(handleDomain) + "&resolve=false&limit=10";
 						var response = await makeRequest("GET", requestUrl, null);
 						var result;
