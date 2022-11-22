@@ -81,7 +81,7 @@ Some basic explanations how the addon works...
 
 ## Todos / Planned features 
 - Add support for post interactions (DONE)
-- Support executing the intended action after redirect
+- Support executing the intended action after redirect (DONE)
 - Add support for other implementations (Plemora, GNU Social, ...)
 - Publish to Chrome Webstore (IN PROGRESS)
 - Publish to Firefox addon store (IN PROGRESS)
