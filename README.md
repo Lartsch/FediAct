@@ -8,6 +8,7 @@ Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi 
   * [Installation](#installation)
   * [Setup](#setup)
   * [Screenshots / GIFs](#screenshots--gifs)
+  * [How it works](#how-it-works)
   * [Todos / Planned features](#todos--planned-features)
 
 ## Installation
@@ -52,6 +53,31 @@ Right now, this needs to be installed in debugging / developer mode. Soon it wil
 ![Extension Popup](https://github.com/lartsch/FediFollow-Chrome/blob/main/img/screenshot1.PNG?raw=true)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 ![Follow Redirect](https://github.com/lartsch/FediFollow-Chrome/blob/main/img/follow-interaction.gif?raw=true)
 ![Follow Redirect](https://github.com/lartsch/FediFollow-Chrome/blob/main/img/post-interaction.gif?raw=true)
+
+## How it works
+Some basic explanations how the addon works...
+### General
+- Addon performs basic checks on the URL and site content to determine if and what scripts to run
+- On external instances, depending on the interaction, a search string is built for the content you wish to interact with
+- You are then redirected to your local instance with the search string as value for an URL parameter that the addon checks for
+- If the home instance is opened with this parameter...
+    - You authorization token is extracted from the DOM
+    - Then the parameter value is used to perform a search for it with the search API endpoint (with resolving, so auth is needed)
+    - If a match for a user or post was found, you are then redirected to the content
+    - Using the search API gives best compatibility for resolving content (for ex. Toot IDs differ on instances for the same toot)
+### Follow interactions
+- Addon uses a list of DOM identifiers of follow buttons (for different views / flavors)
+- All default actions for clicking the button are prevented
+- Addon extracts the handle and handle domain from the profile view
+- The handle domain is then searched for with the external instance's search API endpoint (without resolving, so no authorization needed)
+    - This is to ensure we grab the correct instance URL for this user, since it can differ from the domain handle (also, the domain handle does not always resolve)
+- If all worked out, we build our search string and redirect to your home instance with the value as URL parameter then continue as explained in "General"
+### Post interactions
+- Addon uses a list of allowed URLs and DOM identifiers for interaction buttons
+- It then grabs the Toot ID using different methods, depending on the Mastodon version / flavor
+- The Toot ID is then searched for using the external instance's status API
+    - This gives us the actual URL of the post on its home instance for using as the search string (even if the post is from another external instance than the external instance it is viewed on)
+- If all worked out, we build our search string and redirect to your home instance with the value as URL parameter then continue as explained in "General"
 
 ## Todos / Planned features 
 - Add support for post interactions (DONE)
