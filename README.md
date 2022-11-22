@@ -15,7 +15,7 @@ Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi 
 Right now, this needs to be installed in debugging / developer mode. Soon it will be available on Chrome Webstore / Firefox addon store.
 1. Download the [latest release](https://github.com/Lartsch/FediFollow-Chrome/releases/latest) for your browser (chrome or firefox)
 ### Chrome
-2. Unzip the downloaded file somewhere
+2. Unzip the downloaded file into an empty folder
 3. Go to your Chrome extension page (URL: chrome://extensions) and enable developer mode
 4. Click the "Load unpacked" button and then select the folder of the unpacked extension (should be "FediFollow-Chrome-main")
     + If you have a "Load ZIP" option you can also directly load the downloaded ZIP file
