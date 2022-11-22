@@ -17,6 +17,8 @@ Right now, this needs to be installed in debugging / developer mode. Soon it wil
 3. Select "This Firefox"
 4. Click the "Load Temporary Add-on" button and then select the firefox.zip file in the folder you extracted earlier
 
+**You might need to allow popups if your browser asks for it.**
+
 ## Setup
 - Required: Click the extension icon to set your Mastodon instance
   - Only set the domain name (like "infosec.exchange") without http/https or URL)
@@ -38,8 +40,6 @@ Right now, this needs to be installed in debugging / developer mode. Soon it wil
 >     - Instance chose to hide the follow button when not logged in (not supported yet)
 >     - It's not a Mastodon instance (not supported yet)
 >     - Element identifiers might change over time (extension needs to be updated)
->     - Instance has turned off public API endpoints or changed to custom paths (not sure if this is even possible)
->     - Instance has disabled external resolving (working on a fix)
 >
 > So please be aware, that this extension can fail in some cases. Feel free to submit pull requests / issues.
 
