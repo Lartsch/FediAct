@@ -259,6 +259,8 @@ async function processToots() {
 					var closestTootId;
 					if ($(e.target).closest("div.status").attr("data-id")) {
 						closestTootId = $(e.target).closest("div.status").attr("data-id").replace(/[^0-9]/gi,'');
+					} else if ($(e.target).closest("article").attr("data-id")) {
+						closestTootId = $(e.target).closest("article").attr("data-id").replace(/[^0-9]/gi,'');
 					} else if (tootRegex.test(window.location.href.split("?")[0])) {
 						closestTootId = window.location.href.split("/")[4];
 					} else if (this.href) {
@@ -270,7 +272,7 @@ async function processToots() {
 						// call status API to get correct author handle
 						var response = await makeRequest("GET", requestUrl, null);
 						if (response) {
-							var postUri = JSON.parse(response).url;
+							var postUri = JSON.parse(response).url.replace("/activity/","").replace("/activity","");
 							if (postUri) {
 								// redirect to home instance
 								redirectToHomeInstance(postUri);
