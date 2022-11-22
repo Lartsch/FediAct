@@ -316,7 +316,7 @@ function processFollow() {
 					e.preventDefault();
 					e.stopImmediatePropagation();
 					// backup the button text
-					var originaltext = $(found).text();
+					var originaltext = $(found).html();
 					var handleDomain;
 					var handle;
 					for (const selector of profileNamePaths) {
@@ -358,7 +358,7 @@ function processFollow() {
 							setTimeout(function() {
 								redirectToHomeInstance(window.location.href);
 								// restore original button text
-								$(found).text(originaltext);
+								$(found).html(originaltext);
 							}, 1000);
 						}
 					} else {
