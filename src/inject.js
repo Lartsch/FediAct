@@ -171,6 +171,8 @@ async function processHomeInstance() {
 						if (response) {
 							response = JSON.parse(response);
 							var decodedParam = decodeURIComponent(fediParamValue);
+							// if we got no data (failed resolve) we can at least try to resolve a user by swapping the domain in case we got a domain in the handle
+							// this does not work for resolving post IDs
 							if (!response.accounts.length && !response.statuses.length && handleDomainRegex.test(decodedParam)) {
 								var matches = decodedParam.match(handleDomainRegex);
 								if (matches.groups.handle && matches.groups.handledomain) {
