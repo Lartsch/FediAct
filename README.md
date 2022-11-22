@@ -1,7 +1,7 @@
 # FediFollow (Beta)
 A Chrome/Firefox extension that simplifies following and post interactions on other Mastodon instances than your own by intelligently redirecting you to your instance and utilizing the local API to resolve the content.
 
-Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi browser on Android. Currently only Mastodon in different flavors is supported as far as I tested. Support for other Fediverse software / versions / flavors might be added in the future. Feel free to create pull requests / issues. This is my first proper browser extension so please bear with my awful JS skills.
+Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi browser on Android. Currently only Mastodon 3 + 4 in different flavors are supported as far as I tested. Support for other Fediverse software / versions / flavors might be added in the future. Feel free to create pull requests / issues. This is my first proper browser extension so please bear with my awful JS skills.
 
 **Important**: Your data will never leave your machine by using this addon.
 
@@ -38,7 +38,7 @@ Right now, this needs to be installed in debugging / developer mode. Soon it wil
 - Required: Hit "Submit" to update your settings
 
 > **Note**
-> 1. Currently supports different flavours of Mastodon 4 (3 should work too)
+> 1. Currently supports different flavours of Mastodon 3 + 4
 > 2. The whitelist mode can be useful if you do not want the extension to run basic checks on every site (since it needs to determine if it is a Mastodon site). Not sure if the blacklist feature is good for anything but I still included it.
 > 3. It can have several reasons why a redirection/instance might not work:
 >     - You are not logged in to your home instance
