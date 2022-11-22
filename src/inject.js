@@ -194,7 +194,7 @@ async function processHomeInstance() {
 							if (response.accounts.length && !response.statuses.length) {
 								var redirect = location.protocol + "//" + location.hostname + "/@" + response.accounts[0].acct;
 								$('div#fedifollow').append("<p>Success!</p>");
-								$('div#fedifollow').append("<p>Attempting to follow...</p>");
+								$('div#fedifollow').append("<p>Attempting auto-follow...</p>");
 								var requestUrl = location.protocol + "//" + location.hostname + "/api/v1/accounts/" + response.accounts[0].id + "/follow";
 								var responseFollow = await makeRequest("POST",requestUrl,headers);
 								if (responseFollow) {
@@ -202,7 +202,7 @@ async function processHomeInstance() {
 									if (responseFollow.following || responseFollow.requested) {
 										$('div#fedifollow').append("<p>Success!</p>");
 									} else {
-										$('div#fedifollow').append("<p>Auto-follow failed.</p>");
+										$('div#fedifollow').append("<p>Failed.</p>");
 									}
 								}
 							} else if (!response.accounts.length && response.statuses.length) {
@@ -215,7 +215,7 @@ async function processHomeInstance() {
 								}
 								var redirect = location.protocol + "//" + location.hostname + "/@" + statusData.account + "/" + statusData.id;
 								if (fediParamActionValue == "boost" || fediParamActionValue == "favourite") {
-									$('div#fedifollow').append("<p>Attempting to " + fediParamActionValue + "...</p>");
+									$('div#fedifollow').append("<p>Attempting auto-" + fediParamActionValue + "...</p>");
 									var actionRequest = location.protocol + "//" + location.hostname + "/api/v1/statuses/" + statusData.id + "/";
 									if (fediParamActionValue == "boost") {
 										actionRequest = actionRequest + "reblog";
@@ -227,6 +227,8 @@ async function processHomeInstance() {
 										actionResponse = JSON.parse(actionResponse);
 										if (actionResponse.reblogged || actionResponse.favourited) {
 											$('div#fedifollow').append("<p>Success!<p>");
+										} else {
+											$('div#fedifollow').append("<p>Failed.<p>");
 										}
 									}
 								}
