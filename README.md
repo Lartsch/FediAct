@@ -18,7 +18,6 @@ Right now, this needs to be installed in debugging / developer mode. Soon it wil
 2. Unzip the downloaded file somewhere
 3. Go to your Chrome extension page (URL: chrome://extensions) and enable developer mode
 4. Click the "Load unpacked" button and then select the unzipped folder (should be "fedifollow-X.X.X-chrome")
-    + If you have a "Load ZIP" option you can also directly load the downloaded ZIP file
 ### Firefox
 2. Open the debugging page (URL: about:debugging)
 3. Select "This Firefox"
