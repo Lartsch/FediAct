@@ -134,15 +134,18 @@ var getUrlParameter = function getUrlParameter(sParam) {
 };
 
 function redirectToHomeInstance(searchString, action) {
-	// open the window
+	// build url
 	var url = "https://" + settings.fedifollow_homeinstance + "/?" + fediParamName + "=" + encodeURIComponent(searchString);
 	if (action) {
+		// add action parameter if set
 		url = url + "&" + fediParamActionName + "=" + action;
 	}
 	log("Redirecting to " + url);
+	// alert if set
 	if (settings.fedifollow_alert) {
 		alert("Redirecting to "+url);
 	}
+	// open window according to settings
 	var win = window.open(url, settings.fedifollow_target);
 	// focus the new tab if open was successfull
 	if (win) {
@@ -294,6 +297,7 @@ async function processToots() {
 					e.stopImmediatePropagation();
 					// determine action
 					var action;
+					// determine if we have an action (mastodon 4)
 					if ($(this).children("i.fa-retweet").length) {
 						action = "boost";
 					} else if ($(this).children("i.fa-star").length) {
@@ -304,13 +308,7 @@ async function processToots() {
 					// first check if there is an <a> sibling with the actual post URL (easiest and fastest)
 					if ($(this).siblings("a.status__relative-time").attr("href")) {
 						var redirected = true;
-						var link = (this).siblings("a.status__relative-time").attr("href");
-						if (~link.indexOf("type=reblog")) {
-							action = "boost";
-						} else if (~link.indexOf("type=favourite")) {
-							action = "favourite";
-						}
-						redirectToHomeInstance(link, action);
+						redirectToHomeInstance((this).siblings("a.status__relative-time").attr("href"), action);
 					} else if ($(e.target).closest("div.status").attr("data-id")) {
 						// no? then check if there is a closest div.status with the ID in data-id attribute
 						closestTootId = $(e.target).closest("div.status").attr("data-id").replace(/[^0-9]/gi,'');
@@ -320,6 +318,15 @@ async function processToots() {
 					} else if (this.href) {
 						// no? then this is probably mastodon 3 and we have the ID in the href of the clicked link
 						closestTootId = this.href.split("?")[0].split("/")[4];
+						// double check action because we have a fallback here
+						if (!action) {
+							// if the link contains...
+							if (~this.href.indexOf("type=reblog")) {
+								action = "boost";
+							} else if (~this.href.indexOf("type=favourite")) {
+								action = "favourite";
+							}
+						}
 					} else if (tootRegex.test(window.location.href.split("?")[0])) {
 						// no? then this is probably the detailed view of a post, so we can extract the ID from the URL
 						closestTootId = window.location.href.split("/")[4];
@@ -331,6 +338,7 @@ async function processToots() {
 							// call status API to get correct author handle
 							var response = await makeRequest("GET", requestUrl, null);
 							if (response) {
+								// if succesfull, get the url and clean it (fix for some instances)
 								var postUri = JSON.parse(response).url.replace("/activity/","").replace("/activity","");
 								if (postUri) {
 									// redirect to home instance
@@ -369,29 +377,39 @@ function processFollow() {
 					var originaltext = $(found).html();
 					var handleDomain;
 					var handle;
+					// check all defined selectors for the username element
 					for (const selector of profileNamePaths) {
 						if ($(selector).length) {
+							// match content of first found element against handle regex (with match grups)
 							var handleDomainMatches = $(selector).text().trim().match(handleExtractRegex);
 							handleDomain = handleDomainMatches.groups.handledomain;
 							handle = handleDomainMatches.groups.handle;
 						}
 					}
+					// if extraction worked...
 					if (handleDomain && handle) {
+						// make request to the external instances search endpoint to make sure we get the correct url for the searchstring
+						// (for ex. another external instance, also instance domain can differ from handle domain)
 						var requestUrl = location.protocol + "//" + location.hostname + searchApi + "/?q=" + encodeURIComponent(handle+"@"+handleDomain) + "&resolve=false&limit=10";
 						var response = await makeRequest("GET", requestUrl, null);
 						var result;
 						if (response) {
 							response = JSON.parse(response);
+							// if there are any accounts in the response
 							if (response.accounts.length) {
+								// get url of first account (which will be the one we need since we searched user+domain)
 								result = response.accounts[0].url;
+								// set result for searchstring
 								var url = document.createElement('a');
 								url.setAttribute('href', response.accounts[0].url);
 								result = url.protocol + "//" + url.hostname;
 							}
 						}
+						// replace the button text to indicate redirection
+						$(found).text("Redirecting...");
+						// if we could resolve the user domain...
 						if (result) {
-							// replace the button text to indicate redirection
-							$(found).text("Redirecting...");
+							// add the handle
 							var redirectUrl = result + "/" + handle;
 							// timeout 1000ms to make it possible to notice the redirection indication
 							setTimeout(function() {
@@ -400,9 +418,7 @@ function processFollow() {
 								$(found).html(originaltext);
 							}, 1000);
 						} else {
-							log("Could not get instance URL from API search, attempting raw redirect.")
-							// replace the button text to indicate redirection
-							$(found).text("Redirecting...");
+							log("Could not get instance URL from API search, attempting raw redirect.");
 							// timeout 1000ms to make it possible to notice the redirection indication
 							setTimeout(function() {
 								redirectToHomeInstance(window.location.href, null);
@@ -423,7 +439,7 @@ function processFollow() {
 	}
 }
 
-// for some reason, locationchange event did not work for me so lets use this ugly thing... since it calls processFollow, it needs to be in runWithSettings as well
+// for some reason, locationchange event did not work for me so lets use this ugly thing...
 async function urlChangeLoop() {
 	// run every 100ms, can probably be reduced
 	setTimeout(function() {
@@ -515,7 +531,7 @@ async function checkSite(callback) {
 			return "external";
 		}
 	}
-	log("Does not look like a Mastodon site.");
+	log("Does not look like a Mastodon instance.");
 	return false;
 }
 
