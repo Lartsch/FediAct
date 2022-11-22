@@ -1,6 +1,6 @@
 // prep
 const followButtonPaths = ["div.account__header button.logo-button","div.public-account-header a.logo-button"];
-const tootButtonsPaths = ["div.status__action-bar button:not(.disabled)","div.detailed-status__action-bar button:not(.disabled)","div.status__action-bar a.modal-button","a.detailed-status__link"];
+const tootButtonsPaths = ["div.status__action-bar button:not(.disabled):not(:has(i.fa-share-alt))","div.detailed-status__action-bar button:not(.disabled):not(:has(i.fa-share-alt))","div.status__action-bar a.modal-button","a.detailed-status__link"];
 const tokenPaths = ["head script#initial-state"];
 const appHolderPaths = ["body > div.app-holder", "body > div.public-layout"];
 const profileNamePaths = ["div.account__header__tabs__name small", "div.public-account-header__tabs__name small"];
