@@ -3,11 +3,12 @@ const followButtonPaths = ["div.account__header button.logo-button","div.public-
 const tootButtonsPaths = ["div.status__action-bar button:not(.disabled)","div.detailed-status__action-bar button:not(.disabled)"];
 const tokenPaths = ["head script#initial-state"];
 const appHolderPaths = ["body > div.app-holder"]
+const profileNamePaths = ["div.account__header__tabs__name small"]
 const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/;
 const profileRegex = /^(?:https?:\/\/(www\.)?.*\..*?\/)(?<handle>@\w+(?:@[\w-]+\.\w+)?)\/?$/;
 const tootsRegex = /^(?:https?:\/\/(www\.)?.*\..*?)(\/explore|\/public|\/public\/local|\d+)$/;
 const tootRegex = /^(?:https?:\/\/(www\.)?.*\..*?\/)(?<handle>@\w+(?:@[\w-]+\.\w+)?)\/\d+\/?$/;
-const handleDomainRegex = /^.*(?<handle>@\w+)@(?<handledomain>[\w-]+\.\w+)\/?$/;
+const handleExtractRegex = /^.*(?<handle>@\w+)@(?<handledomain>[\w-]+\.\w+)\/?$/;
 const enableConsoleLog = true;
 const logPrepend = "[FediFollow]";
 const maxElementWaitFactor = 200; // x 100ms for total time
@@ -173,8 +174,8 @@ async function processHomeInstance() {
 							var decodedParam = decodeURIComponent(fediParamValue);
 							// if we got no data (failed resolve) we can at least try to resolve a user by swapping the domain in case we got a domain in the handle
 							// this does not work for resolving post IDs
-							if (!response.accounts.length && !response.statuses.length && handleDomainRegex.test(decodedParam)) {
-								var matches = decodedParam.match(handleDomainRegex);
+							if (!response.accounts.length && !response.statuses.length && handleExtractRegex.test(decodedParam)) {
+								var matches = decodedParam.match(handleExtractRegex);
 								if (matches.groups.handle && matches.groups.handledomain) {
 									$('div#fedifollow').text("Failed, trying domain swap...");
 									var searchstring = encodeURIComponent("https://" + matches.groups.handledomain + "/" + matches.groups.handle);
@@ -266,13 +267,12 @@ async function processToots() {
 						// call status API to get correct author handle
 						var response = await makeRequest("GET", requestUrl, null);
 						if (response) {
-							var user = JSON.parse(response).account.username;
-							if (user) {
-								// prepend @ and build searchstring
-								var handle = "@" + user;
-								var searchstring = location.protocol + '//' + location.host + '/' + handle + "/" + closestTootId;
+							var postUri = JSON.parse(response).url;
+							if (postUri) {
 								// redirect to home instance
-								redirectToHomeInstance(searchstring);
+								redirectToHomeInstance(postUri);
+							} else {
+								log("Could not find post url.")
 							}
 						}
 					} else {
@@ -296,20 +296,59 @@ function processFollow() {
 		waitForEl(0, followButtonPaths, function(found) {
 			if (found) {
 				// setup the button click listener
-				$(found).click(function(e) {
+				$(found).click(async function(e) {
 					// prevent default action and other handlers
 					e.preventDefault();
 					e.stopImmediatePropagation();
 					// backup the button text
 					var originaltext = $(found).text();
-					// replace the button text to indicate redirection
-					$(found).text("Redirecting...");
-					// timeout 1000ms to make it possible to notice the redirection indication
-					setTimeout(function() {
-						redirectToHomeInstance(window.location.href);
-						// restore original button text
-						$(found).text(originaltext);
-					}, 1000);
+					var handleDomain;
+					var handle;
+					for (const selector of profileNamePaths) {
+						if ($(selector).length) {
+							var handleDomainMatches = $(selector).text().trim().match(handleExtractRegex);
+							handleDomain = handleDomainMatches.groups.handledomain;
+							handle = handleDomainMatches.groups.handle;
+						}
+					}
+					if (handleDomain) {
+						var requestUrl = location.protocol + "//" + location.host + searchApi + "/?q=" + encodeURIComponent(handleDomain) + "&resolve=false&limit=10";
+						var response = await makeRequest("GET", requestUrl, null);
+						var result;
+						if (response) {
+							response = JSON.parse(response);
+							if (response.accounts.length) {
+								result = response.accounts[0].url;
+								var url = document.createElement('a');
+								url.setAttribute('href', response.accounts[0].url);
+								result = url.protocol + "//" + url.hostname;
+							}
+						}
+						if (result) {
+							// replace the button text to indicate redirection
+							$(found).text("Redirecting...");
+							var redirectUrl = result + "/" + handle;
+							// timeout 1000ms to make it possible to notice the redirection indication
+							setTimeout(function() {
+								redirectToHomeInstance(redirectUrl);
+								// restore original button text
+								$(found).text(originaltext);
+							}, 1000);
+						} else {
+							log("Could not get instance URL from API search, attempting raw redirect.")
+							// replace the button text to indicate redirection
+							$(found).text("Redirecting...");
+							var redirectUrl = result + "/" + handle;
+							// timeout 1000ms to make it possible to notice the redirection indication
+							setTimeout(function() {
+								redirectToHomeInstance(window.location.href);
+								// restore original button text
+								$(found).text(originaltext);
+							}, 1000);
+						}
+					} else {
+						log("Could not extract user handle.")
+					}
 				});
 			} else {
 				log("Could not find any follow button.");
