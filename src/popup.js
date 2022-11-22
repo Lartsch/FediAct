@@ -6,7 +6,8 @@ var settings = {
 	fedifollow_mode: "blacklist",
 	fedifollow_whitelist: null,
 	fedifollow_blacklist: null,
-	fedifollow_target: "_blank"
+	fedifollow_target: "_blank",
+	fedifollow_autoaction: true
 }
 
 // fix for cross-browser storage api compatibility
@@ -34,6 +35,7 @@ function popupTasks(settings) {
 		settings.fedifollow_whitelist = $("textarea#whitelist_content").val();
 		settings.fedifollow_blacklist = $("textarea#blacklist_content").val();
 		settings.fedifollow_target = $("select#target").val();
+		settings.fedifollow_autoaction = $("input#autoaction").is(':checked');
 		// write to storage
 		const waitForSaved = (browser || chrome).storage.local.set(settings);
 		// show saved indicator after successful save
@@ -48,6 +50,7 @@ function popupTasks(settings) {
 		$("select#mode").val(settings.fedifollow_mode);
 		$("select#target").val(settings.fedifollow_target);
 		$("input#alert").prop('checked', settings.fedifollow_alert);
+		$("input#autoaction").prop('checked', settings.fedifollow_autoaction);
 		// both containers are hidden by default
 		if ($("select#mode").val() == "whitelist") {
 			$("div#whitelist_input").show();

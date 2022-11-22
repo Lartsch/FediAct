@@ -27,7 +27,8 @@ var settingsDefaults = {
 	fedifollow_mode: "blacklist",
 	fedifollow_whitelist: null,
 	fedifollow_blacklist: null,
-	fedifollow_target: "_blank"
+	fedifollow_target: "_blank",
+	fedifollow_autoaction: true
 }
 
 // fix for cross-browser storage api compatibility and other public vars
@@ -194,15 +195,17 @@ async function processHomeInstance() {
 							if (response.accounts.length && !response.statuses.length) {
 								var redirect = location.protocol + "//" + location.hostname + "/@" + response.accounts[0].acct;
 								$('div#fedifollow').append("<p>Success!</p>");
-								$('div#fedifollow').append("<p>Attempting auto-follow...</p>");
-								var requestUrl = location.protocol + "//" + location.hostname + "/api/v1/accounts/" + response.accounts[0].id + "/follow";
-								var responseFollow = await makeRequest("POST",requestUrl,headers);
-								if (responseFollow) {
-									responseFollow = JSON.parse(responseFollow);
-									if (responseFollow.following || responseFollow.requested) {
-										$('div#fedifollow').append("<p>Success!</p>");
-									} else {
-										$('div#fedifollow').append("<p>Failed.</p>");
+								if (settings.fedifollow_autoaction) {
+									$('div#fedifollow').append("<p>Attempting auto-follow...</p>");
+									var requestUrl = location.protocol + "//" + location.hostname + "/api/v1/accounts/" + response.accounts[0].id + "/follow";
+									var responseFollow = await makeRequest("POST",requestUrl,headers);
+									if (responseFollow) {
+										responseFollow = JSON.parse(responseFollow);
+										if (responseFollow.following || responseFollow.requested) {
+											$('div#fedifollow').append("<p>Success!</p>");
+										} else {
+											$('div#fedifollow').append("<p>Failed.</p>");
+										}
 									}
 								}
 							} else if (!response.accounts.length && response.statuses.length) {
@@ -214,7 +217,7 @@ async function processHomeInstance() {
 									"account": status.account.acct
 								}
 								var redirect = location.protocol + "//" + location.hostname + "/@" + statusData.account + "/" + statusData.id;
-								if (fediParamActionValue == "boost" || fediParamActionValue == "favourite") {
+								if (settings.fedifollow_autoaction && (fediParamActionValue == "boost" || fediParamActionValue == "favourite")) {
 									$('div#fedifollow').append("<p>Attempting auto-" + fediParamActionValue + "...</p>");
 									var actionRequest = location.protocol + "//" + location.hostname + "/api/v1/statuses/" + statusData.id + "/";
 									if (fediParamActionValue == "boost") {
