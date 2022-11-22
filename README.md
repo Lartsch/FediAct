@@ -13,10 +13,9 @@ Right now, this needs to be installed in debugging / developer mode. Soon it wil
 3. Click the "Load unpacked" button and then select the folder of the unpacked extension (should be "FediFollow-Chrome-main")
     + If you have a "Load ZIP" option you can also directly load the downloaded ZIP file
 ### Firefox
-2. Zip the "firefox" folder
-3. Open the debugging page (URL: about:debugging)
-4. Select "This Firefox"
-5. Click the "Load Temporary Add-on" button and then select the firefox.zip file in the folder you extracted earlier
+2. Open the debugging page (URL: about:debugging)
+3. Select "This Firefox"
+4. Click the "Load Temporary Add-on" button and then select the firefox.zip file in the folder you extracted earlier
 
 ## Setup
 - Required: Click the extension icon to set your Mastodon instance
