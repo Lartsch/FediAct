@@ -61,7 +61,7 @@ Some basic explanations how the addon works...
 - On external instances, depending on the interaction, a search string is built for the content you wish to interact with
 - You are then redirected to your local instance with the search string as value for an URL parameter that the addon checks for
 - If the home instance is opened with this parameter...
-    - You authorization token is extracted from the DOM
+    - Your authorization token is extracted from the DOM
     - Then the parameter value is used to perform a search for it with the search API endpoint (with resolving, so auth is needed)
     - If a match for a user or post was found, you are then redirected to the content
     - Using the search API gives best compatibility for resolving content (for ex. Toot IDs differ on instances for the same toot)
