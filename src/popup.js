@@ -6,7 +6,7 @@ var settings = {
 	fedifollow_mode: "blacklist",
 	fedifollow_whitelist: null,
 	fedifollow_blacklist: null,
-	fedifollow_target: "_blank",
+	fedifollow_target: "_self",
 	fedifollow_autoaction: true
 }
 
