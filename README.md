@@ -55,6 +55,21 @@ Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi 
 3. Select "This Firefox"
 4. Click the "Load Temporary Add-on" button and then select the downloaded Firefox ZIP file
 
+## Additional notes
+
+1. Currently supports external Mastodon instances v3 + v4
+    - I have not tested if Mastodon v3 works as home instance! In general, Mastodon v4 support is the main objective.
+2. The whitelist mode can be useful if you do not want the extension to run basic checks on every site (since it needs to determine if it is a Mastodon site). Not sure if the blacklist feature is good for anything but I still included it.
+3. It can have several reasons why a redirection/instance might not work:
+    - You are not logged in to your home instance (can't fix, log in)
+    - There are instances that use custom layouts/flavours (additional identifiers need to be added to extension)
+    - Instance chose to hide the follow button when not logged in (not supported yet)
+    - It's not a Mastodon instance (not supported yet)
+    - Element identifiers might change over time (extension needs to be updated)
+    - Your home instance is blocked by the external instance (can't fix, obviously)
+
+So please be aware, that this extension can fail in some cases. Feel free to submit pull requests / issues.
+
 ## How it works
 Some basic explanations how the addon works...
 ### General
@@ -81,21 +96,6 @@ Some basic explanations how the addon works...
 - The Toot ID is then searched for using the external instance's status API
     - This gives us the actual URL of the post on its home instance for using as the search string (even if the post is from another external instance than the external instance it is viewed on)
 - If all worked out, we build our search string and redirect to your home instance with the value as URL parameter then continue as explained in "General"
-
-## Additional notes
-
-1. Currently supports external Mastodon instances v3 + v4
-    - I have not tested if Mastodon v3 works as home instance! In general, Mastodon v4 support is the main objective.
-2. The whitelist mode can be useful if you do not want the extension to run basic checks on every site (since it needs to determine if it is a Mastodon site). Not sure if the blacklist feature is good for anything but I still included it.
-3. It can have several reasons why a redirection/instance might not work:
-    - You are not logged in to your home instance (can't fix, log in)
-    - There are instances that use custom layouts/flavours (additional identifiers need to be added to extension)
-    - Instance chose to hide the follow button when not logged in (not supported yet)
-    - It's not a Mastodon instance (not supported yet)
-    - Element identifiers might change over time (extension needs to be updated)
-    - Your home instance is blocked by the external instance (can't fix, obviously)
-
-So please be aware, that this extension can fail in some cases. Feel free to submit pull requests / issues.
 
 ## Todos / Planned features 
 - Add support for post interactions (DONE)
