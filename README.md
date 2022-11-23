@@ -38,9 +38,19 @@ Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi 
 **Please read the [additional notes](#additional-notes).**
 
 ## Screenshots / GIFs
-![Extension Popup](https://github.com/lartsch/FediFollow-Chrome/blob/main/img/screenshot1.PNG?raw=true)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-![Follow Redirect](https://github.com/lartsch/FediFollow-Chrome/blob/main/img/follow-interaction.gif?raw=true)
-![Follow Redirect](https://github.com/lartsch/FediFollow-Chrome/blob/main/img/post-interaction.gif?raw=true)
+Not guaranteed to be up to date ;)
+<details>
+  <summary>Extension popup / settings</summary>
+  <img src="https://github.com/lartsch/FediFollow-Chrome/blob/main/img/screenshot1.PNG?raw=true">
+</details>
+<details>
+  <summary>Follow interaction</summary>
+  <img src="https://github.com/lartsch/FediFollow-Chrome/blob/main/img/follow-interaction.gif?raw=true">
+</details>
+<details>
+  <summary>Post interaction</summary>
+  <img src="https://github.com/lartsch/FediFollow-Chrome/blob/main/img/post-interaction.gif?raw=true">
+</details>
 
 ## Manual installation
 1. Download the [latest Github release](https://github.com/Lartsch/FediFollow-Chrome/releases/latest) for your browser (chrome or firefox)
