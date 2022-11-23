@@ -1,5 +1,5 @@
 # FediFollow (v0.5.2)
-A Chrome/Firefox extension that simplifies following and post interactions on other Mastodon instances than your own by redirecting you to your instance and utilizing the instance APIs to resolve the content. If enabled, the extension also automatically performs the desired action (follow, boost, favourite) for you.
+A Chrome/Firefox extension that simplifies following and post interactions on other Mastodon instances than your own by redirecting you to your instance and utilizing the APIs to resolve the requested content. If enabled, the extension also automatically performs the desired action (follow, boost, favourite) for you.
 
 Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi browser and Firefox Nightly on Android. Currently only Mastodon 3 + 4 in different flavours are supported as far as I tested. Support for other Fediverse software and additional flavours might be added in the future. Feel free to create pull requests / issues. This is my first proper browser extension so please bear with my awful JS skills.
 
@@ -101,6 +101,7 @@ I included all of the default add-ons in the custom collection, so you will not 
     - Element identifiers might change over time (extension needs to be updated)
     - Your home instance is blocked by the external instance (can't fix, obviously)
 4. There is a known bug that sometimes, when following a user and having auto-action enabled, the follow results in a follow request even though the account is unlocked (so it should instantly accept). I suppose this is a bug with Mastodon / network issue. The followed user will in fact receive the request. If you notice it, you can unfollow and follow again, this will work as usual.
+5. There can be a short delay before you are redirected since an API call to the respective external instance must be made
 
 So please be aware, that this extension can fail in some cases. Feel free to submit pull requests / issues.
 
