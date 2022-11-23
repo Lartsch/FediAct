@@ -31,7 +31,7 @@ Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi 
 ## Setup
 
 - Required: Click the extension icon to set your Mastodon instance
-  - Only set the domain name (like "infosec.exchange") without http/https or URL)
+  - Only set the domain name (like "infosec.exchange") without http/https or URL
 - Optional: All other settings (they are self-explanatory)
 - Required: Hit "Submit" to update your settings
 
