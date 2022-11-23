@@ -1,4 +1,4 @@
-# FediFollow (Beta v0.5.1)
+# FediFollow (Beta v0.5.2)
 A Chrome/Firefox extension that simplifies following and post interactions on other Mastodon instances than your own by intelligently redirecting you to your instance and utilizing the local API to resolve the content. If enabled, the extension automatically performs the desired action (follow, boost, favourite for now).
 
 Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi browser on Android. Currently only Mastodon 3 + 4 in different flavours are supported as far as I tested. Support for other Fediverse software and additional flavours might be added in the future. Feel free to create pull requests / issues. This is my first proper browser extension so please bear with my awful JS skills.
@@ -9,6 +9,7 @@ Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi 
   * [Setup](#setup)
   * [Screenshots / GIFs](#screenshots--gifs)
   * [Manual installation](#manual-installation)
+  * [Install in Firefox for Android](#install-in-firefox-for-android)
   * [Additional notes](#additional-notes)
   * [How it works](#how-it-works)
   * [Todos / Planned features](#todos--planned-features)
@@ -20,23 +21,18 @@ Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi 
 
 [<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/chrome/chrome.svg" width="48" alt="Chrome" valign="middle">][link-chrome] [<img valign="middle" src="https://img.shields.io/chrome-web-store/v/lmpcajpkjcclkjbliapfjfolocffednm.svg?label=%20">][link-chrome] and other Chromium browsers (OUTDATED, v0.5.0 currently in review)
 
-[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fedifollow.svg?label=%20">][link-firefox] (soon including Firefox Android)
+[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fedifollow.svg?label=%20">][link-firefox] including Firefox for Android
 
 > **Note**
 > 
-> **If the webstore releases are outdated, you can use the [manual installation method](#manual-installation) to install the latest version**
+> - **If webstore release is outdated, use the [manual installation method](#manual-installation) to install the latest version**  
+> - **Special [installation steps](#install-in-firefox-for-android) for Firefox on Android**
 
 ## Setup
 
 - Required: Click the extension icon to set your Mastodon instance
   - Only set the domain name (like "infosec.exchange") without http/https or URL)
-- Optional: Change whether to redirect in current or new tab (**for new tab you might need to allow popups if your browser asks for it**)
-- Optional: Change the mode (all sites except those on blacklist (default) / no sites but those on whitelist)
-- Optional: Add domain names to the blacklist/whitelist textarea, one per line, for ex.
-  ```
-  mastodon.social
-  bbq.snoot.com
-  ```
+- Optional: All other settings (they are self-explanatory)
 - Required: Hit "Submit" to update your settings
 
 **Please read the [additional notes](#additional-notes).**
@@ -57,6 +53,24 @@ Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi 
 3. Select "This Firefox"
 4. Click the "Load Temporary Add-on" button and then select the downloaded Firefox ZIP file
 
+## Install in Firefox for Android
+Since a while, Firefox on Android only allows a [curated list](https://addons.mozilla.org/en-US/android/search/?promoted=recommended&sort=random&type=extension) of addons to install, preventing installation of anything else. The following explanation will guide you how to install it from the webstore anyways.
+
+**Requirements:**  
+- Firefox **Nightly** for Android  
+  
+**Steps:**  
+1. In Firefox, go to Settings > About Firefox Nightly
+2. Click the Firefox logo 5 times to enable developer options
+3. Go back to Settings > Custom Add-on Collection
+4. Enter the following data:
+    - ID: 17665294
+    - Name: FediFollow
+5. Click OK, Firefox will close - reopen it
+6. FediFollow will now be available in the Add-ons menu of Firefox Nightly
+  
+I included all of the default add-ons in the custom collection, so you will not miss out on any of those. Of course, you can create [your own collection](https://support.mozilla.org/en-US/kb/how-use-collections-addonsmozillaorg) as well.
+
 ## Additional notes
 1. Currently supports external Mastodon instances v3 + v4
     - I have not tested if Mastodon v3 works as home instance! In general, Mastodon v4 support is the main objective.
@@ -68,6 +82,7 @@ Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi 
     - It's not a Mastodon instance (not supported yet)
     - Element identifiers might change over time (extension needs to be updated)
     - Your home instance is blocked by the external instance (can't fix, obviously)
+4. There is a known bug that sometimes, when following a user and having auto-action enabled, the follow results in a follow request even though the account is unlocked (so it should instantly accept). I suppose this is a bug with Mastodon / network issue. The followed user will in fact receive the request. If you notice it, you can unfollow and follow again, this will work as usual.
 
 So please be aware, that this extension can fail in some cases. Feel free to submit pull requests / issues.
 
