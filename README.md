@@ -38,6 +38,7 @@ Right now, this needs to be installed in debugging / developer mode. Soon it wil
 
 > **Note**
 > 1. Currently supports different flavours of Mastodon 3 + 4
+>     - I have not tested if Mastodon v3 works as home instance! In general, Mastodon v4 support is the main objective.
 > 2. The whitelist mode can be useful if you do not want the extension to run basic checks on every site (since it needs to determine if it is a Mastodon site). Not sure if the blacklist feature is good for anything but I still included it.
 > 3. It can have several reasons why a redirection/instance might not work:
 >     - You are not logged in to your home instance (can't fix, log in)
