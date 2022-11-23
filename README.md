@@ -25,7 +25,7 @@ Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi 
 
 > **Note**
 > 
-> - **If the webstore releases are outdated, you can use the [manual installation method](#manual-installation) to install the latest version**  
+> - **If webstore releases is outdated, use the [manual installation method](#manual-installation) to install the latest version**  
 > - **Special [installation steps](#install-in-firefox-for-android) for Firefox on Android**
 
 ## Setup
