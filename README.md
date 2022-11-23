@@ -1,7 +1,7 @@
 # FediFollow (Beta v0.5.0)
 A Chrome/Firefox extension that simplifies following and post interactions on other Mastodon instances than your own by intelligently redirecting you to your instance and utilizing the local API to resolve the content. If enabled, the extension automatically performs the desired action (follow, boost, favourite for now).
 
-Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi browser on Android. Currently only Mastodon 3 + 4 in different flavors are supported as far as I tested. Support for other Fediverse software / versions / flavors might be added in the future. Feel free to create pull requests / issues. This is my first proper browser extension so please bear with my awful JS skills.
+Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi browser on Android. Currently only Mastodon 3 + 4 in different flavours are supported as far as I tested. Support for other Fediverse software and additional flavours might be added in the future. Feel free to create pull requests / issues. This is my first proper browser extension so please bear with my awful JS skills.
 
 **Important**: Your data will never leave your machine by using this addon. Also, no usage stats are collected.
 
@@ -39,6 +39,8 @@ Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi 
   ```
 - Required: Hit "Submit" to update your settings
 
+**Please read the [additional notes](#additional-notes).**
+
 ## Screenshots / GIFs
 ![Extension Popup](https://github.com/lartsch/FediFollow-Chrome/blob/main/img/screenshot1.PNG?raw=true)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 ![Follow Redirect](https://github.com/lartsch/FediFollow-Chrome/blob/main/img/follow-interaction.gif?raw=true)
@@ -56,7 +58,6 @@ Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi 
 4. Click the "Load Temporary Add-on" button and then select the downloaded Firefox ZIP file
 
 ## Additional notes
-
 1. Currently supports external Mastodon instances v3 + v4
     - I have not tested if Mastodon v3 works as home instance! In general, Mastodon v4 support is the main objective.
 2. The whitelist mode can be useful if you do not want the extension to run basic checks on every site (since it needs to determine if it is a Mastodon site). Not sure if the blacklist feature is good for anything but I still included it.
