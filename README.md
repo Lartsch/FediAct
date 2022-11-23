@@ -44,11 +44,11 @@ Not guaranteed to be up to date ;)
   <img src="https://github.com/lartsch/FediFollow-Chrome/blob/main/img/screenshot1.PNG?raw=true">
 </details>
 <details>
-  <summary>Follow interaction</summary>
+  <summary>Follow interaction (GIF)</summary>
   <img src="https://github.com/lartsch/FediFollow-Chrome/blob/main/img/follow-interaction.gif?raw=true">
 </details>
 <details>
-  <summary>Post interaction</summary>
+  <summary>Post interaction (GIF)</summary>
   <img src="https://github.com/lartsch/FediFollow-Chrome/blob/main/img/post-interaction.gif?raw=true">
 </details>
 <details>
