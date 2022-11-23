@@ -60,9 +60,7 @@ Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi 
 4. Click the "Load Temporary Add-on" button and then select the downloaded Firefox ZIP file
 
 ## Install in Firefox for Android
-Since a while, Firefox on Android only allows a [curated list](https://addons.mozilla.org/en-US/android/search/?promoted=recommended&sort=random&type=extension) of addons to install, preventing installation of anything else.
-
-The following explanation will guide you how to install it from the webstore anyways.
+Since a while, Firefox on Android only allows a [curated list](https://addons.mozilla.org/en-US/android/search/?promoted=recommended&sort=random&type=extension) of addons to install, preventing installation of anything else. The following explanation will guide you how to install it from the webstore anyways.
 
 **Requirements:**  
 - Firefox **Nightly** for Android  
@@ -74,7 +72,7 @@ The following explanation will guide you how to install it from the webstore any
 4. Enter the following data:
     - ID: 17665294
     - Name: FediFollow
-5. Firefox will close - reopen it
+5. Click OK, Firefox will close - reopen it
 6. FediFollow will now be available in the Add-ons menu of Firefox Nightly
   
 I included all of the default add-ons in the custom collection, so will not miss out on any of those.
