@@ -9,6 +9,7 @@ Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi 
   * [Setup](#setup)
   * [Screenshots / GIFs](#screenshots--gifs)
   * [Manual installation](#manual-installation)
+  * [Insall in Firefox for Android](#install-in-firefox-for-android)
   * [Additional notes](#additional-notes)
   * [How it works](#how-it-works)
   * [Todos / Planned features](#todos--planned-features)
@@ -20,11 +21,12 @@ Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi 
 
 [<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/chrome/chrome.svg" width="48" alt="Chrome" valign="middle">][link-chrome] [<img valign="middle" src="https://img.shields.io/chrome-web-store/v/lmpcajpkjcclkjbliapfjfolocffednm.svg?label=%20">][link-chrome] and other Chromium browsers (OUTDATED, v0.5.0 currently in review)
 
-[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fedifollow.svg?label=%20">][link-firefox] (soon including Firefox Android)
+[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fedifollow.svg?label=%20">][link-firefox] (including Firefox for Android)
 
 > **Note**
 > 
-> **If the webstore releases are outdated, you can use the [manual installation method](#manual-installation) to install the latest version**
+> - **If the webstore releases are outdated, you can use the [manual installation method](#manual-installation) to install the latest version**  
+> - **Special [installation steps](#install-in-firefox-for-android) for Firefox on Android**
 
 ## Setup
 
@@ -56,6 +58,26 @@ Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi 
 2. Open the debugging page (URL: about:debugging)
 3. Select "This Firefox"
 4. Click the "Load Temporary Add-on" button and then select the downloaded Firefox ZIP file
+
+## Install in Firefox for Android
+Since a while, Firefox on Android only allows a [curated list](https://addons.mozilla.org/en-US/android/search/?promoted=recommended&sort=random&type=extension) of addons to install, preventing installation of anything else.
+
+The following explanation will guide you how to install it from the webstore anyways.
+
+**Requirements:**  
+- Firefox **Nightly** for Android  
+  
+**Steps:**  
+1. In Firefox, go to Settings > About Firefox Nightly
+2. Click the Firefox logo 5 times to enable developer options
+3. Go back to Settings > Custom Add-on Collection
+4. Enter the following data:
+    - ID: 17665294
+    - Name: FediFollow
+5. Firefox will close - reopen it
+6. FediFollow will now be available in the Add-ons menu of Firefox Nightly
+  
+I included all of the default add-ons in the custom collection, so will not miss out on any of those.
 
 ## Additional notes
 1. Currently supports external Mastodon instances v3 + v4
