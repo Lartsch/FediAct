@@ -63,7 +63,9 @@ Some basic explanations how the addon works...
 - If the home instance is opened with this parameter...
     - Your authorization token is extracted from the DOM
     - Then the parameter value is used to perform a search for it with the search API endpoint (with resolving, so auth is needed)
-    - If a match for a user or post was found, you are then redirected to the content
+    - If a match for a user or post was found
+        - If enabled, the desired action is executed by using the Mastodon API (follow, fav, boost)
+        - You are redirected to the requested content
     - Using the search API gives best compatibility for resolving content (for ex. Toot IDs differ on instances for the same toot)
 ### Follow interactions
 - Addon uses a list of DOM identifiers of follow buttons (for different views / flavors)
