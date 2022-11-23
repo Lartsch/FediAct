@@ -32,13 +32,7 @@ Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi 
 
 - Required: Click the extension icon to set your Mastodon instance
   - Only set the domain name (like "infosec.exchange") without http/https or URL)
-- Optional: Change whether to redirect in current or new tab (**for new tab you might need to allow popups if your browser asks for it**)
-- Optional: Change the mode (all sites except those on blacklist (default) / no sites but those on whitelist)
-- Optional: Add domain names to the blacklist/whitelist textarea, one per line, for ex.
-  ```
-  mastodon.social
-  bbq.snoot.com
-  ```
+- Optional: All other settings (they are self-explanatory)
 - Required: Hit "Submit" to update your settings
 
 **Please read the [additional notes](#additional-notes).**
