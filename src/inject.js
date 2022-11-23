@@ -1,11 +1,11 @@
 // prep
-const followButtonPaths = ["div.account__header button.logo-button","div.public-account-header a.logo-button"];
+const followButtonPaths = ["div.account__header button.logo-button","div.public-account-header a.logo-button","div.account-card a.logo-button"];
 const tootButtonsPaths = ["div.status__action-bar button:not(.disabled):not(:has(i.fa-share-alt))","div.detailed-status__action-bar button:not(.disabled):not(:has(i.fa-share-alt))","div.status__action-bar a.modal-button","a.detailed-status__link"];
 const tokenPaths = ["head script#initial-state"];
 const appHolderPaths = ["body > div.app-holder", "body > div.public-layout"];
 const profileNamePaths = ["div.account__header__tabs__name small", "div.public-account-header__tabs__name small"];
 const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/;
-const profileRegex = /^(?:https?:\/\/(www\.)?.*\..*?\/)(?<handle>@\w+(?:@([\w-]+\.)+?\w+)?)\/?$/;
+const profileRegex = /^(?:https?:\/\/(www\.)?.*\..*?\/)((?<handle>@\w+(?:@([\w-]+\.)+?\w+)?)|explore)\/?$/;
 const tootsRegex = /^(?:https?:\/\/(www\.)?.*\..*?)(\/explore|\/public|\/public\/local|\d+)$/;
 const tootRegex = /^(?:https?:\/\/(www\.)?.*\..*?\/)(?<handle>@\w+(?:@([\w-]+\.)+?\w+)?)\/\d+\/?$/;
 const handleExtractRegex = /^.*(?<handle>@\w+)@(?<handledomain>([\w-]+\.)+?\w+)\/?$/;
@@ -387,16 +387,29 @@ function processFollow() {
 					e.stopImmediatePropagation();
 					// backup the button text
 					var originaltext = $(found).html();
+					var handleEl;
 					var handleDomain;
 					var handle;
-					// check all defined selectors for the username element
-					for (const selector of profileNamePaths) {
-						if ($(selector).length) {
-							// match content of first found element against handle regex (with match grups)
-							var handleDomainMatches = $(selector).text().trim().match(handleExtractRegex);
-							handleDomain = handleDomainMatches.groups.handledomain;
-							handle = handleDomainMatches.groups.handle;
+					// dirty fix for some v3 instance views
+					if (~window.location.href.indexOf("/explore")) {
+						var temp = $(e.target).closest("div.account-card").find("div.display-name > span");
+						if (temp.length) {
+							handleEl = temp;
 						}
+					} else {
+						// check all defined selectors for the username element
+						for (const selector of profileNamePaths) {
+							if ($(selector).length) {
+								handleEl = $(selector)
+								break;
+							}
+						}
+					}
+					if (handleEl) {
+						// match content of first found element against handle regex (with match grups)
+						var handleDomainMatches = handleEl.text().trim().match(handleExtractRegex);
+						handleDomain = handleDomainMatches.groups.handledomain;
+						handle = handleDomainMatches.groups.handle;
 					}
 					// if extraction worked...
 					if (handleDomain && handle) {
@@ -431,9 +444,14 @@ function processFollow() {
 							}, 1000);
 						} else {
 							log("Could not get instance URL from API search, attempting raw redirect.");
+							var rawRedirect = window.location.href;
+							// dirty fix for some v3 views
+							if (~rawRedirect.indexOf("/explore")) {
+								rawRedirect = "https://" + handleDomain + "/" + handle;
+							}
 							// timeout 1000ms to make it possible to notice the redirection indication
 							setTimeout(function() {
-								redirectToHomeInstance(window.location.href, null);
+								redirectToHomeInstance(rawRedirect, null);
 								// restore original button text
 								$(found).html(originaltext);
 							}, 1000);
@@ -507,7 +525,6 @@ async function checkSite(callback) {
 		// do we have a fedifollow param?
 		fediParamValue = getUrlParameter(fediParamName);
 		fediParamActionValue = getUrlParameter(fediParamActionName);
-		log(fediParamActionValue)
 		if (fediParamValue) {
 			// if so, run home mode
 			return "home";
