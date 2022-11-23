@@ -9,7 +9,7 @@ Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi 
   * [Setup](#setup)
   * [Screenshots / GIFs](#screenshots--gifs)
   * [Manual installation](#manual-installation)
-  * [Insall in Firefox for Android](#install-in-firefox-for-android)
+  * [Install in Firefox for Android](#install-in-firefox-for-android)
   * [Additional notes](#additional-notes)
   * [How it works](#how-it-works)
   * [Todos / Planned features](#todos--planned-features)
