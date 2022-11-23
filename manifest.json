@@ -17,6 +17,9 @@
     "https://*/*",
     "http://*/*"
   ],
+  "options_ui": {
+    "page": "src/popup.html"
+  },
   "action":
   {
 	"default_popup": "src/popup.html",
