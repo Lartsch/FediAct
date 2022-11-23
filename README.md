@@ -1,19 +1,53 @@
-# FediFollow (Beta)
+# FediFollow (Beta v0.5.0)
 A Chrome/Firefox extension that simplifies following and post interactions on other Mastodon instances than your own by intelligently redirecting you to your instance and utilizing the local API to resolve the content. If enabled, the extension automatically performs the desired action (follow, boost, favourite for now).
 
-Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi browser on Android. Currently only Mastodon 3 + 4 in different flavors are supported as far as I tested. Support for other Fediverse software / versions / flavors might be added in the future. Feel free to create pull requests / issues. This is my first proper browser extension so please bear with my awful JS skills.
+Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi browser on Android. Currently only Mastodon 3 + 4 in different flavours are supported as far as I tested. Support for other Fediverse software and additional flavours might be added in the future. Feel free to create pull requests / issues. This is my first proper browser extension so please bear with my awful JS skills.
 
-**Important**: Your data will never leave your machine by using this addon.
+**Important**: Your data will never leave your machine by using this addon. Also, no usage stats are collected.
 
   * [Installation](#installation)
   * [Setup](#setup)
   * [Screenshots / GIFs](#screenshots--gifs)
+  * [Manual installation](#manual-installation)
+  * [Additional notes](#additional-notes)
   * [How it works](#how-it-works)
   * [Todos / Planned features](#todos--planned-features)
 
 ## Installation
-Right now, this needs to be installed in debugging / developer mode. Soon it will be available on Chrome Webstore / Firefox addon store.
-1. Download the [latest release](https://github.com/Lartsch/FediFollow-Chrome/releases/latest) for your browser (chrome or firefox)
+
+[link-chrome]: https://chrome.google.com/webstore/detail/fedifollow/lmpcajpkjcclkjbliapfjfolocffednm 'Version published on Chrome Web Store'
+[link-firefox]: https://addons.mozilla.org/en-US/firefox/addon/fedifollow/ 'Version published on Mozilla Add-ons'
+
+[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/chrome/chrome.svg" width="48" alt="Chrome" valign="middle">][link-chrome] [<img valign="middle" src="https://img.shields.io/chrome-web-store/v/lmpcajpkjcclkjbliapfjfolocffednm.svg?label=%20">][link-chrome] and other Chromium browsers (OUTDATED, v0.5.0 currently in review)
+
+[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fedifollow.svg?label=%20">][link-firefox] (soon including Firefox Android)
+
+> **Note**
+> 
+> **If the webstore releases are outdated, you can use the [manual installation method](#manual-installation) to install the latest version**
+
+## Setup
+
+- Required: Click the extension icon to set your Mastodon instance
+  - Only set the domain name (like "infosec.exchange") without http/https or URL)
+- Optional: Change whether to redirect in current or new tab (**for new tab you might need to allow popups if your browser asks for it**)
+- Optional: Change the mode (all sites except those on blacklist (default) / no sites but those on whitelist)
+- Optional: Add domain names to the blacklist/whitelist textarea, one per line, for ex.
+  ```
+  mastodon.social
+  bbq.snoot.com
+  ```
+- Required: Hit "Submit" to update your settings
+
+**Please read the [additional notes](#additional-notes).**
+
+## Screenshots / GIFs
+![Extension Popup](https://github.com/lartsch/FediFollow-Chrome/blob/main/img/screenshot1.PNG?raw=true)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+![Follow Redirect](https://github.com/lartsch/FediFollow-Chrome/blob/main/img/follow-interaction.gif?raw=true)
+![Follow Redirect](https://github.com/lartsch/FediFollow-Chrome/blob/main/img/post-interaction.gif?raw=true)
+
+## Manual installation
+1. Download the [latest Github release](https://github.com/Lartsch/FediFollow-Chrome/releases/latest) for your browser (chrome or firefox)
 ### Chrome
 2. Unzip the downloaded file somewhere
 3. Go to your Chrome extension page (URL: chrome://extensions) and enable developer mode
@@ -23,36 +57,19 @@ Right now, this needs to be installed in debugging / developer mode. Soon it wil
 3. Select "This Firefox"
 4. Click the "Load Temporary Add-on" button and then select the downloaded Firefox ZIP file
 
-## Setup
-**You might need to allow popups if your browser asks for it.**
+## Additional notes
+1. Currently supports external Mastodon instances v3 + v4
+    - I have not tested if Mastodon v3 works as home instance! In general, Mastodon v4 support is the main objective.
+2. The whitelist mode can be useful if you do not want the extension to run basic checks on every site (since it needs to determine if it is a Mastodon site). Not sure if the blacklist feature is good for anything but I still included it.
+3. It can have several reasons why a redirection/instance might not work:
+    - You are not logged in to your home instance (can't fix, log in)
+    - There are instances that use custom layouts/flavours (additional identifiers need to be added to extension)
+    - Instance chose to hide the follow button when not logged in (not supported yet)
+    - It's not a Mastodon instance (not supported yet)
+    - Element identifiers might change over time (extension needs to be updated)
+    - Your home instance is blocked by the external instance (can't fix, obviously)
 
-- Required: Click the extension icon to set your Mastodon instance
-  - Only set the domain name (like "infosec.exchange") without http/https or URL)
-- Optional: Change whether to redirect in current or new tab
-- Optional: Change the mode (all sites except those on blacklist (default) / no sites but those on whitelist)
-- Optional: Add domain names to the blacklist/whitelist textarea, one per line, for ex.
-  ```
-  mastodon.social
-  bbq.snoot.com
-  ```
-- Required: Hit "Submit" to update your settings
-
-> **Note**
-> 1. Currently supports different flavours of Mastodon 3 + 4
-> 2. The whitelist mode can be useful if you do not want the extension to run basic checks on every site (since it needs to determine if it is a Mastodon site). Not sure if the blacklist feature is good for anything but I still included it.
-> 3. It can have several reasons why a redirection/instance might not work:
->     - You are not logged in to your home instance
->     - There are instances that use custom layouts/flavours (additional identifiers need to be added to extension)
->     - Instance chose to hide the follow button when not logged in (not supported yet)
->     - It's not a Mastodon instance (not supported yet)
->     - Element identifiers might change over time (extension needs to be updated)
->
-> So please be aware, that this extension can fail in some cases. Feel free to submit pull requests / issues.
-
-## Screenshots / GIFs
-![Extension Popup](https://github.com/lartsch/FediFollow-Chrome/blob/main/img/screenshot1.PNG?raw=true)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-![Follow Redirect](https://github.com/lartsch/FediFollow-Chrome/blob/main/img/follow-interaction.gif?raw=true)
-![Follow Redirect](https://github.com/lartsch/FediFollow-Chrome/blob/main/img/post-interaction.gif?raw=true)
+So please be aware, that this extension can fail in some cases. Feel free to submit pull requests / issues.
 
 ## How it works
 Some basic explanations how the addon works...
@@ -63,7 +80,9 @@ Some basic explanations how the addon works...
 - If the home instance is opened with this parameter...
     - Your authorization token is extracted from the DOM
     - Then the parameter value is used to perform a search for it with the search API endpoint (with resolving, so auth is needed)
-    - If a match for a user or post was found, you are then redirected to the content
+    - If a match for a user or post was found
+        - If enabled, the desired action is executed by using the Mastodon API (follow, fav, boost)
+        - You are redirected to the requested content
     - Using the search API gives best compatibility for resolving content (for ex. Toot IDs differ on instances for the same toot)
 ### Follow interactions
 - Addon uses a list of DOM identifiers of follow buttons (for different views / flavors)
@@ -81,7 +100,7 @@ Some basic explanations how the addon works...
 
 ## Todos / Planned features 
 - Add support for post interactions (DONE)
-- Support executing the intended action after redirect
+- Support executing the intended action after redirect (DONE)
 - Add support for other implementations (Plemora, GNU Social, ...)
 - Publish to Chrome Webstore (IN PROGRESS)
 - Publish to Firefox addon store (IN PROGRESS)
