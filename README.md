@@ -51,6 +51,14 @@ Not guaranteed to be up to date ;)
   <summary>Post interaction</summary>
   <img src="https://github.com/lartsch/FediFollow-Chrome/blob/main/img/post-interaction.gif?raw=true">
 </details>
+<details>
+  <summary>FediFollow installed in Kiwi browser (Android/Chromium)</summary>
+  <img width=300 src="https://github.com/lartsch/FediFollow-Chrome/blob/main/img/fedifollow-android-chrome-kiwi-browser.jpg?raw=true">
+</details>
+<details>
+  <summary>FediFollow installed in Firefox Nightly (Android)</summary>
+  <img width=300 src="https://github.com/lartsch/FediFollow-Chrome/blob/main/img/fedifollow-android-firefox.jpg?raw=true">
+</details>
 
 ## Manual installation
 1. Download the [latest Github release](https://github.com/Lartsch/FediFollow-Chrome/releases/latest) for your browser (chrome or firefox)
