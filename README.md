@@ -40,7 +40,7 @@ Right now, this needs to be installed in debugging / developer mode. Soon it wil
 > 1. Currently supports different flavours of Mastodon 3 + 4
 > 2. The whitelist mode can be useful if you do not want the extension to run basic checks on every site (since it needs to determine if it is a Mastodon site). Not sure if the blacklist feature is good for anything but I still included it.
 > 3. It can have several reasons why a redirection/instance might not work:
->     - You are not logged in to your home instance
+>     - You are not logged in to your home instance (can't fix, log in)
 >     - There are instances that use custom layouts/flavours (additional identifiers need to be added to extension)
 >     - Instance chose to hide the follow button when not logged in (not supported yet)
 >     - It's not a Mastodon instance (not supported yet)
