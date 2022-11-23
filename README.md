@@ -82,6 +82,7 @@ I included all of the default add-ons in the custom collection, so you will not 
     - It's not a Mastodon instance (not supported yet)
     - Element identifiers might change over time (extension needs to be updated)
     - Your home instance is blocked by the external instance (can't fix, obviously)
+4. There is a known bug that sometimes, when following a user and having auto-action enabled, the follow results in a follow request even though the account is unlocked (so it should instantly accept). I suppose this is a bug with Mastodon / network issue. The followed user will in fact receive the request. If you notice it, you can unfollow and follow again, this will work as usual.
 
 So please be aware, that this extension can fail in some cases. Feel free to submit pull requests / issues.
 
