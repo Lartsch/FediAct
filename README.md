@@ -9,7 +9,7 @@ Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi 
   * [Setup](#setup)
   * [Screenshots / GIFs](#screenshots--gifs)
   * [Manual installation](#manual-installation)
-  * [Install in Firefox for Android](#install-in-firefox-for-android)
+      * [Install in Firefox for Android](#install-in-firefox-for-android)
   * [Additional notes](#additional-notes)
   * [How it works](#how-it-works)
   * [Todos / Planned features](#todos--planned-features)
@@ -71,7 +71,7 @@ Not guaranteed to be up to date ;)
 3. Select "This Firefox"
 4. Click the "Load Temporary Add-on" button and then select the downloaded Firefox ZIP file
 
-## Install in Firefox for Android
+### Install in Firefox for Android
 Since a while, Firefox on Android only allows a [curated list](https://addons.mozilla.org/en-US/android/search/?promoted=recommended&sort=random&type=extension) of addons to install, preventing installation of anything else. The following explanation will guide you how to install it from the webstore anyways.
 
 **Requirements:**  
