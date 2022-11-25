@@ -136,11 +136,12 @@ Some basic explanations how the addon works...
 - Add support for post interactions (DONE)
 - Support executing the intended action after redirect (DONE)
 - Add support for other implementations (Plemora, GNU Social, ...)
-- Publish to Chrome Webstore (IN PROGRESS)
-- Publish to Firefox addon store (IN PROGRESS)
+- Publish to Chrome Webstore (DONE)
+- Publish to Firefox addon store (DONE)
 - Find additional layouts/flavours to add identifiers for
 - Support for profiles views with follow button disabled
 - Add support for Firefox (DONE)
+- Add support for Firefox on Android (DONE)
 - Fix some rare cases where an instance runs on a subdomain but the handle uses the domain without subdomain (need to get the handle directly from the profile instead of URL + domain name) (DONE)
 - Add support for whitelist/blacklist (DONE)
 - Add feature to indicate if you are already following a user when browsing his profile on another instance (this requires calls to the home instance, will look into it soon)
