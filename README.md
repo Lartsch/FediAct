@@ -3,7 +3,7 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 
 Should work for all *updated* Chromium browsers, *updated* Firefox, as well as Kiwi browser and Firefox Nightly on Android. Currently only Mastodon 3 + 4 in different flavours are supported as far as I tested. Support for other Fediverse software and additional flavours might be added in the future. Feel free to create pull requests / issues. This is my first proper browser extension so please bear with my awful JS skills.
 
-It can take up to 2 minutes after you have set your home instance to start working (needs to get your API token). Performance of this addon depends on the performance of the external instance and your home instance.
+**It can take up to 2 minutes after you have set your home instance to start working** (needs to get your API token). Performance of this addon depends on the performance of the external instance and your home instance.
 
 **Important**: Your data will never leave your machine by using this addon. Also, no usage stats are collected.
 
