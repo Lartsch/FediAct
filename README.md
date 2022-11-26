@@ -1,7 +1,7 @@
-# FediFollow (Beta v0.5.2)
-A Chrome/Firefox extension that simplifies following and post interactions on other Mastodon instances than your own by intelligently redirecting you to your instance and utilizing the local API to resolve the content. If enabled, the extension automatically performs the desired action (follow, boost, favourite for now).
+# FediFollow (v0.5.2)
+A Chrome/Firefox extension that simplifies following and post interactions on other Mastodon instances than your own by redirecting you to your instance and utilizing the APIs to resolve the requested content. If enabled, the extension also automatically performs the desired action (follow, boost, favourite) for you.
 
-Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi browser on Android. Currently only Mastodon 3 + 4 in different flavours are supported as far as I tested. Support for other Fediverse software and additional flavours might be added in the future. Feel free to create pull requests / issues. This is my first proper browser extension so please bear with my awful JS skills.
+Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi browser and Firefox Nightly on Android. Currently only Mastodon 3 + 4 in different flavours are supported as far as I tested. Support for other Fediverse software and additional flavours might be added in the future. Feel free to create pull requests / issues. This is my first proper browser extension so please bear with my awful JS skills.
 
 **Important**: Your data will never leave your machine by using this addon. Also, no usage stats are collected.
 
@@ -9,7 +9,7 @@ Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi 
   * [Setup](#setup)
   * [Screenshots / GIFs](#screenshots--gifs)
   * [Manual installation](#manual-installation)
-  * [Install in Firefox for Android](#install-in-firefox-for-android)
+      * [Install in Firefox for Android](#install-in-firefox-for-android)
   * [Additional notes](#additional-notes)
   * [How it works](#how-it-works)
   * [Todos / Planned features](#todos--planned-features)
@@ -19,28 +19,46 @@ Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi 
 [link-chrome]: https://chrome.google.com/webstore/detail/fedifollow/lmpcajpkjcclkjbliapfjfolocffednm 'Version published on Chrome Web Store'
 [link-firefox]: https://addons.mozilla.org/en-US/firefox/addon/fedifollow/ 'Version published on Mozilla Add-ons'
 
-[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/chrome/chrome.svg" width="48" alt="Chrome" valign="middle">][link-chrome] [<img valign="middle" src="https://img.shields.io/chrome-web-store/v/lmpcajpkjcclkjbliapfjfolocffednm.svg?label=%20">][link-chrome] and other Chromium browsers (OUTDATED, v0.5.0 currently in review)
+[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/chrome/chrome.svg" width="48" alt="Chrome" valign="middle">][link-chrome] [<img valign="middle" src="https://img.shields.io/chrome-web-store/v/lmpcajpkjcclkjbliapfjfolocffednm.svg?label=%20">][link-chrome] and other Chromium browsers
 
 [<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fedifollow.svg?label=%20">][link-firefox] including Firefox for Android
 
 > **Note**
 > 
 > - **If webstore release is outdated, use the [manual installation method](#manual-installation) to install the latest version**  
-> - **Special [installation steps](#install-in-firefox-for-android) for Firefox on Android**
+> - **Special installation steps for [Firefox on Android](#install-in-firefox-for-android)**
 
 ## Setup
 
 - Required: Click the extension icon to set your Mastodon instance
-  - Only set the domain name (like "infosec.exchange") without http/https or URL)
+  - Only set the domain name (like "infosec.exchange") without http/https or URL
 - Optional: All other settings (they are self-explanatory)
 - Required: Hit "Submit" to update your settings
 
 **Please read the [additional notes](#additional-notes).**
 
 ## Screenshots / GIFs
-![Extension Popup](https://github.com/lartsch/FediFollow-Chrome/blob/main/img/screenshot1.PNG?raw=true)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-![Follow Redirect](https://github.com/lartsch/FediFollow-Chrome/blob/main/img/follow-interaction.gif?raw=true)
-![Follow Redirect](https://github.com/lartsch/FediFollow-Chrome/blob/main/img/post-interaction.gif?raw=true)
+Not guaranteed to be up to date ;)
+<details>
+  <summary>Extension popup / settings</summary>
+  <img src="https://github.com/lartsch/FediFollow-Chrome/blob/main/img/screenshot1.PNG?raw=true">
+</details>
+<details>
+  <summary>Follow interaction (GIF)</summary>
+  <img src="https://github.com/lartsch/FediFollow-Chrome/blob/main/img/follow-interaction.gif?raw=true">
+</details>
+<details>
+  <summary>Post interaction (GIF)</summary>
+  <img src="https://github.com/lartsch/FediFollow-Chrome/blob/main/img/post-interaction.gif?raw=true">
+</details>
+<details>
+  <summary>FediFollow installed in Kiwi browser (Android/Chromium)</summary>
+  <img width=300 src="https://github.com/lartsch/FediFollow-Chrome/blob/main/img/fedifollow-android-chrome-kiwi-browser.jpg?raw=true">
+</details>
+<details>
+  <summary>FediFollow installed in Firefox Nightly (Android)</summary>
+  <img width=300 src="https://github.com/lartsch/FediFollow-Chrome/blob/main/img/fedifollow-android-firefox.jpg?raw=true">
+</details>
 
 ## Manual installation
 1. Download the [latest Github release](https://github.com/Lartsch/FediFollow-Chrome/releases/latest) for your browser (chrome or firefox)
@@ -53,7 +71,7 @@ Should work for all updated Chromium browsers, updated Firefox, as well as Kiwi 
 3. Select "This Firefox"
 4. Click the "Load Temporary Add-on" button and then select the downloaded Firefox ZIP file
 
-## Install in Firefox for Android
+### Install in Firefox for Android
 Since a while, Firefox on Android only allows a [curated list](https://addons.mozilla.org/en-US/android/search/?promoted=recommended&sort=random&type=extension) of addons to install, preventing installation of anything else. The following explanation will guide you how to install it from the webstore anyways.
 
 **Requirements:**  
@@ -83,6 +101,7 @@ I included all of the default add-ons in the custom collection, so you will not 
     - Element identifiers might change over time (extension needs to be updated)
     - Your home instance is blocked by the external instance (can't fix, obviously)
 4. There is a known bug that sometimes, when following a user and having auto-action enabled, the follow results in a follow request even though the account is unlocked (so it should instantly accept). I suppose this is a bug with Mastodon / network issue. The followed user will in fact receive the request. If you notice it, you can unfollow and follow again, this will work as usual.
+5. There can be a short delay before you are redirected since an API call to the respective external instance must be made. In general, performance of this addon depends on the performance of the external instance and your home instance.
 
 So please be aware, that this extension can fail in some cases. Feel free to submit pull requests / issues.
 
@@ -117,11 +136,12 @@ Some basic explanations how the addon works...
 - Add support for post interactions (DONE)
 - Support executing the intended action after redirect (DONE)
 - Add support for other implementations (Plemora, GNU Social, ...)
-- Publish to Chrome Webstore (IN PROGRESS)
-- Publish to Firefox addon store (IN PROGRESS)
+- Publish to Chrome Webstore (DONE)
+- Publish to Firefox addon store (DONE)
 - Find additional layouts/flavours to add identifiers for
 - Support for profiles views with follow button disabled
 - Add support for Firefox (DONE)
+- Add support for Firefox on Android (DONE)
 - Fix some rare cases where an instance runs on a subdomain but the handle uses the domain without subdomain (need to get the handle directly from the profile instead of URL + domain name) (DONE)
 - Add support for whitelist/blacklist (DONE)
 - Add feature to indicate if you are already following a user when browsing his profile on another instance (this requires calls to the home instance, will look into it soon)
