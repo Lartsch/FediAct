@@ -11,7 +11,6 @@ Should work for all *updated* Chromium browsers, *updated* Firefox, as well as K
   * [Manual installation](#manual-installation)
       * [Install in Firefox for Android](#install-in-firefox-for-android)
   * [Additional notes](#additional-notes)
-  * [How it works](#how-it-works)
   * [Todos / Planned features](#todos--planned-features)
 
 ## Installation
@@ -102,35 +101,9 @@ I included all of the default add-ons in the custom collection, so you will not 
     - Your home instance is blocked by the external instance (can't fix, obviously)
 4. There is a known bug that sometimes, when following a user and having auto-action enabled, the follow results in a follow request even though the account is unlocked (so it should instantly accept). I suppose this is a bug with Mastodon / network issue. The followed user will in fact receive the request. If you notice it, you can unfollow and follow again, this will work as usual.
 5. There can be a short delay before you are redirected since an API call to the respective external instance must be made. In general, performance of this addon depends on the performance of the external instance and your home instance.
+6. It can take 1-2 minutes after the installation to sync your API token and following list
 
 So please be aware, that this extension can fail in some cases. Feel free to submit pull requests / issues.
-
-## How it works
-Some basic explanations how the addon works...
-### General
-- Addon performs basic checks on the URL and site content to determine if and what scripts to run
-- On external instances, depending on the interaction, a search string is built for the content you wish to interact with
-- You are then redirected to your local instance with the search string as value for an URL parameter that the addon checks for
-- If the home instance is opened with this parameter...
-    - Your authorization token is extracted from the DOM
-    - Then the parameter value is used to perform a search for it with the search API endpoint (with resolving, so auth is needed)
-    - If a match for a user or post was found
-        - If enabled, the desired action is executed by using the Mastodon API (follow, fav, boost)
-        - You are redirected to the requested content
-    - Using the search API gives best compatibility for resolving content (for ex. Toot IDs differ on instances for the same toot)
-### Follow interactions
-- Addon uses a list of DOM identifiers of follow buttons (for different views / flavors)
-- All default actions for clicking the button are prevented
-- Addon extracts the handle and handle domain from the profile view
-- The handle domain is then searched for with the external instance's search API endpoint (without resolving, so no authorization needed)
-    - This is to ensure we grab the correct instance URL for this user, since it can differ from the domain handle (also, the domain handle does not always resolve)
-- If all worked out, we build our search string and redirect to your home instance with the value as URL parameter then continue as explained in "General"
-### Post interactions
-- Addon uses a list of allowed URLs and DOM identifiers for interaction buttons
-- It then grabs the Toot ID using different methods, depending on the Mastodon version / flavor
-- The Toot ID is then searched for using the external instance's status API
-    - This gives us the actual URL of the post on its home instance for using as the search string (even if the post is from another external instance than the external instance it is viewed on)
-- If all worked out, we build our search string and redirect to your home instance with the value as URL parameter then continue as explained in "General"
 
 ## Todos / Planned features 
 - Add support for post interactions (DONE)
@@ -144,7 +117,8 @@ Some basic explanations how the addon works...
 - Add support for Firefox on Android (DONE)
 - Fix some rare cases where an instance runs on a subdomain but the handle uses the domain without subdomain (need to get the handle directly from the profile instead of URL + domain name) (DONE)
 - Add support for whitelist/blacklist (DONE)
-- Add feature to indicate if you are already following a user when browsing his profile on another instance (this requires calls to the home instance, will look into it soon)
+- Add feature to indicate if you are already following a user when browsing his profile on another instance (this requires calls to the home instance, will look into it soon) (DONE)
+- Indicate if post is already fav'ed / boosted
 - Review if permissions in current manifest are actually needed like that (DONE)
 - If I find myself to be bored, probably more
 
