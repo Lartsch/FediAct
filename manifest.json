@@ -11,8 +11,7 @@
 	}
   ],
   "background": {
-    "service_worker": "src/background.js",
-    "persistent": false
+    "service_worker": "src/background.js"
   },
   "permissions": [
 	"storage",
