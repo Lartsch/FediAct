@@ -113,6 +113,7 @@ I included all of the default add-ons in the custom collection, so you will not 
 So please be aware, that this extension can fail in some cases. Feel free to submit pull requests / issues.
 
 ## Todos / Planned features 
+- Fully integrate (see 6. above)
 - Add support for post interactions (DONE)
 - Support executing the intended action after redirect (DONE)
 - Add support for other implementations (Plemora, GNU Social, ...)
