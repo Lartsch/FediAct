@@ -8,7 +8,7 @@ const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/;
 const profileRegex = /^(?:https?:\/\/(www\.)?.*\..*?\/)((?<handle>@\w+(?:@([\w-]+\.)+?\w+)?)|explore)\/?$/;
 const tootsRegex = /^(?:https?:\/\/(www\.)?.*\..*?)(\/explore|\/public|\/public\/local|\d+)$/;
 const tootRegex = /^(?:https?:\/\/(www\.)?.*\..*?\/)(?<handle>@\w+(?:@([\w-]+\.)+?\w+)?)\/\d+\/?$/;
-const handleExtractRegex = /^.*(?<handle>@\w+)@(?<handledomain>([\w-]+\.)+?\w+)\/?$/;
+const handleExtractRegex = /^.*@(?<handle>\w+)@(?<handledomain>([\w-]+\.)+?\w+)\/?$/;
 const enableConsoleLog = true;
 const logPrepend = "[FediFollow]";
 const maxElementWaitFactor = 200; // x 100ms for total time
@@ -28,11 +28,15 @@ var settingsDefaults = {
 	fedifollow_whitelist: null,
 	fedifollow_blacklist: null,
 	fedifollow_target: "_self",
-	fedifollow_autoaction: true
+	fedifollow_autoaction: true,
+	fedifollow_token: null,
+	fedifollow_follows: null,
+	fedifollow_showfollows: true,
+	fedifollow_redirects: true
 }
 
 // fix for cross-browser storage api compatibility and other public vars
-var browser, chrome, instanceUri, fediParamValue, fediParamActionValue, settings;
+var browser, chrome, settings;
 
 // wrappers to prepend to log messages
 function log(text) {
@@ -133,163 +137,139 @@ var getUrlParameter = function getUrlParameter(sParam) {
     return false;
 };
 
-function redirectToHomeInstance(searchString, action) {
-	// build url
-	var url = "https://" + settings.fedifollow_homeinstance + "/?" + fediParamName + "=" + encodeURIComponent(searchString);
-	if (action) {
-		// add action parameter if set
-		url = url + "&" + fediParamActionName + "=" + action;
-	}
-	log("Redirecting to " + url);
-	// alert if set
-	if (settings.fedifollow_alert) {
-		alert("Redirecting to "+url);
-	}
-	// open window according to settings
-	var win = window.open(url, settings.fedifollow_target);
-	// focus the new tab if open was successfull
-	if (win) {
-		win.focus();
+function redirectTo(url) {
+	if (settings.fedifollow_redirects) {
+		if (settings.fedifollow_alert) {
+			alert("Redirecting...")
+		}
+		// open the url in same/new tab
+		var win = window.open(url, settings.fedifollow_target);
+		log("Redirected to " + url)
+		// focus the new tab if open was successfull
+		if (win) {
+			win.focus();
+		} else {
+			// otherwise notify user...
+			log('Could not open new window. Please allow popups for this website.');
+		}
 	} else {
-		// otherwise notify user...
-		log('Could not open new window. Please allow popups for this website.');
+		log("Redirects disabled.")
 	}
 }
 
-// process fedifollow redirects to the home instance
-async function processHomeInstance() {
-	// first we need the api token
-	waitForEl(0, tokenPaths, function(found){
-		if (found) {
-			// then we wait for the appHolder
-			waitForEl(0, appHolderPaths, async function(holder) {
-				if (holder) {
-					// hide the app holder
-					$(holder).hide();
-					// append our notification div
-					$('body').append('<div style="position: absolute; display: block; margin-left: 30px; margin-top: 30px; font-size: 18px; font-weight: bold" id="fedifollow"></div>');
-					// extract the token
-					var token = JSON.parse($(found).text()).meta.access_token;
-					if (token) {
-						// update notification div
-						$('div#fedifollow').html("<p>Resolving search...</p>");
-						var requestUrl = location.protocol + '//' + location.hostname + searchApi + "/?q="+fediParamValue+"&resolve=true&limit=10";
-						var headers = {"Authorization":"Bearer "+token,};
-						// api request: search endpoint, resolve search string locally (best support for edge cases (for ex. where subdomain does not equal the handle domain) and prevents uncached profile issue)
-						var response = await makeRequest("GET", requestUrl, headers);
-						if (response) {
-							response = JSON.parse(response);
-							// decode for additional checks
-							var decodedParam = decodeURIComponent(fediParamValue);
-							// if we got no data (failed resolve) we can at least try to resolve a user by swapping the domain in case we got a domain in the handle
-							// this does not work for resolving post IDs so we check against the handle regex
-							if (!response.accounts.length && !response.statuses.length && handleExtractRegex.test(decodedParam)) {
-								// get matches
-								var matches = decodedParam.match(handleExtractRegex);
-								if (matches.groups.handle && matches.groups.handledomain) {
-									// we got handle + handledomain, so try to put the handle domain as host for this fallback (not guaranteed to resolve)
-									$('div#fedifollow').append("<p>Failed, trying domain swap...</p>");
-									var searchstring = encodeURIComponent("https://" + matches.groups.handledomain + "/" + matches.groups.handle);
-									var requestUrl = location.protocol + '//' + location.hostname + searchApi + "/?q="+searchstring+"&resolve=true&limit=10";
-									// update response var
-									response = await makeRequest("GET", requestUrl, headers);
-									response = JSON.parse(response);
-								}
-							}
-							// set to false initially
-							var redirect = false;
-							// if we got an account but no statuses, redirect to profile (first result)
-							if (response.accounts.length && !response.statuses.length) {
-								// build redirect url
-								var redirect = location.protocol + "//" + location.hostname + "/@" + response.accounts[0].acct;
-								$('div#fedifollow').append("<p>Success!</p>");
-								// if auto actions are enbaled...
-								if (settings.fedifollow_autoaction) {
-									$('div#fedifollow').append("<p>Attempting auto-follow...</p>");
-									// build follow post request
-									var requestUrl = location.protocol + "//" + location.hostname + "/api/v1/accounts/" + response.accounts[0].id + "/follow";
-									var responseFollow = await makeRequest("POST",requestUrl,headers);
-									// check if it worked (it is ignored if the user was already followed)
-									if (responseFollow) {
-										responseFollow = JSON.parse(responseFollow);
-										if (responseFollow.following || responseFollow.requested) {
-											$('div#fedifollow').append("<p>Success!</p>");
-										} else {
-											$('div#fedifollow').append("<p>Failed.</p>");
-										}
-									}
-								}
-							} else if (!response.accounts.length && response.statuses.length) {
-								$('div#fedifollow').append("<p>Success!</p>");
-								// if statuses but no accounts, redirect to status (first result)
-								var status = response.statuses[0];
-								var statusData = {
-									"id": status.id,
-									"account": status.account.acct
-								}
-								// build redirect url
-								var redirect = location.protocol + "//" + location.hostname + "/@" + statusData.account + "/" + statusData.id;
-								// if autoactions enabled and fediParamValue is okay...
-								if (settings.fedifollow_autoaction && (fediParamActionValue == "boost" || fediParamActionValue == "favourite")) {
-									$('div#fedifollow').append("<p>Attempting auto-" + fediParamActionValue + "...</p>");
-									// build favourite/boost post request
-									var actionRequest = location.protocol + "//" + location.hostname + "/api/v1/statuses/" + statusData.id + "/";
-									if (fediParamActionValue == "boost") {
-										actionRequest = actionRequest + "reblog";
-									} else {
-										actionRequest = actionRequest + "favourite";
-									}
-									var actionResponse = await makeRequest("POST", actionRequest, headers);
-									// check if it worked (it is ignored if the post was already fav'ed / boosted)
-									if (actionResponse) {
-										actionResponse = JSON.parse(actionResponse);
-										if (actionResponse.reblogged || actionResponse.favourited) {
-											$('div#fedifollow').append("<p>Success!<p>");
-										} else {
-											$('div#fedifollow').append("<p>Failed.<p>");
-										}
-									}
-								}
-							}
-							// if we got a redirect url...
-							if (redirect) {
-								$('div#fedifollow').append("<p>Redirecting...</p>");
-								// open the url in current tab
-								var win = window.open(redirect, "_self");
-								log("Redirected to " + redirect)
-								// focus the new tab if open was successfull
-								if (win) {
-									win.focus();
-									return true;
-								} else {
-									// otherwise notify user...
-									log('Could not open new window. Please allow popups for this website.');
-									$('div#fedifollow').text('Could not open new window. Please allow popups for this website.');
-								}
-							} else {
-								log("Could not resolve a match for this search...");
-								$('div#fedifollow').text("Could not resolve a match for this search....")
-							}
-						} else {
-							log("API call failed...")
-							$('div#fedifollow').text("API call failed...")
-						}
-					} else {
-						log("Could not extract API token.")
-						$('div#fedifollow').text("Could not get API token...");
-					}
-					// show app holder after 1.5s (in case we did not redirect)
-					setTimeout(function(){
-						$(holder).show()
-					}, 1500);
-				} else {
-					log("Could not find app holder element.")
-				}
-			});
+async function followHomeInstance(id, headers, unfollow) {
+	// if auto actions are enbaled...
+	if (settings.fedifollow_autoaction) {
+		// build follow post request
+		var requestUrl = 'https://' + settings.fedifollow_homeinstance + "/api/v1/accounts/" + id + "/";
+		if (unfollow) {
+			requestUrl = requestUrl + "unfollow";
 		} else {
-			log("Could not find API token.")
+			requestUrl = requestUrl + "follow";
 		}
-	});
+		var responseFollow = await makeRequest("POST",requestUrl,headers);
+		// check if it worked (it is ignored if the user was already followed)
+		if (responseFollow) {
+			responseFollow = JSON.parse(responseFollow);
+			if (!responseFollow.following && !responseFollow.requested) {
+				log("Follow failed.");
+			}
+		}
+	} else {
+		log("Auto-action disabled.")
+	}
+}
+
+async function boostHomeInstance(id, headers) {
+	// if auto actions are enbaled...
+	if (settings.fedifollow_autoaction) {
+		// build follow post request
+		var requestUrl = 'https://' + settings.fedifollow_homeinstance + "/api/v1/statuses/" + id + "/reblog";
+		var responseBoost = await makeRequest("POST",requestUrl,headers);
+		// check if it worked (it is ignored if the user was already followed)
+		if (responseBoost) {
+			responseBoost = JSON.parse(responseBoost);
+			if (!responseBoost.reblogged) {
+				log("Boost failed.");
+			}
+		}
+	} else {
+		log("Auto-action disabled.")
+	}
+}
+
+async function favouriteHomeInstance(id, headers) {
+	// if auto actions are enbaled...
+	if (settings.fedifollow_autoaction) {
+		// build follow post request
+		var requestUrl = 'https://' + settings.fedifollow_homeinstance + "/api/v1/statuses/" + id + "/favourite";
+		var responseFav = await makeRequest("POST",requestUrl,headers);
+		// check if it worked (it is ignored if the user was already followed)
+		if (responseFav) {
+			responseFav = JSON.parse(responseFav);
+			if (!responseFav.favourited) {
+				log("Favourite failed.");
+			}
+		}
+	} else {
+		log("Auto-action disabled.")
+	}
+}
+
+// resolve content uri on home instance
+async function resolveHomeInstance(searchstring, action, unfollow) {
+	var requestUrl = 'https://' + settings.fedifollow_homeinstance + searchApi + "/?q="+encodeURIComponent(searchstring)+"&resolve=true&limit=10";
+	var headers = {"Authorization":"Bearer " + settings.fedifollow_token,};
+	// api request: search endpoint, resolve search string locally (best support for edge cases (for ex. where subdomain does not equal the handle domain) and prevents uncached profile issue)
+	var response = await makeRequest("GET", requestUrl, headers);
+	if (response) {
+		response = JSON.parse(response);
+		// if we got no data (failed resolve) we can at least try to resolve a user by swapping the domain in case we got a domain in the handle
+		// this does not work for resolving post IDs so we check against the handle regex
+		if (!response.accounts.length && !response.statuses.length && handleExtractRegex.test(searchstring)) {
+			// get matches
+			var matches = searchstring.match(handleExtractRegex);
+			if (matches.groups.handle && matches.groups.handledomain) {
+				// we got handle + handledomain, so try to put the handle domain as host for this fallback (not guaranteed to resolve)
+				var searchstring = "https://" + matches.groups.handledomain + "/@" + matches.groups.handle;
+				var requestUrl = 'https://' + settings.fedifollow_homeinstance + searchApi + "/?q="+encodeURIComponent(searchstring)+"&resolve=true&limit=10";
+				// update response var
+				response = await makeRequest("GET", requestUrl, headers);
+				response = JSON.parse(response);
+			}
+		}
+		// set to false initially
+		var redirect = false;
+		// if we got an account but no statuses, redirect to profile (first result)
+		if (response.accounts.length && !response.statuses.length) {
+			// build redirect url
+			var redirect = 'https://' + settings.fedifollow_homeinstance + "/@" + response.accounts[0].acct;
+			await followHomeInstance(response.accounts[0].id, headers, unfollow);
+		} else if (!response.accounts.length && response.statuses.length) {
+			// if statuses but no accounts, redirect to status (first result)
+			var status = response.statuses[0];
+			var statusData = {
+				"id": status.id,
+				"account": status.account.acct
+			}
+			// build redirect url
+			var redirect = 'https://' + settings.fedifollow_homeinstance + "/@" + statusData.account + "/" + statusData.id;
+			// perform action if set
+			if (action == "boost") {
+				await boostHomeInstance(statusData.id, headers)
+			} else if (action == "favourite") {
+				await favouriteHomeInstance(statusData.id, headers)
+			}
+		}
+		// if we got a redirect url...
+		if (redirect) {
+			redirectTo(redirect);
+		} else {
+			log("Could not resolve a match for this search...");
+		}
+	} else {
+		log("API call failed...")
+	}
 }
 
 // process any toots found on supported sites
@@ -320,7 +300,7 @@ async function processToots() {
 					// first check if there is an <a> sibling with the actual post URL (easiest and fastest)
 					if ($(this).siblings("a.status__relative-time").attr("href")) {
 						var redirected = true;
-						redirectToHomeInstance((this).siblings("a.status__relative-time").attr("href"), action);
+						resolveHomeInstance((this).siblings("a.status__relative-time").attr("href"), action, null);
 					} else if ($(e.target).closest("div.status").attr("data-id")) {
 						// no? then check if there is a closest div.status with the ID in data-id attribute
 						closestTootId = $(e.target).closest("div.status").attr("data-id").replace(/[^0-9]/gi,'');
@@ -354,7 +334,7 @@ async function processToots() {
 								var postUri = JSON.parse(response).url.replace("/activity/","").replace("/activity","");
 								if (postUri) {
 									// redirect to home instance
-									redirectToHomeInstance(postUri, action);
+									resolveHomeInstance(postUri, action, null);
 								} else {
 									log("Could not find post url.")
 								}
@@ -378,67 +358,73 @@ function processFollow() {
 	// check if this is a profile url
 	if (profileRegex.test(window.location.href.split("?")[0])) {
 		// wait until follow button appears (document is already ready, but most content is loaded afterwards)
-		waitForEl(0, followButtonPaths, function(found) {
+		waitForEl(0, followButtonPaths, async function(found) {
 			if (found) {
-				// setup the button click listener
-				$(found).click(async function(e) {
-					// prevent default action and other handlers
-					e.preventDefault();
-					e.stopImmediatePropagation();
-					// backup the button text
-					var originaltext = $(found).html();
-					var handleEl;
-					var handleDomain;
-					var handle;
-					// dirty fix for some v3 instance views
-					if (~window.location.href.indexOf("/explore")) {
-						var temp = $(e.target).closest("div.account-card").find("div.display-name > span");
-						if (temp.length) {
-							handleEl = temp;
+				var unfollow, handleEl, handleDomain, handle;
+				// dirty fix for some v3 instance views
+				if (~window.location.href.indexOf("/explore")) {
+					var temp = $(e.target).closest("div.account-card").find("div.display-name > span");
+					if (temp.length) {
+						handleEl = temp;
+					}
+				} else {
+					// check all defined selectors for the username element
+					for (const selector of profileNamePaths) {
+						if ($(selector).length) {
+							handleEl = $(selector)
+							break;
 						}
-					} else {
-						// check all defined selectors for the username element
-						for (const selector of profileNamePaths) {
-							if ($(selector).length) {
-								handleEl = $(selector)
-								break;
+					}
+				}
+				if (handleEl) {
+					// match content of first found element against handle regex (with match grups)
+					var handleDomainMatches = handleEl.text().trim().match(handleExtractRegex);
+					handleDomain = handleDomainMatches.groups.handledomain;
+					handle = handleDomainMatches.groups.handle;
+				}
+				// if extraction worked...
+				if (handleDomain && handle) {
+					if (settings.fedifollow_showfollows) {
+						if (settings.fedifollow_follows) {
+							if ($.inArray(handle + "@" + handleDomain, settings.fedifollow_follows) > -1) {
+								$(found).text("Unfollow");
+								unfollow = true;
 							}
 						}
 					}
-					if (handleEl) {
-						// match content of first found element against handle regex (with match grups)
-						var handleDomainMatches = handleEl.text().trim().match(handleExtractRegex);
-						handleDomain = handleDomainMatches.groups.handledomain;
-						handle = handleDomainMatches.groups.handle;
-					}
-					// if extraction worked...
-					if (handleDomain && handle) {
-						// make request to the external instances search endpoint to make sure we get the correct url for the searchstring
-						// (for ex. another external instance, also instance domain can differ from handle domain)
-						var requestUrl = location.protocol + "//" + location.hostname + searchApi + "/?q=" + encodeURIComponent(handle+"@"+handleDomain) + "&resolve=false&limit=10";
-						var response = await makeRequest("GET", requestUrl, null);
-						var result;
-						if (response) {
-							response = JSON.parse(response);
-							// if there are any accounts in the response
-							if (response.accounts.length) {
-								// get url of first account (which will be the one we need since we searched user+domain)
-								result = response.accounts[0].url;
-								// set result for searchstring
-								var url = document.createElement('a');
-								url.setAttribute('href', response.accounts[0].url);
-								result = url.protocol + "//" + url.hostname;
-							}
+					// make request to the external instances search endpoint to make sure we get the correct url for the searchstring
+					// (for ex. another external instance, also instance domain can differ from handle domain)
+					var requestUrl = location.protocol + "//" + location.hostname + searchApi + "/?q=" + encodeURIComponent("@"+handle+"@"+handleDomain) + "&resolve=false&limit=10";
+					var response = await makeRequest("GET", requestUrl, null);
+					var result;
+					if (response) {
+						response = JSON.parse(response);
+						// if there are any accounts in the response
+						if (response.accounts.length) {
+							// get url of first account (which will be the one we need since we searched user+domain)
+							result = response.accounts[0].url;
+							// set result for searchstring
+							var url = document.createElement('a');
+							url.setAttribute('href', response.accounts[0].url);
+							result = url.protocol + "//" + url.hostname;
 						}
+					}
+					// setup the button click listener
+					$(found).click(async function(e) {
+						// prevent default action and other handlers
+						e.preventDefault();
+						e.stopImmediatePropagation();
+						// backup the button text
+						var originaltext = $(found).html();
 						// replace the button text to indicate redirection
 						$(found).text("Redirecting...");
 						// if we could resolve the user domain...
 						if (result) {
 							// add the handle
-							var redirectUrl = result + "/" + handle;
+							var redirectUrl = result + "/@" + handle;
 							// timeout 1000ms to make it possible to notice the redirection indication
 							setTimeout(function() {
-								redirectToHomeInstance(redirectUrl, null);
+								resolveHomeInstance(redirectUrl, null, unfollow);
 								// restore original button text
 								$(found).html(originaltext);
 							}, 1000);
@@ -447,19 +433,19 @@ function processFollow() {
 							var rawRedirect = window.location.href;
 							// dirty fix for some v3 views
 							if (~rawRedirect.indexOf("/explore")) {
-								rawRedirect = "https://" + handleDomain + "/" + handle;
+								rawRedirect = "https://" + handleDomain + "/@" + handle;
 							}
 							// timeout 1000ms to make it possible to notice the redirection indication
 							setTimeout(function() {
-								redirectToHomeInstance(rawRedirect, null);
+								resolveHomeInstance(rawRedirect, null, unfollow);
 								// restore original button text
 								$(found).html(originaltext);
 							}, 1000);
 						}
-					} else {
-						log("Could not extract user handle.")
-					}
-				});
+					});
+				} else {
+					log("Could not extract user handle.")
+				}
 			} else {
 				log("Could not find any follow button.");
 			}
@@ -489,6 +475,11 @@ function checkSettings() {
 	// if the home instance is undefined/null/empty
 	if (settings.fedifollow_homeinstance == null || !settings.fedifollow_homeinstance) {
 		log("Mastodon home instance is not set.");
+		return false;
+	}
+	// no token for api available (see background.js)
+	if (!settings.fedifollow_token) {
+		log("No API token available. Are you logged in to your home instance?");
 		return false;
 	}
 	// if the value looks like a domain...
@@ -522,16 +513,8 @@ function checkSettings() {
 async function checkSite(callback) {
 	// is this site on our home instance?
 	if (location.hostname == settings.fedifollow_homeinstance) {
-		// do we have a fedifollow param?
-		fediParamValue = getUrlParameter(fediParamName);
-		fediParamActionValue = getUrlParameter(fediParamActionName);
-		if (fediParamValue) {
-			// if so, run home mode
-			return "home";
-		} else {
-			log("Current site is your home instance.");
-			return false;
-		}
+		log("Current site is your home instance.");
+		return false;
 	}
 	// are we in whitelist mode?
 	if (settings.fedifollow_mode == "whitelist") {
@@ -554,10 +537,8 @@ async function checkSite(callback) {
 	if (response) {
 		var uri = JSON.parse(response).uri;
 		if (uri) {
-			// update global var
-			instanceUri = uri;
 			// run external mode
-			return "external";
+			return true;
 		}
 	}
 	log("Does not look like a Mastodon instance.");
@@ -572,14 +553,10 @@ async function run() {
 		// validate settings
 		if (checkSettings()) {
 			// check site (if and which scripts should run)
-			var mode = await checkSite();
-			// run or exit
-			if (mode == "external") {
+			if (await checkSite()) {
 				processFollow();
 				processToots();
 				urlChangeLoop();
-			} else if (mode == "home") {
-				processHomeInstance();
 			} else {
 				log("Will not process this site.")
 			}

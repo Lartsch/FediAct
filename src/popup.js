@@ -1,5 +1,5 @@
 
-// settings keys with defauls
+// required settings keys with defauls
 var settings = {
 	fedifollow_homeinstance: null,
 	fedifollow_alert: false,
@@ -7,14 +7,16 @@ var settings = {
 	fedifollow_whitelist: null,
 	fedifollow_blacklist: null,
 	fedifollow_target: "_self",
-	fedifollow_autoaction: true
+	fedifollow_autoaction: true,
+	fedifollow_showfollows: true,
+	fedifollow_redirects: true
 }
 
 // fix for cross-browser storage api compatibility
 var browser, chrome;
 
 function onError(error){
-	console.error(`[FediFollow] Error: ${error}`)
+	console.error(`[FediFollow] Error: ${error}`);
 }
 
 // this performs loading the settings into the popup, reacting to changes and saving changes
@@ -36,6 +38,8 @@ function popupTasks(settings) {
 		settings.fedifollow_blacklist = $("textarea#blacklist_content").val();
 		settings.fedifollow_target = $("select#target").val();
 		settings.fedifollow_autoaction = $("input#autoaction").is(':checked');
+		settings.fedifollow_showfollows = $("input#showfollows").is(':checked');
+		settings.fedifollow_redirects = $("input#redirects").is(':checked');
 		// write to storage
 		const waitForSaved = (browser || chrome).storage.local.set(settings);
 		// show saved indicator after successful save
@@ -51,6 +55,8 @@ function popupTasks(settings) {
 		$("select#target").val(settings.fedifollow_target);
 		$("input#alert").prop('checked', settings.fedifollow_alert);
 		$("input#autoaction").prop('checked', settings.fedifollow_autoaction);
+		$("input#showfollows").prop('checked', settings.fedifollow_showfollows);
+		$("input#redirects").prop('checked', settings.fedifollow_redirects);
 		// both containers are hidden by default
 		if ($("select#mode").val() == "whitelist") {
 			$("div#whitelist_input").show();

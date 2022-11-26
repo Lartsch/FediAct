@@ -10,8 +10,13 @@
 		"run_at": "document_start"
 	}
   ],
+  "background": {
+    "service_worker": "src/background.js",
+    "persistent": false
+  },
   "permissions": [
-	"storage"
+	"storage",
+  "alarms"
   ],
   "host_permissions": [
     "https://*/*",

@@ -10,8 +10,13 @@
 		"run_at": "document_start"
 	}
   ],
+  "background": {
+    "scripts": ["src/background.js"],
+    "persistent": false
+  },
   "permissions": [
 	  "storage",
+    "alarms",
     "https://*/*",
     "http://*/*"
   ],

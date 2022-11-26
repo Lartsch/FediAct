@@ -5,34 +5,48 @@
 			.hide {
 				display: none;
 			}
+			label.pad {
+				margin-bottom: 4px;
+				display: block;
+			}
+			p {
+				margin-bottom: 5px;
+			}
 		</style>
   </head>
-  <body>
+  <body style="min-width: 300px">
    <div id="mhi-wrapper">
     <div id="mhi-containers">
 			<form id="fedifollow-settings">
-				<label for="homeinstance">Home instance (make sure you are logged in):</label><br>
+				<p><b>General</b></p>
+				<label class="pad" for="homeinstance">Home instance (make sure you are logged in):</label>
 				<input type="text" id="homeinstance" name="homeinstance" placeholder="mastodon.social"><br>
-				<label for="alert">Alert on redirect:</label><br>
-				<input type="checkbox" id="alert" name="alert"><br>
-				<label for="alert">Auto-action:</label><br>
-				<input type="checkbox" id="autoaction" name="autoaction"><br>
-				<label for="target">Open in:</label><br>
-				<select name="target" id="target" selected="_blank">
+				<p><b>Redirect settings</b></p>
+				<input type="checkbox" id="redirects" name="redirects">
+				<label for="redirects">Enable</label><br>
+				<input type="checkbox" id="alert" name="alert">
+				<label for="alert">Alert on redirect</label><br>
+				<label style="padding-right: 5px" for="target">Open in</label>
+				<select style="margin-top: 5px;" name="target" id="target" selected="_blank">
 					<option id="target_blank" value="_blank">New tab</option>
 					<option id="target_self" value="_self">Same tab</option>
 				</select><br>
-				<label for="mode">Mode:</label><br>
+				<p><b>Other</b></p>
+				<input type="checkbox" id="autoaction" name="autoaction">
+				<label for="alert">Auto-action</label><br>
+				<input type="checkbox" id="showfollows" name="showfollows">
+				<label for="alert">Show external follows</label><br>
+				<p><b>Mode</b></p>
 				<select name="mode" id="mode" selected="blacklist">
 					<option id="blacklist" value="blacklist">All (with blacklist)</option>
 					<option id="whitelist" value="whitelist">Whitelist</option>
 				</select><br>
 				<div class="hide" id="blacklist_input">
-					<label for="blacklist_content">Blacklist (one per line):</label><br>
+					<label for="blacklist_content">Blacklist:</label><br>
 					<textarea id="blacklist_content" name="blacklist_content" placeholder="mastodon.social&#10;infosec.exchange"></textarea><br>
 				</div>
 				<div class="hide" id="whitelist_input">
-					<label for="whitelist_content">Whitelist (one per line):</label><br>
+					<label for="whitelist_content">Whitelist:</label><br>
 					<textarea id="whitelist_content" name="whitelist_content" placeholder="mastodon.social&#10;infosec.exchange"></textarea><br>
 				</div><br>
 				<input type="submit" value="Submit">
