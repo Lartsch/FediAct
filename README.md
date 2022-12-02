@@ -1,4 +1,4 @@
-# FediFollow (v0.6.0)
+# FediFollow (v0.8.0)
 A Chrome/Firefox extension that simplifies following and post interactions on other Mastodon instances than your own.
 
 **Features**:
@@ -15,7 +15,7 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 **Important notes**:
 - This is still a beta, there will be issues!
 - All data is processed locally only
-- Performance depends on the performance of your home instance (read more below)
+- Performance depends on the performance (and rate limiting) of your home instance (read more [below](#additional-notes))
 
 ## Navigation
   * [Installation](#installation)
@@ -53,7 +53,14 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 **Please read the [additional notes](#additional-notes).**
 
 ## Screenshots / GIFs
-<img src="https://github.com/lartsch/FediFollow-Chrome/blob/main/img/screenshot1.PNG?raw=true" width="600">
+<details>
+  <summary>Extension popup / settings</summary>
+  <img src="https://github.com/lartsch/FediFollow-Chrome/blob/main/img/settings.png?raw=true">
+</details>
+<details>
+  <summary>Showcase</summary>
+  <img src="https://github.com/lartsch/FediFollow-Chrome/blob/main/img/showcase.gif?raw=true">
+</details>
 
 ## Manual installation
 1. Download the [latest Github release](https://github.com/Lartsch/FediFollow-Chrome/releases/latest) for your browser (chrome or firefox)
@@ -89,38 +96,25 @@ I included all of the default add-ons in the custom collection, so you will not 
     - I have not tested if Mastodon v3 works as home instance! In general, Mastodon v4 support is the main objective.
     - Support for other Fedi software is still planned
 2. The whitelist mode can be useful if you do not want the extension to run basic checks on every site (since it needs to determine if it is a Mastodon site). Not sure if the blacklist feature is good for anything but I still included it.
-3. It can have several reasons why a redirection/instance might not work:
+3. It can have several reasons why resolving/executing actions/redirection might not work:
     - You are not logged in to your home instance (can't fix, log in)
     - There are instances that use custom layouts/flavours (additional identifiers need to be added to extension)
-    - Instance chose to hide the follow button when not logged in (not supported yet)
     - It's not a Mastodon instance (not supported yet)
     - Element identifiers might change over time (extension needs to be updated)
-    - Your home instance is blocked by the external instance (can't fix, obviously)
-4. There is a known bug that sometimes, when following a user and having auto-action enabled, the follow results in a follow request even though the account is unlocked (so it should instantly accept). I suppose this is a bug with Mastodon / network issue. The followed user will in fact receive the request. If you notice it, you can unfollow and follow again, this will work as usual.
+    - **Your home instance has strong rate limiting and blocks the API requests**
 5. There can be a short delay before you are redirected since an API call to the respective external instance must be made. In general, performance of this addon depends on the performance of the external instance and your home instance.
-6. The redirect enable/disable option is not really meant to be turned off atm. But soon:
-    - Toot actions (boost, fav) will be fully integrated (main toot will be synced on page load, all others as soon as they are fully in the viewport)
-    - Single clicks (boost, fav, un/follow) will only perform action, double click will perform action + redirect
-
-So please be aware, that this extension can fail in some cases. Feel free to submit pull requests / issues.
+6. If you only want redirects, simply turn off auto-action and leave redirect on - double click will then only redirect, not execute the action
+7. If the extension fails to resolve content, the affected buttons will behave like usually
 
 ## Todos / Planned features 
-- Fully integrate (see 6. above)
-- Add support for post interactions (DONE)
-- Support executing the intended action after redirect (DONE)
+- Fix last remaining resolve fails
+- General performance improvements
+- Improve 429 prevention and add fallbacks
 - Add support for other implementations (Plemora, GNU Social, ...)
-- Publish to Chrome Webstore (DONE)
-- Publish to Firefox addon store (DONE)
 - Find additional layouts/flavours to add identifiers for
 - Support for profiles views with follow button disabled
-- Add support for Firefox (DONE)
-- Add support for Firefox on Android (DONE)
-- Fix some rare cases where an instance runs on a subdomain but the handle uses the domain without subdomain (need to get the handle directly from the profile instead of URL + domain name) (DONE)
-- Add support for whitelist/blacklist (DONE)
-- Add feature to indicate if you are already following a user when browsing his profile on another instance (this requires calls to the home instance, will look into it soon) (DONE)
-- Indicate if post is already fav'ed / boosted
-- Review if permissions in current manifest are actually needed like that (DONE)
 - If I find myself to be bored, probably more
 
 ## Thanks to...
 @raikasdev because I stole his fix for cross-browser storage API support
+@rosemarydotworld because I customized and use his awesome jQuery.DOMNodeAppear
