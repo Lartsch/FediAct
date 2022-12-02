@@ -20,7 +20,7 @@
 			<form id="fedifollow-settings">
 				<p><b>General</b></p>
 				<label class="pad" for="homeinstance">Home instance (make sure you are logged in):</label>
-				<input type="text" id="homeinstance" name="homeinstance" placeholder="mastodon.social"><br>
+				<input type="text" id="homeinstance" name="homeinstance" placeholder="example.social"><br>
 				<p><b>Redirect settings</b></p>
 				<input type="checkbox" id="redirects" name="redirects">
 				<label for="redirects">Enable</label><br>
@@ -33,9 +33,11 @@
 				</select><br>
 				<p><b>Other</b></p>
 				<input type="checkbox" id="autoaction" name="autoaction">
-				<label for="alert">Auto-action</label><br>
+				<label for="autoaction">Auto-action</label><br>
 				<input type="checkbox" id="showfollows" name="showfollows">
-				<label for="alert">Show external follows</label><br>
+				<label for="showfollows">Show external follows</label><br>
+				<input type="checkbox" id="delay" name="delay">
+				<label for="delay">Enable API delay</label><br>
 				<p><b>Mode</b></p>
 				<select name="mode" id="mode" selected="blacklist">
 					<option id="blacklist" value="blacklist">All (with blacklist)</option>
@@ -43,11 +45,11 @@
 				</select><br>
 				<div class="hide" id="blacklist_input">
 					<label for="blacklist_content">Blacklist:</label><br>
-					<textarea id="blacklist_content" name="blacklist_content" placeholder="mastodon.social&#10;infosec.exchange"></textarea><br>
+					<textarea id="blacklist_content" name="blacklist_content" placeholder="example.social&#10;example2.social"></textarea><br>
 				</div>
 				<div class="hide" id="whitelist_input">
 					<label for="whitelist_content">Whitelist:</label><br>
-					<textarea id="whitelist_content" name="whitelist_content" placeholder="mastodon.social&#10;infosec.exchange"></textarea><br>
+					<textarea id="whitelist_content" name="whitelist_content" placeholder="example.social&#10;example2.social"></textarea><br>
 				</div><br>
 				<input type="submit" value="Submit">
 				<span id="indicator" style="display:none">Settings saved!</span>

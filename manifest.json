@@ -1,12 +1,13 @@
 {
   "name": "FediFollow",
-  "version": "0.6.0",
+  "version": "0.8.0",
   "description": "Simplifies interactions on other Mastodon instances than your own. Visit https://github.com/lartsch/FediFollow-Chrome for more.",
   "manifest_version": 3,
   "content_scripts": [
 	{
 		"matches": ["*://*/*"],
 		"js": ["src/lib/jquery-3.6.1.min.js","src/inject.js"],
+    "css": ["src/nodeinserted.css"],
 		"run_at": "document_start"
 	}
   ],
@@ -14,8 +15,8 @@
     "service_worker": "src/background.js"
   },
   "permissions": [
-	"storage",
-  "alarms"
+    "storage",
+    "alarms"
   ],
   "host_permissions": [
     "https://*/*",

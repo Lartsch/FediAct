@@ -1,27 +1,28 @@
-// prep
-const followButtonPaths = ["div.account__header button.logo-button","div.public-account-header a.logo-button","div.account-card a.logo-button"];
-const tootButtonsPaths = ["div.status__action-bar button:not(.disabled):not(:has(i.fa-share-alt))","div.detailed-status__action-bar button:not(.disabled):not(:has(i.fa-share-alt))","div.status__action-bar a.modal-button","a.detailed-status__link"];
-const tokenPaths = ["head script#initial-state"];
-const appHolderPaths = ["body > div.app-holder", "body > div.public-layout"];
-const profileNamePaths = ["div.account__header__tabs__name small", "div.public-account-header__tabs__name small"];
+// =-=-=-=-==-=-=-=-==-=-=-=-==-=-=
+// =-=-=-=-=-= CONSTANTS =-==-=-=-=
+// =-=-=-=-==-=-=-=-==-=-=-=-==-=-=
+
+//const tootButtonsPaths = ["div.status__action-bar button:not(.disabled):not(:has(i.fa-share-alt))","div.detailed-status__action-bar button:not(.disabled):not(:has(i.fa-share-alt))","div.status__action-bar a.modal-button","a.detailed-status__link"];
+//const appHolderPaths = ["body > div.app-holder", "body > div.public-layout"];
+const followButtonPaths = ["div.account__header button.logo-button","div.public-account-header a.logo-button","div.account-card a.logo-button","div.directory-card a.icon-button", "div.detailed-status a.logo-button"];
+const profileNamePaths = ["div.account__header__tabs__name small", "div.public-account-header__tabs__name small", "div.detailed-status span.display-name__account", "div.display-name > span"];
 const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/;
-const profileRegex = /^(?:https?:\/\/(www\.)?.*\..*?\/)((?<handle>@\w+(?:@([\w-]+\.)+?\w+)?)|explore)\/?$/;
-const tootsRegex = /^(?:https?:\/\/(www\.)?.*\..*?)(\/explore|\/public|\/public\/local|\d+)$/;
-const tootRegex = /^(?:https?:\/\/(www\.)?.*\..*?\/)(?<handle>@\w+(?:@([\w-]+\.)+?\w+)?)\/\d+\/?$/;
-const handleExtractRegex = /^.*@(?<handle>\w+)@(?<handledomain>([\w-]+\.)+?\w+)\/?$/;
+const followPageRegex = /^(https?:\/\/(www\.)?.*\..*?\/)((@\w+(@([\w-]+\.)+?\w+)?)|explore|following|followers)\/?(\d+)?\/?$/;
+const tootsPageRegex = /^(https?:\/\/(www\.)?.*\..*?\/)((@\w+(@([\w-]+\.)+?\w+)?)|explore|public|public\/local)\/?(\d+)?\/?$/;
+const tootRegex = /^(?:https?:\/\/(www\.)?.*\..*?\/)(@\w+(?:@([\w-]+\.)+?\w+)?)\/\d+\/?$/;
+const handleExtractRegex = /^[^@]*@(?<handle>\w+)(@(?<handledomain>([\w-]+\.)+?\w+))?\/?$/;
 const enableConsoleLog = true;
 const logPrepend = "[FediFollow]";
 const maxElementWaitFactor = 200; // x 100ms for total time
 const instanceApi = "/api/v1/instance";
 const statusApi = "/api/v1/statuses";
-const searchApi = "/api/v2/search"
-const fediParamName = "fedifollow";
-const fediParamActionName = "fediaction";
-
-var lastUrl = window.location.href;
+const searchApi = "/api/v2/search";
+const accountsApi = "/api/v1/accounts";
+const apiDelay = 500
 
 // settings keys with defauls
-var settingsDefaults = {
+var settings = {}
+const settingsDefaults = {
 	fedifollow_homeinstance: null,
 	fedifollow_alert: false,
 	fedifollow_mode: "blacklist",
@@ -30,13 +31,19 @@ var settingsDefaults = {
 	fedifollow_target: "_self",
 	fedifollow_autoaction: true,
 	fedifollow_token: null,
-	fedifollow_follows: null,
 	fedifollow_showfollows: true,
-	fedifollow_redirects: true
+	fedifollow_redirects: true,
+	fedifollow_enabledelay: true
 }
 
-// fix for cross-browser storage api compatibility and other public vars
-var browser, chrome, settings;
+// fix for cross-browser storage api compatibility and global settings var
+var browser, chrome, lasthomerequest;
+var lastUrl = window.location.href;
+
+
+// =-=-=-=-==-=-=-=-==-=-=-=-=-
+// =-=-=-=-=-= UTILS =-==-=-=-=
+// =-=-=-=-==-=-=-=-==-=-=-=-=-
 
 // wrappers to prepend to log messages
 function log(text) {
@@ -45,35 +52,46 @@ function log(text) {
 	}
 }
 
-// function to wait for given elements to appear - first found element gets returned (but as of now the selectors are for different layouts anyways)
-function waitForEl(counter, selectors, callback) {
-	// check all of the selectors
-	for (const selector of selectors) {
-		// if found
-		if ($(selector).length) {
-			return callback(selector);
-		}
-	}
-	// repeat if no match was found and we did not exceed the wait factor yet
-	if (counter < maxElementWaitFactor) {
-	    setTimeout(function() {
-				// increase counter
-        waitForEl(counter + 1, selectors, callback);
-      }, 100);
-	} else {
-		return callback(false);
-	}
-};
+(function($) {
+    $.fn.DOMNodeAppear = function(callback, selector) {
+      var $this = $(this)
+      selector = selector || (typeof $this.selector === 'function' && $this.selector)
+      if (!selector) {
+        return false
+      }
+      $(document).on('animationstart webkitAnimationStart oanimationstart MSAnimationStart', function(e){
+        if (e.originalEvent.animationName == 'nodeInserted' && $(e.target).is(selector)) {
+          if (typeof callback == 'function') {
+            callback(e);
+          }
+        }
+      });
+    };
+    jQuery.fn.onAppear = jQuery.fn.DOMNodeAppear;
+  })(jQuery);
 
 // promisified xhr for api calls
-function makeRequest(method, url, headers) {
+async function makeRequest(method, url, extraheaders) {
+	// try to prevent error 429 too many request by delaying home instance requests
+	if (~url.indexOf(settings.fedifollow_homeinstance) && settings.fedifollow_enabledelay) {
+		var currenttime = Date.now()
+		var difference = currenttime - lasthomerequest
+		if (difference < 300) {
+			await new Promise(resolve => {
+				setTimeout(function() {
+					resolve()
+				}, apiDelay-difference)
+			})
+		}
+		lasthomerequest = currenttime
+	} 
     return new Promise(function (resolve, reject) {
         let xhr = new XMLHttpRequest();
         xhr.open(method, url);
-        xhr.timeout = 6000;
-		if (headers) {
-			for (var key in headers) {
-				xhr.setRequestHeader(key, headers[key])
+        xhr.timeout = 3000;
+		if (extraheaders) {
+			for (var key in extraheaders) {
+				xhr.setRequestHeader(key, extraheaders[key])
 			}
 		}
         xhr.onload = function () {
@@ -89,39 +107,8 @@ function makeRequest(method, url, headers) {
                 statusText: xhr.statusText
             });
         };
-        xhr.send();
+		xhr.send();
     });
-}
-
-// extract handle from elements
-function extractHandle(selectors) {
-	// check all of the selectors
-	for (const selector of selectors) {
-		// if found
-		if ($(selector).length) {
-			return $(selector).text().trim();
-		}
-	}
-	return false;
-}
-
-// process white/blacklist from ext settings
-function processDomainList(newLineList) {
-	// split by new line
-	var arrayFromList = newLineList.split(/\r?\n/);
-	// array to put checked domains into
-	var cleanedArray = [];
-	for (var domain of arrayFromList) {
-		// remove whitespace
-		domain = domain.trim();
-		if (domainRegex.test(domain)) {
-			cleanedArray.push(domain)
-		} else {
-			log("Removed invalid domain " + domain + " from blacklist/whitelist.")
-		}
-	}
-	// return newly created set (remvoes duplicates)
-	return [...new Set(cleanedArray)];;
 }
 
 // extract given url parameter value
@@ -136,6 +123,14 @@ var getUrlParameter = function getUrlParameter(sParam) {
     }
     return false;
 };
+
+function escapeRegExp(string) {
+	return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+  }
+  
+function replaceAll(str, find, replace) {
+	return str.replace(new RegExp(escapeRegExp(find), 'g'), replace);
+}
 
 function redirectTo(url) {
 	if (settings.fedifollow_redirects) {
@@ -157,22 +152,25 @@ function redirectTo(url) {
 	}
 }
 
-async function followHomeInstance(id, headers, unfollow) {
+
+// =-=-=-=-==-=-=-=-==-=-=-=-==-=-=
+// =-=-=-=-= INTERACTIONS =-=-=-=-=
+// =-=-=-=-==-=-=-=-==-=-=-=-==-=-=
+
+async function followHomeInstance(id) {
 	// if auto actions are enbaled...
 	if (settings.fedifollow_autoaction) {
 		// build follow post request
-		var requestUrl = 'https://' + settings.fedifollow_homeinstance + "/api/v1/accounts/" + id + "/";
-		if (unfollow) {
-			requestUrl = requestUrl + "unfollow";
-		} else {
-			requestUrl = requestUrl + "follow";
-		}
-		var responseFollow = await makeRequest("POST",requestUrl,headers);
+		var requestUrl = 'https://' + settings.fedifollow_homeinstance + accountsApi + "/" + id + "/follow";
+		var responseFollow = await makeRequest("POST",requestUrl,settings.tokenheader);
 		// check if it worked (it is ignored if the user was already followed)
 		if (responseFollow) {
 			responseFollow = JSON.parse(responseFollow);
 			if (!responseFollow.following && !responseFollow.requested) {
-				log("Follow failed.");
+				log("Follow failed.")
+				return false;
+			} else {
+				return true;
 			}
 		}
 	} else {
@@ -180,17 +178,41 @@ async function followHomeInstance(id, headers, unfollow) {
 	}
 }
 
-async function boostHomeInstance(id, headers) {
+async function unfollowHomeInstance(id) {
 	// if auto actions are enbaled...
 	if (settings.fedifollow_autoaction) {
 		// build follow post request
-		var requestUrl = 'https://' + settings.fedifollow_homeinstance + "/api/v1/statuses/" + id + "/reblog";
-		var responseBoost = await makeRequest("POST",requestUrl,headers);
+		var requestUrl = 'https://' + settings.fedifollow_homeinstance + accountsApi + "/" + id + "/unfollow";
+		var responseUnfollow = await makeRequest("POST",requestUrl,settings.tokenheader);
+		// check if it worked (it is ignored if the user was already followed)
+		if (responseUnfollow) {
+			responseUnfollow = JSON.parse(responseUnfollow);
+			if (responseUnfollow.following || responseUnfollow.requested) {
+				log("Unfollow failed.")
+				return false;
+			} else {
+				return true;
+			}
+		}
+	} else {
+		log("Auto-action disabled.")
+	}
+}
+
+async function boostHomeInstance(id) {
+	// if auto actions are enbaled...
+	if (settings.fedifollow_autoaction) {
+		// build follow post request
+		var requestUrl = 'https://' + settings.fedifollow_homeinstance + statusApi + "/" + id + "/reblog";
+		var responseBoost = await makeRequest("POST",requestUrl,settings.tokenheader);
 		// check if it worked (it is ignored if the user was already followed)
 		if (responseBoost) {
 			responseBoost = JSON.parse(responseBoost);
 			if (!responseBoost.reblogged) {
 				log("Boost failed.");
+				return false;
+			} else {
+				return true;
 			}
 		}
 	} else {
@@ -198,17 +220,41 @@ async function boostHomeInstance(id, headers) {
 	}
 }
 
-async function favouriteHomeInstance(id, headers) {
+async function unboostHomeInstance(id) {
 	// if auto actions are enbaled...
 	if (settings.fedifollow_autoaction) {
 		// build follow post request
-		var requestUrl = 'https://' + settings.fedifollow_homeinstance + "/api/v1/statuses/" + id + "/favourite";
-		var responseFav = await makeRequest("POST",requestUrl,headers);
+		var requestUrl = 'https://' + settings.fedifollow_homeinstance + statusApi + "/"  + id + "/unreblog";
+		var responseUnboost = await makeRequest("POST",requestUrl,settings.tokenheader);
+		// check if it worked (it is ignored if the user was already followed)
+		if (responseUnboost) {
+			responseUnboost = JSON.parse(responseUnboost);
+			if (responseUnboost.reblogged) {
+				log("Unboost failed.");
+				return false;
+			} else {
+				return true;
+			}
+		}
+	} else {
+		log("Auto-action disabled.")
+	}
+}
+
+async function favouriteHomeInstance(id) {
+	// if auto actions are enbaled...
+	if (settings.fedifollow_autoaction) {
+		// build follow post request
+		var requestUrl = 'https://' + settings.fedifollow_homeinstance + statusApi + "/"  + id + "/favourite";
+		var responseFav = await makeRequest("POST",requestUrl,settings.tokenheader);
 		// check if it worked (it is ignored if the user was already followed)
 		if (responseFav) {
 			responseFav = JSON.parse(responseFav);
 			if (!responseFav.favourited) {
 				log("Favourite failed.");
+				return false;
+			} else {
+				return true;
 			}
 		}
 	} else {
@@ -216,12 +262,89 @@ async function favouriteHomeInstance(id, headers) {
 	}
 }
 
+async function unfavouriteHomeInstance(id) {
+	// if auto actions are enbaled...
+	if (settings.fedifollow_autoaction) {
+		// build follow post request
+		var requestUrl = 'https://' + settings.fedifollow_homeinstance + statusApi + "/" + id + "/unfavourite";
+		var responseUnFav = await makeRequest("POST",requestUrl,settings.tokenheader);
+		// check if it worked (it is ignored if the user was already followed)
+		if (responseUnFav) {
+			responseUnFav = JSON.parse(responseUnFav);
+			if (responseUnFav.favourited) {
+				log("Unfavourite failed.");
+				return false;
+			} else {
+				return true;
+			}
+		}
+	} else {
+		log("Auto-action disabled.")
+	}
+}
+
+async function isFollowingHomeInstance(ids) {
+	var requestUrl = 'https://' + settings.fedifollow_homeinstance + accountsApi + "/relationships?"
+	for (const id of ids) {
+		// trailing & is no issue
+		requestUrl += "id[]=" + id.toString() + "&"
+	}
+	var responseFollowing = await makeRequest("GET",requestUrl,settings.tokenheader);
+	const follows = Array(ids.length).fill(false);
+	// check if it worked (it is ignored if the user was already followed)
+	if (responseFollowing) {
+		responseFollowing = JSON.parse(responseFollowing);
+		for (var i = 0; i < ids.length; i++) {
+			for (account of responseFollowing) {
+				if (account.id == ids[i]) {
+					if (account.following) {
+						follows[i] = true
+					}
+				}
+			}
+		}
+	}
+	return follows
+}
+
+
+// =-=-=-=-==-=-=-=-==-=-=-=-==-=-=
+// =-=-=-=-=-= RESOLVING =-=-==-=-=
+// =-=-=-=-==-=-=-=-==-=-=-=-==-=-=
+
+async function resolveHandleToHome(handle) {
+	var requestUrl = 'https://' + settings.fedifollow_homeinstance + accountsApi + "/search?q=" + handle
+	var searchResponse = await makeRequest("GET",requestUrl,settings.tokenheader)
+	if (searchResponse) {
+		searchResponse = JSON.parse(searchResponse)
+		if (searchResponse[0].id) {
+			return [searchResponse[0].id, searchResponse[0].acct]
+		}
+	}
+	return false
+}
+
+function resolveTootToExternalHome(tooturl) {
+	if (tooturl) {
+		return new Promise(resolve => {
+			chrome.runtime.sendMessage({url: tooturl}, function(response) {
+				if(response) {
+					resolve(response);
+				} else {
+					resolve(false);
+				}
+			});
+		});
+	} else {
+		return false
+	}
+}
+
 // resolve content uri on home instance
-async function resolveHomeInstance(searchstring, action, unfollow) {
-	var requestUrl = 'https://' + settings.fedifollow_homeinstance + searchApi + "/?q="+encodeURIComponent(searchstring)+"&resolve=true&limit=10";
-	var headers = {"Authorization":"Bearer " + settings.fedifollow_token,};
+async function resolveHomeInstance(searchstring, action) {
+	var requestUrl = 'https://' + settings.fedifollow_homeinstance + searchApi + "/?q="+searchstring+"&resolve=true&limit=10";
 	// api request: search endpoint, resolve search string locally (best support for edge cases (for ex. where subdomain does not equal the handle domain) and prevents uncached profile issue)
-	var response = await makeRequest("GET", requestUrl, headers);
+	var response = await makeRequest("GET", requestUrl, settings.tokenheader);
 	if (response) {
 		response = JSON.parse(response);
 		// if we got no data (failed resolve) we can at least try to resolve a user by swapping the domain in case we got a domain in the handle
@@ -232,224 +355,498 @@ async function resolveHomeInstance(searchstring, action, unfollow) {
 			if (matches.groups.handle && matches.groups.handledomain) {
 				// we got handle + handledomain, so try to put the handle domain as host for this fallback (not guaranteed to resolve)
 				var searchstring = "https://" + matches.groups.handledomain + "/@" + matches.groups.handle;
-				var requestUrl = 'https://' + settings.fedifollow_homeinstance + searchApi + "/?q="+encodeURIComponent(searchstring)+"&resolve=true&limit=10";
+				var requestUrl = 'https://' + settings.fedifollow_homeinstance + searchApi + "/?q="+searchstring+"&resolve=true&limit=10";
 				// update response var
-				response = await makeRequest("GET", requestUrl, headers);
+				response = await makeRequest("GET", requestUrl, settings.tokenheader);
 				response = JSON.parse(response);
 			}
 		}
 		// set to false initially
-		var redirect = false;
+		var actionExecuted, faved, boosted;
 		// if we got an account but no statuses, redirect to profile (first result)
 		if (response.accounts.length && !response.statuses.length) {
 			// build redirect url
 			var redirect = 'https://' + settings.fedifollow_homeinstance + "/@" + response.accounts[0].acct;
-			await followHomeInstance(response.accounts[0].id, headers, unfollow);
+			if (action == "follow") {
+				actionExecuted = await followHomeInstance(response.accounts[0].id);
+			} else if (action == "unfollow") {
+				actionExecuted = await unfollowHomeInstance(response.accounts[0].id);
+			}
 		} else if (!response.accounts.length && response.statuses.length) {
 			// if statuses but no accounts, redirect to status (first result)
 			var status = response.statuses[0];
-			var statusData = {
-				"id": status.id,
-				"account": status.account.acct
-			}
 			// build redirect url
-			var redirect = 'https://' + settings.fedifollow_homeinstance + "/@" + statusData.account + "/" + statusData.id;
+			var redirect = 'https://' + settings.fedifollow_homeinstance + "/@" + status.account.acct + "/" + status.id;
 			// perform action if set
 			if (action == "boost") {
-				await boostHomeInstance(statusData.id, headers)
+				actionExecuted = await boostHomeInstance(status.id)
 			} else if (action == "favourite") {
-				await favouriteHomeInstance(statusData.id, headers)
+				actionExecuted = await favouriteHomeInstance(status.id)
+			} else if (action == "unboost") {
+				actionExecuted = await unboostHomeInstance(status.id)
+			} else if (action == "unfavourite") {
+				actionExecuted = await unfavouriteHomeInstance(status.id)
 			}
+			faved = status.favourited;
+			boosted = status.reblogged;
 		}
 		// if we got a redirect url...
 		if (redirect) {
-			redirectTo(redirect);
+			return [redirect, actionExecuted, faved, boosted]
 		} else {
-			log("Could not resolve a match for this search...");
+			return false;
 		}
 	} else {
-		log("API call failed...")
+		log("API call failed...");
+		return false;
 	}
+}
+
+
+// =-=-=-=-==-=-=-=-==-=-=-=-==-=-=-=
+// =-=-=-=-= SITE PROCESSING =-==-=-=
+// =-=-=-=-==-=-=-=-==-=-=-=-==-=-=-=
+
+// function to wait for given elements to appear - first found element gets returned (but as of now the selectors are for different layouts anyways)
+function waitForEl(counter, selectors, callback) {
+	// check all of the selectors
+	for (const selector of selectors) {
+		// if found
+		if ($(selector).length) {
+			return callback(selector);
+		}
+	}
+	// repeat if no match was found and we did not exceed the wait factor yet
+	if (counter < maxElementWaitFactor) {
+	    setTimeout(function() {
+				// increase counter
+        waitForEl(counter + 1, selectors, callback);
+      }, 100);
+	} else {
+		return callback(false);
+	}
+};
+
+// custom implementation for allowing to toggle inline css - .css etc. are not working for all layouts
+function toggleInlineCss(el, styles, toggleclass) {
+	var active = $(el).toggleClass(toggleclass).hasClass(toggleclass);
+	for (var style of styles) {
+		if (active) {
+			$(el).css(style[0], style[2])
+		} else {
+			if (style[1] == "!remove") {
+				var newinline = replaceAll($(el).attr('style'), style[0]+": "+style[2]+";", "")
+				$(el).attr('style', newinline)
+			} else {
+				$(el).css(style[0], style[1])
+			}
+		}
+	}
+}
+
+// returns a mutation observer for custom selectors
+function getMutationObserver(targetparentselector, options, targetchildselectors, callback) {
+	// Create an observer instance
+	if (targetchildselectors) {
+		targetchildselectors = targetchildselectors.join(",");
+	}
+	var observer = new MutationObserver(function( mutations ) {
+		mutations.forEach(function( mutation ) {
+			var newNodes = mutation.addedNodes; // DOM NodeList
+			if( newNodes !== null ) { // If there are new nodes added
+				var $nodes = $( newNodes ); // jQuery set
+				$nodes.each(function(){
+					if(targetchildselectors) {
+						if ($(this).is(targetchildselectors)) {
+							callback(this, mutation);
+						}
+					} else {
+						callback(this, mutation);
+					}
+				});
+			}
+		});    
+	});
+	return observer.observe($(targetparentselector)[0], options);
+}
+
+// extract handle from elements
+function extractHandle(selectors) {
+	// check all of the selectors
+	for (const selector of selectors) {
+		// if found
+		if ($(selector).length) {
+			return $(selector).text().trim();
+		}
+	}
+	return false;
 }
 
 // process any toots found on supported sites
 async function processToots() {
-	// if the url matches our pattern for supported sites OR is a profile url
-	if (tootsRegex.test(window.location.href.split("?")[0]) || profileRegex.test(window.location.href.split("?")[0])) {
-		// wait for follow button to appear
-		waitForEl(0,tootButtonsPaths, function(found) {
-			if (found) {
-				// convert array to comma separated list for jquery select
-				var allElements = tootButtonsPaths.join(", ");
-				// disable handlers for those elements
-				$(allElements).off();
-				$("body").on("click", allElements, async function(e) {
-					// prevent default and immediate propagation
-					e.preventDefault();
-					e.stopImmediatePropagation();
-					// determine action
-					var action;
-					// determine if we have an action (mastodon 4)
-					if ($(this).children("i.fa-retweet").length) {
-						action = "boost";
-					} else if ($(this).children("i.fa-star").length) {
-						action = "favourite";
-					}
-					// extract the toot id from the closest article element
-					var closestTootId;
-					// first check if there is an <a> sibling with the actual post URL (easiest and fastest)
-					if ($(this).siblings("a.status__relative-time").attr("href")) {
-						var redirected = true;
-						resolveHomeInstance((this).siblings("a.status__relative-time").attr("href"), action, null);
-					} else if ($(e.target).closest("div.status").attr("data-id")) {
-						// no? then check if there is a closest div.status with the ID in data-id attribute
-						closestTootId = $(e.target).closest("div.status").attr("data-id").replace(/[^0-9]/gi,'');
-					} else if ($(e.target).closest("article").attr("data-id")) {
-						// no? then check if there is a closest <article> element with the ID in data-id attribute
-						closestTootId = $(e.target).closest("article").attr("data-id").replace(/[^0-9]/gi,'');
-					} else if (this.href) {
-						// no? then this is probably mastodon 3 and we have the ID in the href of the clicked link
-						closestTootId = this.href.split("?")[0].split("/")[4];
-						// double check action because we have a fallback here
-						if (!action) {
-							// if the link contains...
-							if (~this.href.indexOf("type=reblog")) {
-								action = "boost";
-							} else if (~this.href.indexOf("type=favourite")) {
-								action = "favourite";
-							}
-						}
-					} else if (tootRegex.test(window.location.href.split("?")[0])) {
-						// no? then this is probably the detailed view of a post, so we can extract the ID from the URL
-						closestTootId = window.location.href.split("/")[4];
-					}
-					// if we have a toot id and NOT already redirected (see first check above)
-					if (!redirected) {
-						if (closestTootId) {
-							var requestUrl = location.protocol + '//' + location.hostname + statusApi+"/"+closestTootId;
-							// call status API to get correct author handle
-							var response = await makeRequest("GET", requestUrl, null);
-							if (response) {
-								// if succesfull, get the url and clean it (fix for some instances)
-								var postUri = JSON.parse(response).url.replace("/activity/","").replace("/activity","");
-								if (postUri) {
-									// redirect to home instance
-									resolveHomeInstance(postUri, action, null);
-								} else {
-									log("Could not find post url.")
-								}
-							}
-						} else {
-							log("Could not find toot ID.");
-						}
-					}
-				});
+	async function clickAction(searchstring, e) {
+		var action = getTootAction(e);
+		if (action) {
+			// resolve url on home instance and execute action
+			var resolveAndAction = await resolveHomeInstance(searchstring, action);
+			if (resolveAndAction) {
+				if(resolveAndAction[1]) {
+					if (action == "boost" || action == "unboost") {
+						toggleInlineCss($(e.currentTarget).find("i"),[["color","!remove","rgb(140, 141, 255)"],["transition-duration", "!remove", "0.9s"],["background-position", "!remove", "0px 100%"]], "fediactive")
+					} else {
+						toggleInlineCss($(e.currentTarget),[["color","!remove","rgb(202, 143, 4)"]], "fediactive")
+					}						
+				}
+				return resolveAndAction[0]
 			} else {
-				log("Could not find any toots");
+				log("Could not resolve action on home instance.")
 			}
-		});
+		} else {
+			log("Could not determine action.")
+		}
+	}
+	function getTootAction(e) {
+		var action = false
+		if ($(e.currentTarget).children("i.fa-retweet").length) {
+			if ($(e.currentTarget).children("i.fa-retweet").hasClass("fediactive")) {
+				action = "unboost";
+			} else {
+				action = "boost";
+			}
+		} else if ($(e.currentTarget).children("i.fa-star").length) {
+			if ($(e.currentTarget).hasClass("fediactive")) {
+				action = "unfavourite";
+			} else {
+				action = "favourite";
+			}
+		} else if ($(e.currentTarget).attr("href")) {
+			if (~$(e.currentTarget).attr("href").indexOf("type=reblog")) {
+				if ($(e.currentTarget).hasClass("fediactive")) {
+					action = "unboost";
+				} else {
+					action = "boost";
+				}
+			} else if (~$(e.currentTarget).attr("href").indexOf("type=favourite")) {
+				if ($(e.currentTarget).hasClass("fediactive")) {
+					action = "unfavourite";
+				} else {
+					action = "favourite";
+				}
+			}
+		}
+		return action
+	}
+	function getTootIdAndAuthor(el) {
+		var [closestTootId, closestTootAuthor] = [false, false]
+		if ($(el).find("span.display-name__account").length) {
+			closestTootAuthor = $(el).find("span.display-name__account").text().trim()
+		}
+		if ($(el).is(".detailed-status__wrapper")) {
+			closestTootId = lastUrl.split("?")[0].split("/")[4]
+		} else if ($(el).find("a.status__relative-time").attr("href")) {
+			var temp = $(el).find("a.status__relative-time").attr("href").split("?")[0]
+			if (temp.startsWith("http")) {
+				closestTootId = temp.split("/")[4]
+			} else {
+				closestTootId = temp.split("/")[2]
+			}
+		} else if ($(el).find("a.detailed-status__datetime").attr("href")) {
+			var temp = $(el).find("a.detailed-status__datetime").attr("href").split("?")[0]
+			if (temp.startsWith("http")) {
+				closestTootId = temp.split("/")[4]
+			} else {
+				closestTootId = temp.split("/")[2]
+			}
+		} else if ($(el).attr("data-id")) {
+			closestTootId = $(el).attr("data-id").split("-").slice(-1)[0];
+		} else if ($(el).closest("article[data-id], div[data-id]").length) {
+			closestTootId = $(el).closest("article[data-id], div[data-id]")[0].attr("data-id").split("-").slice(-1)[0];
+		} else if ($(el).find("a.modal-button").length) {
+			var temp = $(el).find("a.modal-button").attr("href").split("?")[0]
+			if (temp.startsWith("http")) {
+				closestTootId = temp.split("/")[4]
+			} else {
+				closestTootId = temp.split("/")[2]
+			}
+		}
+		return [closestTootId, closestTootAuthor]
+	}
+	async function process(el) {
+		var homeResolveString = location.protocol + "//" + location.hostname + "/"
+		var tootData = getTootIdAndAuthor($(el))
+		if (tootData) {
+			// get handle/handledomain without @
+			var matches = tootData[1].match(handleExtractRegex);
+			// if we have a handledomain...
+			if (matches.groups.handledomain) {
+				// check if the current hostname includes that handle domain...
+				if (~location.hostname.indexOf(matches.groups.handledomain)) {
+					// yes? then clear it for further processing
+					clearedHandle = tootData[1].split("@"+matches.groups.handledomain)[0]
+					homeResolveString += clearedHandle + "/" + tootData[0]
+				} else {
+					// otherwise this is an external handle and we will use external home URI resolving
+					var resolveString = location.protocol + '//' + location.hostname + "/" + tootData[1] + "/" + tootData[0]
+					var resolveTootHome = await resolveTootToExternalHome(resolveString)
+					if (resolveTootHome) {
+						homeResolveString = resolveTootHome
+					} else {
+						// fallback, less probability for resolving
+						homeResolveString = 'https://' + matches.groups.handledomain + '/' + '@' + matches.groups.handle + '/' + tootData[0]
+					}
+				}
+			} else {
+				homeResolveString += tootData[1] + "/" + tootData[0]
+			}
+			if (homeResolveString) {
+				// redirect to home instance
+				// resolve url on home instance and execute action
+				resolveAndAction = await resolveHomeInstance(homeResolveString, null); // redirect, actionExecuted, faved, boosted
+				if (resolveAndAction) {
+					var favButton = $(el).find("button:has(i.fa-star), a.icon-button:has(i.fa-star)")
+					var boostButton = $(el).find("button:has(i.fa-retweet), a.icon-button:has(i.fa-retweet)")
+					if (resolveAndAction[2]) {
+						if (!$(favButton).hasClass("fediactive")) {
+							toggleInlineCss($(favButton),[["color","!remove","rgb(202, 143, 4)"]], "fediactive")
+						}
+					}
+					if (resolveAndAction[3]) {
+						if (!$(boostButton).find("i.fediactive").length) {
+							toggleInlineCss($(boostButton).find("i"),[["color","!remove","rgb(140, 141, 255)"],["transition-duration", "!remove", "0.9s"],["background-position", "!remove", "0px 100%"]], "fediactive")
+						}
+					}
+					// continue with click handling...
+					var clicks = 0;
+					var timer;
+					$(favButton).add(boostButton).on("click", async function(e) {
+						// prevent default and immediate propagation
+						e.preventDefault();
+						e.stopImmediatePropagation();
+						clicks++;
+						if (clicks == 1) {
+							timer = setTimeout(async function() {
+								await clickAction(homeResolveString, e); // TODO: replace postUri with resolveAndAction[0] and make a separate function for action execute, so we do not need to resolve two times
+								clicks = 0;
+							}, 500);
+						} else {
+							clearTimeout(timer);
+							url = await clickAction(homeResolveString, e);
+							if (url) {
+								redirectTo(url)
+							}
+							clicks = 0;
+						}
+					}).on("dblclick", function(e) {
+						e.preventDefault();
+						e.stopImmediatePropagation();
+					});
+				} else {
+					log("Failed to resolve: "+homeResolveString)
+				}
+			} else {
+				log("Could not identify a post URI for home resolving.")
+			}
+		} else {
+			log("Could not get toot data.")
+		}
+	}
+	// TODO: ADD MASTODON v3 IDENTIFIERS + MASTODON v4 ALTERNATIVE IDENTIFIERS
+	if (tootsPageRegex.test(lastUrl.split("?")[0])) {
+		// single toot pages load all replies instantly, so this is easy
+		if (tootRegex.test(lastUrl)) {
+			// on page changes, the detailed status (either reply or original toot) are on the page right away
+			$(document).find("div.detailed-status__wrapper").each(function() {
+				process($(this))
+			})
+			// all others will be inserted
+			$(document).DOMNodeAppear(async function(e) {
+				process($(e.target))
+			}, "div.status, div.detailed-status__wrapper");
+		// OTHERWISE (/explore and profile pages), we need additional steps.
+		} else {
+			// this is for v3 only
+			$(document).ready(async function() {
+				var lasthtml = $("body").html()
+				// wait for the html to not change anymore
+				await new Promise(resolve => {
+					// check all 100ms
+					var i = setInterval(function() {
+						let currenthtml = $("body").html()
+						if (currenthtml == lasthtml) {
+							changing = false
+							resolve(true)
+							clearInterval(i)
+						} else {
+							lasthtml = currenthtml
+						}
+					},100)
+				})
+				$(document).find("div.entry > div.status").each(function() {
+					process($(this))
+				})
+			})
+			// wait for any articles to appear
+			// this solution utilizes css animation events and is WAY more reliable than a) DOMInsertedNode (depcrecated), b) on ready delegation and c) MutationObserver (will not observe childs if only their parent was inserted)
+			$(document).DOMNodeAppear(async function(e) {
+				let article = $(e.target)
+				var lasthtml = $("body").html()
+				// wait for the html to not change anymore
+				// mastodon 4 feeds will have all div.status elements on load BUT will replace them after a short time, leading to the found div.status being gone
+				await new Promise(resolve => {
+					// check all 100ms
+					var i = setInterval(function() {
+						let currenthtml = $("body").html()
+						if (currenthtml == lasthtml) {
+							changing = false
+							resolve(true)
+							clearInterval(i)
+						} else {
+							lasthtml = currenthtml
+						}
+					},100)
+				})
+				// okay, now we look for ACTUAL div.status elements that are still there and will not be catched by below mutation observer
+				article.find("div.status").each(async function() {
+					// one last check if it really exists...
+					if (document.body.contains($(this)[0])) {
+						// okay, lets go
+						process($(this))
+					}
+				})
+				// all other div.status elements will be updated/inserted/replaced when the user is scrolling, so here the mutationobserver is a great choice
+				let observe = getMutationObserver(article, {subtree: true, childList: true}, ["div.status"], function(el, mutation) {
+					process($(el))
+				})
+			}, "article, div.entry > div.status");
+		}
 	} else {
 		log("There are no toots on this site");
 	}
 }
 
 // main function to listen for the follow button pressed and open a new tab with the home instance
-function processFollow() {
-	// check if this is a profile url
-	if (profileRegex.test(window.location.href.split("?")[0])) {
-		// wait until follow button appears (document is already ready, but most content is loaded afterwards)
-		waitForEl(0, followButtonPaths, async function(found) {
-			if (found) {
-				var unfollow, handleEl, handleDomain, handle;
-				// dirty fix for some v3 instance views
-				if (~window.location.href.indexOf("/explore")) {
-					var temp = $(e.target).closest("div.account-card").find("div.display-name > span");
-					if (temp.length) {
-						handleEl = temp;
-					}
-				} else {
-					// check all defined selectors for the username element
-					for (const selector of profileNamePaths) {
-						if ($(selector).length) {
-							handleEl = $(selector)
-							break;
-						}
+// TODO: this is still an old implementation, update in accordance with processToots as far as possible
+async function processFollow() {
+	async function clickAction(result, handle, handleDomain, action) {
+		if (result) {
+			// add the handle
+			var redirectUrl = result + "/@" + handle;
+			var resolveAndAction = await resolveHomeInstance(redirectUrl, action);
+			if (resolveAndAction) {
+				return resolveAndAction
+			}
+		} else {
+			log("Could not get instance URL from API search, resolve probability will be lower.");
+			var rawRedirect = lastUrl;
+			// dirty fix for some v3 views
+			if (~rawRedirect.indexOf("/explore") || tootRegex.test(rawRedirect)) {
+				rawRedirect = "https://" + handleDomain + "/@" + handle;
+			}
+			var resolveAndAction = await resolveHomeInstance(rawRedirect, action);
+			if (resolveAndAction) {
+				return resolveAndAction
+			}
+		}
+	}
+	// for mastodon v3 - v4 does not show follow buttons / account cards on /explore
+	async function process(el) {
+		var fullHandle
+		var action = "follow"
+		// for mastodon v3 explore page
+		if ($(el).closest("div.account-card").length) {
+			fullHandle = $(el).closest("div.account-card").find("div.display-name > span").text().trim()
+		} else {
+			// for all other pages, where only one of the selection elements is present
+			for (const selector of profileNamePaths) {
+				if ($(selector).length) {
+					fullHandle = $(selector).text().trim()
+					break
+				}
+			}
+		}
+		if (fullHandle) {
+			var resolvedHandle = await resolveHandleToHome(fullHandle)
+			if (resolvedHandle) {
+				if (settings.fedifollow_showfollows) {
+					var isFollowing = await isFollowingHomeInstance([resolvedHandle[0]])
+					if (isFollowing[0]) {
+						$(el).text("Unfollow");
+						action = "unfollow";
 					}
 				}
-				if (handleEl) {
-					// match content of first found element against handle regex (with match grups)
-					var handleDomainMatches = handleEl.text().trim().match(handleExtractRegex);
-					handleDomain = handleDomainMatches.groups.handledomain;
-					handle = handleDomainMatches.groups.handle;
-				}
-				// if extraction worked...
-				if (handleDomain && handle) {
-					if (settings.fedifollow_showfollows) {
-						if (settings.fedifollow_follows) {
-							if ($.inArray(handle + "@" + handleDomain, settings.fedifollow_follows) > -1) {
-								$(found).text("Unfollow");
-								unfollow = true;
+				var clicks = 0;
+				var timer;
+				$(el).off()
+				$(el).unbind()
+				$(el).on("click", async function(e) {
+					// prevent default and immediate propagation
+					e.preventDefault();
+					e.stopImmediatePropagation();
+					clicks++;
+					if (clicks == 1) {
+						timer = setTimeout(async function() {
+							if (action == "follow") {
+								var followed = await followHomeInstance(resolvedHandle[0])
+								if (followed) {
+									$(el).text("Unfollow");
+									action = "unfollow"
+								}
+							} else {
+								var unfollowed = await unfollowHomeInstance(resolvedHandle[0])
+								if (unfollowed) {
+									$(el).text("Follow");
+									action = "follow"
+								}
+							}
+							clicks = 0;
+						}, 500);
+					} else {
+						clearTimeout(timer);
+						var done
+						if (action == "follow") {
+							var followed = await followHomeInstance(resolvedHandle[0])
+							if (followed) {
+								$(el).text("Unfollow");
+								action = "unfollow"
+								done = true
+							}
+						} else {
+							var unfollowed = await unfollowHomeInstance(resolvedHandle[0])
+							if (unfollowed) {
+								$(el).text("Follow");
+								action = "follow"
+								done = true
 							}
 						}
-					}
-					// make request to the external instances search endpoint to make sure we get the correct url for the searchstring
-					// (for ex. another external instance, also instance domain can differ from handle domain)
-					var requestUrl = location.protocol + "//" + location.hostname + searchApi + "/?q=" + encodeURIComponent("@"+handle+"@"+handleDomain) + "&resolve=false&limit=10";
-					var response = await makeRequest("GET", requestUrl, null);
-					var result;
-					if (response) {
-						response = JSON.parse(response);
-						// if there are any accounts in the response
-						if (response.accounts.length) {
-							// get url of first account (which will be the one we need since we searched user+domain)
-							result = response.accounts[0].url;
-							// set result for searchstring
-							var url = document.createElement('a');
-							url.setAttribute('href', response.accounts[0].url);
-							result = url.protocol + "//" + url.hostname;
-						}
-					}
-					// setup the button click listener
-					$(found).click(async function(e) {
-						// prevent default action and other handlers
-						e.preventDefault();
-						e.stopImmediatePropagation();
-						// backup the button text
-						var originaltext = $(found).html();
-						// replace the button text to indicate redirection
-						$(found).text("Redirecting...");
-						// if we could resolve the user domain...
-						if (result) {
-							// add the handle
-							var redirectUrl = result + "/@" + handle;
-							// timeout 1000ms to make it possible to notice the redirection indication
+						if (done) {
+							var saveText = $(el).text()
+							var redirectUrl = 'https://' + settings.fedifollow_homeinstance + '/@' + resolvedHandle[1]
+							$(el).text("Redirecting...");
 							setTimeout(function() {
-								resolveHomeInstance(redirectUrl, null, unfollow);
-								// restore original button text
-								$(found).html(originaltext);
+								redirectTo(redirectUrl);
+								$(el).text(saveText)
 							}, 1000);
 						} else {
-							log("Could not get instance URL from API search, attempting raw redirect.");
-							var rawRedirect = window.location.href;
-							// dirty fix for some v3 views
-							if (~rawRedirect.indexOf("/explore")) {
-								rawRedirect = "https://" + handleDomain + "/@" + handle;
-							}
-							// timeout 1000ms to make it possible to notice the redirection indication
-							setTimeout(function() {
-								resolveHomeInstance(rawRedirect, null, unfollow);
-								// restore original button text
-								$(found).html(originaltext);
-							}, 1000);
+							log("Action failed.")
 						}
-					});
-				} else {
-					log("Could not extract user handle.")
-				}
+						clicks = 0;
+					}
+				}).on("dblclick", function(e) {
+					e.preventDefault();
+					e.stopImmediatePropagation();
+				});
 			} else {
-				log("Could not find any follow button.");
+				log("Could not resolve user home ID.")
 			}
-		});
+		}
+	}
+	// check if this is a profile url or explore page with account cards
+	if (followPageRegex.test(lastUrl.split("?")[0])) {
+		// dirty fix for some v3 instance views
+		var allFollowPaths = followButtonPaths.join(",")
+		$(document).DOMNodeAppear(async function(e) {
+			process($(e.target))
+		}, allFollowPaths)
 	} else {
 		log("Not a profile URL.");
 	}
@@ -471,6 +868,30 @@ async function urlChangeLoop() {
 	}, 300);
 }
 
+
+// =-=-=-=-==-=-=-=-==-=-=-=-==-=-=-=
+// =-=-=-=-=-= SETUP / RUN =-==-=-=-=
+// =-=-=-=-==-=-=-=-==-=-=-=-==-=-=-=
+
+// process white/blacklist from ext settings
+function processDomainList(newLineList) {
+	// split by new line
+	var arrayFromList = newLineList.split(/\r?\n/);
+	// array to put checked domains into
+	var cleanedArray = [];
+	for (var domain of arrayFromList) {
+		// remove whitespace
+		domain = domain.trim();
+		if (domainRegex.test(domain)) {
+			cleanedArray.push(domain)
+		} else {
+			log("Removed invalid domain " + domain + " from blacklist/whitelist.")
+		}
+	}
+	// return newly created set (remvoes duplicates)
+	return [...new Set(cleanedArray)];;
+}
+
 function checkSettings() {
 	// if the home instance is undefined/null/empty
 	if (settings.fedifollow_homeinstance == null || !settings.fedifollow_homeinstance) {
@@ -479,8 +900,10 @@ function checkSettings() {
 	}
 	// no token for api available (see background.js)
 	if (!settings.fedifollow_token) {
-		log("No API token available. Are you logged in to your home instance?");
+		log("No API token available. Are you logged in to your home instance? If yes, wait for 1-2 minutes and reload page.");
 		return false;
+	} else {
+		settings.tokenheader = {"Authorization":"Bearer " + settings.fedifollow_token,};
 	}
 	// if the value looks like a domain...
 	if (!(domainRegex.test(settings.fedifollow_homeinstance))) {
@@ -510,7 +933,7 @@ function checkSettings() {
 
 // test if the current site should be processed or not
 // this will also be the function for whitelist/blacklist feature
-async function checkSite(callback) {
+async function checkSite() {
 	// is this site on our home instance?
 	if (location.hostname == settings.fedifollow_homeinstance) {
 		log("Current site is your home instance.");

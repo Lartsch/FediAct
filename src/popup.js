@@ -9,7 +9,8 @@ var settings = {
 	fedifollow_target: "_self",
 	fedifollow_autoaction: true,
 	fedifollow_showfollows: true,
-	fedifollow_redirects: true
+	fedifollow_redirects: true,
+	fedifollow_enabledelay: true
 }
 
 // fix for cross-browser storage api compatibility
@@ -40,6 +41,7 @@ function popupTasks(settings) {
 		settings.fedifollow_autoaction = $("input#autoaction").is(':checked');
 		settings.fedifollow_showfollows = $("input#showfollows").is(':checked');
 		settings.fedifollow_redirects = $("input#redirects").is(':checked');
+		settings.fedifollow_enabledelay = $("input#delay").is(':checked');
 		// write to storage
 		const waitForSaved = (browser || chrome).storage.local.set(settings);
 		// show saved indicator after successful save
@@ -57,6 +59,7 @@ function popupTasks(settings) {
 		$("input#autoaction").prop('checked', settings.fedifollow_autoaction);
 		$("input#showfollows").prop('checked', settings.fedifollow_showfollows);
 		$("input#redirects").prop('checked', settings.fedifollow_redirects);
+		$("input#delay").prop('checked', settings.fedifollow_enabledelay);
 		// both containers are hidden by default
 		if ($("select#mode").val() == "whitelist") {
 			$("div#whitelist_input").show();
