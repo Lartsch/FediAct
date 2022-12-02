@@ -1,7 +1,9 @@
 # FediFollow (v0.6.0)
-A Chrome/Firefox extension that simplifies following and post interactions on other Mastodon instances than your own by utilizing the Mastodon APIs and redirecting you toyour home instance. If enabled, the extension also automatically performs the desired action (follow, unfollow, boost, favourite) for you. If you are already following a user while viewing his profile on another instance, this is also shown.
+A Chrome/Firefox extension that simplifies following and post interactions on other Mastodon instances than your own by utilizing the Mastodon APIs to resolve the content on your home instance. If enabled, the extension also automatically performs the desired action (follow, unfollow, boost, favourite) for you. If you are already following a user while viewing his profile on another instance, this is also shown.
 
 Should work for all *updated* Chromium browsers, *updated* Firefox, as well as Kiwi browser and Firefox Nightly on Android. Currently only Mastodon 3 + 4 in different flavours are supported as far as I tested. Support for other Fediverse software and additional flavours might be added in the future. Feel free to create pull requests / issues. This is my first proper browser extension so please bear with my awful JS skills.
+
+**It can take up to 2 minutes after you have set your home instance to start working** (needs to get your API token). Performance of this addon depends on the performance of the external instance and your home instance.
 
 **Important**: Your data will never leave your machine by using this addon. Also, no usage stats are collected.
 
@@ -33,6 +35,8 @@ Should work for all *updated* Chromium browsers, *updated* Firefox, as well as K
   - Only set the domain name (like "infosec.exchange") without http/https or URL
 - Optional: All other settings (they are self-explanatory)
 - Required: Hit "Submit" to update your settings
+
+It can take 1-2 minutes after you have set your home instance to sync your API token and following list.
 
 **Please read the [additional notes](#additional-notes).**
 
@@ -91,6 +95,7 @@ I included all of the default add-ons in the custom collection, so you will not 
 ## Additional notes
 1. Currently supports external Mastodon instances v3 + v4
     - I have not tested if Mastodon v3 works as home instance! In general, Mastodon v4 support is the main objective.
+    - Support for other Fedi software is still planned
 2. The whitelist mode can be useful if you do not want the extension to run basic checks on every site (since it needs to determine if it is a Mastodon site). Not sure if the blacklist feature is good for anything but I still included it.
 3. It can have several reasons why a redirection/instance might not work:
     - You are not logged in to your home instance (can't fix, log in)
@@ -101,11 +106,14 @@ I included all of the default add-ons in the custom collection, so you will not 
     - Your home instance is blocked by the external instance (can't fix, obviously)
 4. There is a known bug that sometimes, when following a user and having auto-action enabled, the follow results in a follow request even though the account is unlocked (so it should instantly accept). I suppose this is a bug with Mastodon / network issue. The followed user will in fact receive the request. If you notice it, you can unfollow and follow again, this will work as usual.
 5. There can be a short delay before you are redirected since an API call to the respective external instance must be made. In general, performance of this addon depends on the performance of the external instance and your home instance.
-6. It can take 1-2 minutes after the installation to sync your API token and following list
+6. The redirect enable/disable option is not really meant to be turned off atm. But soon:
+    - Toot actions (boost, fav) will be fully integrated (main toot will be synced on page load, all others as soon as they are fully in the viewport)
+    - Single clicks (boost, fav, un/follow) will only perform action, double click will perform action + redirect
 
 So please be aware, that this extension can fail in some cases. Feel free to submit pull requests / issues.
 
 ## Todos / Planned features 
+- Fully integrate (see 6. above)
 - Add support for post interactions (DONE)
 - Support executing the intended action after redirect (DONE)
 - Add support for other implementations (Plemora, GNU Social, ...)
