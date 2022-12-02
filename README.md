@@ -15,7 +15,7 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 **Important notes**:
 - This is still a beta, there will be issues!
 - All data is processed locally only
-- Performance depends on the performance of your home instance (read more below)
+- Performance depends on the performance of your home instance (read more [below](#additional-notes))
 
 ## Navigation
   * [Installation](#installation)
@@ -101,7 +101,7 @@ I included all of the default add-ons in the custom collection, so you will not 
     - There are instances that use custom layouts/flavours (additional identifiers need to be added to extension)
     - It's not a Mastodon instance (not supported yet)
     - Element identifiers might change over time (extension needs to be updated)
-    - Your home instance has strong rate limiting and blocks the API requests
+    - **Your home instance has strong rate limiting and blocks the API requests**
 5. There can be a short delay before you are redirected since an API call to the respective external instance must be made. In general, performance of this addon depends on the performance of the external instance and your home instance.
 6. If you only want redirects, simply turn off auto-action and leave redirect on - double click will then only redirect, not execute the action
 
