@@ -1,4 +1,4 @@
-# FediFollow (v0.6.0)
+# FediFollow (v0.8.0)
 A Chrome/Firefox extension that simplifies following and post interactions on other Mastodon instances than your own.
 
 **Features**:
@@ -53,7 +53,14 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 **Please read the [additional notes](#additional-notes).**
 
 ## Screenshots / GIFs
-<img src="https://github.com/lartsch/FediFollow-Chrome/blob/main/img/screenshot1.PNG?raw=true" width="600">
+<details>
+  <summary>Extension popup / settings</summary>
+  <img src="https://github.com/lartsch/FediFollow-Chrome/blob/main/img/settings.png?raw=true">
+</details>
+<details>
+  <summary>Showcase</summary>
+  <img src="https://github.com/lartsch/FediFollow-Chrome/blob/main/img/showcase.gif?raw=true">
+</details>
 
 ## Manual installation
 1. Download the [latest Github release](https://github.com/Lartsch/FediFollow-Chrome/releases/latest) for your browser (chrome or firefox)
@@ -92,17 +99,11 @@ I included all of the default add-ons in the custom collection, so you will not 
 3. It can have several reasons why a redirection/instance might not work:
     - You are not logged in to your home instance (can't fix, log in)
     - There are instances that use custom layouts/flavours (additional identifiers need to be added to extension)
-    - Instance chose to hide the follow button when not logged in (not supported yet)
     - It's not a Mastodon instance (not supported yet)
     - Element identifiers might change over time (extension needs to be updated)
-    - Your home instance is blocked by the external instance (can't fix, obviously)
-4. There is a known bug that sometimes, when following a user and having auto-action enabled, the follow results in a follow request even though the account is unlocked (so it should instantly accept). I suppose this is a bug with Mastodon / network issue. The followed user will in fact receive the request. If you notice it, you can unfollow and follow again, this will work as usual.
+    - Your home instance has strong rate limiting and blocks the API requests
 5. There can be a short delay before you are redirected since an API call to the respective external instance must be made. In general, performance of this addon depends on the performance of the external instance and your home instance.
-6. The redirect enable/disable option is not really meant to be turned off atm. But soon:
-    - Toot actions (boost, fav) will be fully integrated (main toot will be synced on page load, all others as soon as they are fully in the viewport)
-    - Single clicks (boost, fav, un/follow) will only perform action, double click will perform action + redirect
-
-So please be aware, that this extension can fail in some cases. Feel free to submit pull requests / issues.
+6. If you only want redirects, simply turn off auto-action and leave redirect on - double click will then only redirect, not execute the action
 
 ## Todos / Planned features 
 - Fully integrate (see 6. above)
