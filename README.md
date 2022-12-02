@@ -15,7 +15,7 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 **Important notes**:
 - This is still a beta, there will be issues!
 - All data is processed locally only
-- Performance depends on the performance of your home instance (read more [below](#additional-notes))
+- Performance depends on the performance (and rate limiting) of your home instance (read more [below](#additional-notes))
 
 ## Navigation
   * [Installation](#installation)
