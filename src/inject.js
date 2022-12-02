@@ -407,26 +407,6 @@ async function resolveHomeInstance(searchstring, action) {
 // =-=-=-=-= SITE PROCESSING =-==-=-=
 // =-=-=-=-==-=-=-=-==-=-=-=-==-=-=-=
 
-// function to wait for given elements to appear - first found element gets returned (but as of now the selectors are for different layouts anyways)
-function waitForEl(counter, selectors, callback) {
-	// check all of the selectors
-	for (const selector of selectors) {
-		// if found
-		if ($(selector).length) {
-			return callback(selector);
-		}
-	}
-	// repeat if no match was found and we did not exceed the wait factor yet
-	if (counter < maxElementWaitFactor) {
-	    setTimeout(function() {
-				// increase counter
-        waitForEl(counter + 1, selectors, callback);
-      }, 100);
-	} else {
-		return callback(false);
-	}
-};
-
 // custom implementation for allowing to toggle inline css - .css etc. are not working for all layouts
 function toggleInlineCss(el, styles, toggleclass) {
 	var active = $(el).toggleClass(toggleclass).hasClass(toggleclass);
