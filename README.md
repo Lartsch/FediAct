@@ -125,3 +125,4 @@ I included all of the default add-ons in the custom collection, so you will not 
 
 ## Thanks to...
 @raikasdev because I stole his fix for cross-browser storage API support
+@rosemarydotworld because I customized and use his awesome jQuery.DOMNodeAppear
