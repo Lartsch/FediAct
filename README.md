@@ -1,12 +1,23 @@
 # FediFollow (v0.6.0)
-A Chrome/Firefox extension that simplifies following and post interactions on other Mastodon instances than your own by utilizing the Mastodon APIs to resolve the content on your home instance. If enabled, the extension also automatically performs the desired action (follow, unfollow, boost, favourite) for you. If you are already following a user while viewing his profile on another instance, this is also shown.
+A Chrome/Firefox extension that simplifies following and post interactions on other Mastodon instances than your own.
 
-Should work for all *updated* Chromium browsers, *updated* Firefox, as well as Kiwi browser and Firefox Nightly on Android. Currently only Mastodon 3 + 4 in different flavours are supported as far as I tested. Support for other Fediverse software and additional flavours might be added in the future. Feel free to create pull requests / issues. This is my first proper browser extension so please bear with my awful JS skills.
+**Features**:
+- Supports Mastodon v3 + v4
+- Follow, reblog and favourite on external instances
+- Show following status and toot status (reblogged, faved) on external instances
+- Single click to execute action, double click to redirect to content on home instance
+- Customizable
 
-**It can take up to 2 minutes after you have set your home instance to start working** (needs to get your API token). Performance of this addon depends on the performance of the external instance and your home instance.
+**Supported browsers**:
+- All up-to-date Chromium browsers, including Kiwi browser on Android
+- Up-to-date Firefox, including Firefox Nightly on Android
 
-**Important**: Your data will never leave your machine by using this addon. Also, no usage stats are collected.
+**Important notes**:
+- This is still a beta, there will be issues!
+- All data is processed locally only
+- Performance depends on the performance of your home instance (read more below)
 
+## Navigation
   * [Installation](#installation)
   * [Setup](#setup)
   * [Screenshots / GIFs](#screenshots--gifs)
@@ -31,37 +42,18 @@ Should work for all *updated* Chromium browsers, *updated* Firefox, as well as K
 
 ## Setup
 
-- Required: Click the extension icon to set your Mastodon instance
-  - Only set the domain name (like "infosec.exchange") without http/https or URL
-- Optional: All other settings (they are self-explanatory)
-- Required: Hit "Submit" to update your settings
+1. Make sure you are logged in to your home instance
+2. Click the extension icon or open its settings page
+3. Set your home instance (required)
+4. Check the other settings (optional)
+5. Click the "Submit" button to save
 
-It can take 1-2 minutes after you have set your home instance to sync your API token and following list.
+**It can take 1-2 minutes after you have set your home instance to sync your API token for the extension to work.**
 
 **Please read the [additional notes](#additional-notes).**
 
 ## Screenshots / GIFs
-Not guaranteed to be up to date ;)
-<details>
-  <summary>Extension popup / settings</summary>
-  <img src="https://github.com/lartsch/FediFollow-Chrome/blob/main/img/screenshot1.PNG?raw=true">
-</details>
-<details>
-  <summary>Follow interaction (GIF)</summary>
-  <img src="https://github.com/lartsch/FediFollow-Chrome/blob/main/img/follow-interaction.gif?raw=true">
-</details>
-<details>
-  <summary>Post interaction (GIF)</summary>
-  <img src="https://github.com/lartsch/FediFollow-Chrome/blob/main/img/post-interaction.gif?raw=true">
-</details>
-<details>
-  <summary>FediFollow installed in Kiwi browser (Android/Chromium)</summary>
-  <img width=300 src="https://github.com/lartsch/FediFollow-Chrome/blob/main/img/fedifollow-android-chrome-kiwi-browser.jpg?raw=true">
-</details>
-<details>
-  <summary>FediFollow installed in Firefox Nightly (Android)</summary>
-  <img width=300 src="https://github.com/lartsch/FediFollow-Chrome/blob/main/img/fedifollow-android-firefox.jpg?raw=true">
-</details>
+<img src="https://github.com/lartsch/FediFollow-Chrome/blob/main/img/screenshot1.PNG?raw=true" width="600">
 
 ## Manual installation
 1. Download the [latest Github release](https://github.com/Lartsch/FediFollow-Chrome/releases/latest) for your browser (chrome or firefox)
