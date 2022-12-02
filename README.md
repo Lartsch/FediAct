@@ -96,7 +96,7 @@ I included all of the default add-ons in the custom collection, so you will not 
     - I have not tested if Mastodon v3 works as home instance! In general, Mastodon v4 support is the main objective.
     - Support for other Fedi software is still planned
 2. The whitelist mode can be useful if you do not want the extension to run basic checks on every site (since it needs to determine if it is a Mastodon site). Not sure if the blacklist feature is good for anything but I still included it.
-3. It can have several reasons why a redirection/instance might not work:
+3. It can have several reasons why resolving/executing actions/redirection might not work:
     - You are not logged in to your home instance (can't fix, log in)
     - There are instances that use custom layouts/flavours (additional identifiers need to be added to extension)
     - It's not a Mastodon instance (not supported yet)
