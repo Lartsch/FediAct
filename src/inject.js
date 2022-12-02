@@ -627,7 +627,7 @@ async function processToots() {
 							timer = setTimeout(async function() {
 								await clickAction(homeResolveString, e); // TODO: replace postUri with resolveAndAction[0] and make a separate function for action execute, so we do not need to resolve two times
 								clicks = 0;
-							}, 500);
+							}, 350);
 						} else {
 							clearTimeout(timer);
 							url = await clickAction(homeResolveString, e);
@@ -799,7 +799,7 @@ async function processFollow() {
 								}
 							}
 							clicks = 0;
-						}, 500);
+						}, 350);
 					} else {
 						clearTimeout(timer);
 						var done
