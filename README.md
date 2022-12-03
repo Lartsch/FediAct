@@ -31,7 +31,7 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 [link-chrome]: https://chrome.google.com/webstore/detail/fedifollow/lmpcajpkjcclkjbliapfjfolocffednm 'Version published on Chrome Web Store'
 [link-firefox]: https://addons.mozilla.org/en-US/firefox/addon/fedifollow/ 'Version published on Mozilla Add-ons'
 
-[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/chrome/chrome.svg" width="48" alt="Chrome" valign="middle">][link-chrome] [<img valign="middle" src="https://img.shields.io/chrome-web-store/v/lmpcajpkjcclkjbliapfjfolocffednm.svg?label=%20">][link-chrome] and other Chromium browsers
+[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/chrome/chrome.svg" width="48" alt="Chrome" valign="middle">][link-chrome] [<img valign="middle" src="https://img.shields.io/chrome-web-store/v/lmpcajpkjcclkjbliapfjfolocffednm.svg?label=%20">][link-chrome] and other Chromium browsers (v0.8.0 in review)
 
 [<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fedifollow.svg?label=%20">][link-firefox] including Firefox for Android
 
@@ -93,7 +93,7 @@ I included all of the default add-ons in the custom collection, so you will not 
 
 ## Additional notes
 1. Currently supports external Mastodon instances v3 + v4
-    - I have not tested if Mastodon v3 works as home instance! In general, Mastodon v4 support is the main objective.
+    - **I have not tested if Mastodon v3 works as home instance! In general, Mastodon v4 support is the main objective.**
     - Support for other Fedi software is still planned
 2. The whitelist mode can be useful if you do not want the extension to run basic checks on every site (since it needs to determine if it is a Mastodon site). Not sure if the blacklist feature is good for anything but I still included it.
 3. It can have several reasons why resolving/executing actions/redirection might not work:
@@ -107,6 +107,7 @@ I included all of the default add-ons in the custom collection, so you will not 
 7. If the extension fails to resolve content, the affected buttons will behave like usually
 
 ## Todos / Planned features 
+- Add support for bookmarking, replying
 - Fix last remaining resolve fails
 - General performance improvements
 - Improve 429 prevention and add fallbacks
