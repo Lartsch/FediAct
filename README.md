@@ -107,6 +107,7 @@ I included all of the default add-ons in the custom collection, so you will not 
 7. If the extension fails to resolve content, the affected buttons will behave like usually
 
 ## Todos / Planned features 
+- Add support for bookmarking, replying
 - Fix last remaining resolve fails
 - General performance improvements
 - Improve 429 prevention and add fallbacks
