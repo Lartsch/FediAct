@@ -88,6 +88,8 @@ Since a while, Firefox on Android only allows a [curated list](https://addons.mo
     - Name: FediFollow
 5. Click OK, Firefox will close - reopen it
 6. FediFollow will now be available in the Add-ons menu of Firefox Nightly
+
+To update the addon instantly, simply remove and re-install it. Not sure when/if auto-update triggers in Firefox.
   
 I included all of the default add-ons in the custom collection, so you will not miss out on any of those. Of course, you can create [your own collection](https://support.mozilla.org/en-US/kb/how-use-collections-addonsmozillaorg) as well.
 
