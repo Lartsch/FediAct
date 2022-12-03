@@ -78,7 +78,7 @@ function popupTasks(settings) {
 		});
 	}
 
-	$(document).ready(function() {
+	$(document).ready(async function() {
 		// restore the form values
 		restoreForm();
 		// perform storage actions on form submit
@@ -87,9 +87,10 @@ function popupTasks(settings) {
 			e.preventDefault();
 			// update settings
 			updateSettings();
+			chrome.runtime.sendMessage({updatedsettings: true});
 		});
 	});
 
 }
 
-(browser || chrome).storage.local.get(settings).then(popupTasks, onError);
+(browser || chrome).storage.local.get(settings).then(popupTasks, onError)

@@ -42,7 +42,7 @@ async function fetchBearerToken() {
     var text = await res.text();
     if (text) {
         // dom parser is not available in background workers, so we use regex to parse the html....
-        // for some reason, regex groups do not seem to work in chrome background workers... the following is ugly but should work fine
+        // for some reason, regex groups do also not seem to work in chrome background workers... the following is ugly but should work fine
         var content = text.match(tokenRegex);
         if (content) {
             var indexOne = content[0].search(/"access_token":"/);
@@ -77,6 +77,11 @@ chrome.runtime.onInstalled.addListener(fetchData);
 chrome.alarms.onAlarm.addListener(fetchData);
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    resolveToot(request.url).then(sendResponse)
-    return true
+    if(request.url) {
+        resolveToot(request.url).then(sendResponse)
+        return true
+    }
+    if (request.updatedsettings) {
+        fetchData()
+    }
 });
