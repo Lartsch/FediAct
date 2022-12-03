@@ -2,8 +2,6 @@
 // =-=-=-=-=-= CONSTANTS =-==-=-=-=
 // =-=-=-=-==-=-=-=-==-=-=-=-==-=-=
 
-//const tootButtonsPaths = ["div.status__action-bar button:not(.disabled):not(:has(i.fa-share-alt))","div.detailed-status__action-bar button:not(.disabled):not(:has(i.fa-share-alt))","div.status__action-bar a.modal-button","a.detailed-status__link"];
-//const appHolderPaths = ["body > div.app-holder", "body > div.public-layout"];
 const followButtonPaths = ["div.account__header button.logo-button","div.public-account-header a.logo-button","div.account-card a.logo-button","div.directory-card a.icon-button", "div.detailed-status a.logo-button"];
 const profileNamePaths = ["div.account__header__tabs__name small", "div.public-account-header__tabs__name small", "div.detailed-status span.display-name__account", "div.display-name > span"];
 const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/;
@@ -36,7 +34,7 @@ const settingsDefaults = {
 	fedifollow_enabledelay: true
 }
 
-// fix for cross-browser storage api compatibility and global settings var
+// fix for cross-browser storage api compatibility and other global vars
 var browser, chrome, lasthomerequest;
 var lastUrl = window.location.href;
 
@@ -52,6 +50,9 @@ function log(text) {
 	}
 }
 
+// Custom solution for detecting inserted nodes
+// Works in combination with nodeinserted.css (fixes Firefox blocking addon-inserted <style> elements for sites with CSP)
+// Is more reliable in certain situation than mutationobserver
 (function($) {
     $.fn.DOMNodeAppear = function(callback, selector) {
       var $this = $(this)
@@ -111,14 +112,17 @@ async function makeRequest(method, url, extraheaders) {
     });
 }
 
+// Escape characters used for regex
 function escapeRegExp(string) {
 	return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
   }
-  
+
+// Replace all occurrences of a substring
 function replaceAll(str, find, replace) {
 	return str.replace(new RegExp(escapeRegExp(find), 'g'), replace);
 }
 
+// handles redirects to home instance
 function redirectTo(url) {
 	if (settings.fedifollow_redirects) {
 		if (settings.fedifollow_alert) {
@@ -299,6 +303,7 @@ async function isFollowingHomeInstance(ids) {
 // =-=-=-=-=-= RESOLVING =-=-==-=-=
 // =-=-=-=-==-=-=-=-==-=-=-=-==-=-=
 
+// Return the user id on the home instance
 async function resolveHandleToHome(handle) {
 	var requestUrl = 'https://' + settings.fedifollow_homeinstance + accountsApi + "/search?q=" + handle
 	var searchResponse = await makeRequest("GET",requestUrl,settings.tokenheader)
@@ -311,6 +316,7 @@ async function resolveHandleToHome(handle) {
 	return false
 }
 
+// Get a toot's (external) home instance url
 function resolveTootToExternalHome(tooturl) {
 	if (tooturl) {
 		return new Promise(resolve => {
