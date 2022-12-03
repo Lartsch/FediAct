@@ -7,5 +7,5 @@ find . -type d -name lib -prune -o -type f -name "*.js" -exec bash -c 'uglifyjs 
 # minify all css files, excluding lib folder
 find . -type d -name lib -prune -o -type f -name "*.css" -exec bash -c 'uglifycss $1 > "$(echo $1 | rev | cut -f 2- -d '.' | rev).min.css"' _ {} \;
 # zip release files
-zip -r "fedifollow-$1-chrome.zip" ./ -x "firefox/*" -x "img/*" -x ".git/*" -x "README.md" -x "NOTES.md" -x ".gitignore" -x "pack.sh" -x "LICENSE" -x "src/background.js" -x "src/inject.js" -x "src/popup.js" -x "src/nodeinserted.css"
-cd firefox && zip -r "../fedifollow-$1-firefox.zip" ./ -x "src/background.js" -x "src/inject.js" -x "src/popup.js" -x "src/nodeinserted.css"
+zip -r "fedifollow-$1-chrome.zip" ./ -x "firefox/*" -x "img/*" -x ".git/*" -x "README.md" -x "NOTES.md" -x ".gitignore" -x "pack.sh" -x "LICENSE" -x "src/background.js" -x "src/inject.js" -x "src/popup.js" -x "src/nodeinserted.css" 1>/dev/null
+cd firefox && zip -r "../fedifollow-$1-firefox.zip" ./ -x "src/background.js" -x "src/inject.js" -x "src/popup.js" -x "src/nodeinserted.css" 1>/dev/null
