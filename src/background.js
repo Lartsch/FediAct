@@ -43,13 +43,13 @@ async function fetchBearerToken() {
     if (text) {
         // dom parser is not available in background workers, so we use regex to parse the html....
         // for some reason, regex groups do not seem to work in chrome background workers... the following is ugly but should work fine
-        var content = text.match(tokenRegex)[0];
+        var content = text.match(tokenRegex);
         if (content) {
-            var indexOne = content.search(/"access_token":"/);
-            var indexTwo = content.search(/",/);
+            var indexOne = content[0].search(/"access_token":"/);
+            var indexTwo = content[0].search(/",/);
             if (indexOne > -1 && indexTwo > -1) {
                 indexOne = indexOne + 16
-                var token = content.substring(indexOne, indexTwo);
+                var token = content[0].substring(indexOne, indexTwo);
                 console.log(token)
                 if (token.length > 16) {
                     settings.fedifollow_token = token;
