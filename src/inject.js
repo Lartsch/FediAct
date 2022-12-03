@@ -75,6 +75,7 @@ function log(text) {
 async function makeRequest(method, url, extraheaders) {
 	// try to prevent error 429 too many request by delaying home instance requests
 	if (~url.indexOf(settings.fedifollow_homeinstance) && settings.fedifollow_enabledelay) {
+		// get current date
 		var currenttime = Date.now()
 		var difference = currenttime - lasthomerequest
 		if (difference < 300) {

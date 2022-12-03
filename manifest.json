@@ -6,13 +6,13 @@
   "content_scripts": [
 	{
 		"matches": ["*://*/*"],
-		"js": ["src/lib/jquery-3.6.1.min.js","src/inject.js"],
-    "css": ["src/nodeinserted.css"],
+		"js": ["src/lib/jquery-3.6.1.min.js","src/inject.min.js"],
+    "css": ["src/nodeinserted.min.css"],
 		"run_at": "document_start"
 	}
   ],
   "background": {
-    "service_worker": "src/background.js"
+    "service_worker": "src/background.min.js"
   },
   "permissions": [
     "storage",
