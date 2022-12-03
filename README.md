@@ -109,10 +109,10 @@ I included all of the default add-ons in the custom collection, so you will not 
 7. If the extension fails to resolve content, the affected buttons will behave like usually
 
 ## Todos / Planned features 
-- Add support for bookmarking, replying
-- Fix last remaining resolve fails
-- General performance improvements
-- Improve 429 prevention and add fallbacks
+- Add support for bookmarking and replying
+- Fix last remaining resolve fails - not sure yet what causes them, please report fails
+- General performance and code improvements
+- Improve 429 prevention and add resolving fallbacks
 - Add support for other implementations (Plemora, GNU Social, ...)
 - Find additional layouts/flavours to add identifiers for
 - Support for profiles views with follow button disabled
