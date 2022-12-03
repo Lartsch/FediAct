@@ -116,6 +116,7 @@ I included all of the default add-ons in the custom collection, so you will not 
 - Add support for other implementations (Plemora, GNU Social, ...)
 - Find additional layouts/flavours to add identifiers for
 - Support for profiles views with follow button disabled
+- Implement caching where applicable to decrease required requests
 - If I find myself to be bored, probably more
 
 ## Thanks to...
