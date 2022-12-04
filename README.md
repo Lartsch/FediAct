@@ -1,10 +1,10 @@
-# FediFollow (v0.8.1)
+# FediFollow (v0.8.2)
 A Chrome/Firefox extension that simplifies following and post interactions on other Mastodon instances than your own.
 
 **Features**:
 - Supports Mastodon v3 + v4
-- Follow, reblog and favourite on external instances
-- Show following status and toot status (reblogged, faved) on external instances
+- Follow, reblog, bookmark and favourite on external instances (and vice-versa)
+- Show following status and toot status (reblogged, faved, bookmarked) on external instances
 - Single click to execute action, double click to redirect to content on home instance
 - Customizable
 
@@ -110,7 +110,7 @@ I included all of the default add-ons in the custom collection, so you will not 
 7. If the extension fails to resolve content, the affected buttons will behave like usually
 
 ## Todos / Planned features 
-- Add support for bookmarking and replying
+- Add support for replying
 - Fix last remaining resolve fails - not sure yet what causes them, please report fails
 - General performance and code improvements
 - Add indicator for content that failed to resolve
