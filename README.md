@@ -113,6 +113,7 @@ I included all of the default add-ons in the custom collection, so you will not 
 - Add support for bookmarking and replying
 - Fix last remaining resolve fails - not sure yet what causes them, please report fails
 - General performance and code improvements
+- Add indicator for content that failed to resolve
 - Update settings in content script instantly (so no page reload is needed)
 - Improve 429 prevention and add resolving fallbacks
 - Add support for other implementations (Plemora, GNU Social, ...)
