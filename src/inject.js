@@ -35,7 +35,7 @@ const settingsDefaults = {
 }
 
 // fix for cross-browser storage api compatibility and other global vars
-var browser, chrome, lasthomerequest;
+var browser, chrome, lasthomerequest, fedireply;
 var lastUrl = window.location.href;
 
 
@@ -70,6 +70,19 @@ function log(text) {
     };
     jQuery.fn.onAppear = jQuery.fn.DOMNodeAppear;
   })(jQuery);
+
+// extract given url parameter value
+var getUrlParameter = function getUrlParameter(sParam) {
+    var sPageURL = window.location.search.substring(1),
+        sURLVariables = sPageURL.split('&'), sParameterName, i;
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+        }
+    }
+    return false;
+};
 
 // promisified xhr for api calls
 async function makeRequest(method, url, extraheaders) {
@@ -504,6 +517,13 @@ function extractHandle(selectors) {
 }
 
 // process any toots found on supported sites
+async function processReply() {
+	$(document).DOMNodeAppear(function(e) {
+		$(e.target).find("button:has(i.fa-reply").click()
+	}, "div.detailed-status__action-bar")
+}
+
+// process any toots found on supported sites
 async function processToots() {
 	async function clickAction(searchstring, e) {
 		var action = getTootAction(e);
@@ -635,6 +655,7 @@ async function processToots() {
 					var favButton = $(el).find("button:has(i.fa-star), a.icon-button:has(i.fa-star)")
 					var boostButton = $(el).find("button:has(i.fa-retweet), a.icon-button:has(i.fa-retweet)")
 					var bookmarkButton = $(el).find("button:has(i.fa-bookmark)")
+					var replyButton = $(el).find("button:has(i.fa-reply)")
 					$(bookmarkButton).removeClass("disabled").removeAttr("disabled")
 					if (resolveAndAction[2]) {
 						if (!$(favButton).hasClass("fediactive")) {
@@ -652,6 +673,11 @@ async function processToots() {
 						}
 					}
 					// continue with click handling...
+					$(replyButton).on("click", function(e){
+						e.preventDefault();
+						e.stopImmediatePropagation();
+						redirectTo(resolveAndAction[0]+"?fedireply")
+					})
 					var clicks = 0;
 					var timer;
 					$([favButton, boostButton, bookmarkButton]).each(function() {
@@ -974,8 +1000,11 @@ function checkSettings() {
 async function checkSite() {
 	// is this site on our home instance?
 	if (location.hostname == settings.fedifollow_homeinstance) {
-		log("Current site is your home instance.");
-		return false;
+		fedireply = getUrlParameter("fedireply")
+		if (!fedireply) {
+			log("Current site is your home instance.");
+			return false;
+		}
 	}
 	// are we in whitelist mode?
 	if (settings.fedifollow_mode == "whitelist") {
@@ -1015,9 +1044,13 @@ async function run() {
 		if (checkSettings()) {
 			// check site (if and which scripts should run)
 			if (await checkSite()) {
-				processFollow();
-				processToots();
-				urlChangeLoop();
+				if (fedireply) {
+					processReply()
+				} else {
+					processFollow();
+					processToots();
+					urlChangeLoop();
+				}
 			} else {
 				log("Will not process this site.")
 			}
