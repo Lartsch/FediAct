@@ -78,7 +78,7 @@ async function makeRequest(method, url, extraheaders) {
 		// get current date
 		var currenttime = Date.now()
 		var difference = currenttime - lasthomerequest
-		if (difference < 300) {
+		if (difference < apiDelay) {
 			await new Promise(resolve => {
 				setTimeout(function() {
 					resolve()

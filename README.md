@@ -31,7 +31,7 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 [link-chrome]: https://chrome.google.com/webstore/detail/fedifollow/lmpcajpkjcclkjbliapfjfolocffednm 'Version published on Chrome Web Store'
 [link-firefox]: https://addons.mozilla.org/en-US/firefox/addon/fedifollow/ 'Version published on Mozilla Add-ons'
 
-[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/chrome/chrome.svg" width="48" alt="Chrome" valign="middle">][link-chrome] [<img valign="middle" src="https://img.shields.io/chrome-web-store/v/lmpcajpkjcclkjbliapfjfolocffednm.svg?label=%20">][link-chrome] and other Chromium browsers (v0.8.0 in review)
+[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/chrome/chrome.svg" width="48" alt="Chrome" valign="middle">][link-chrome] [<img valign="middle" src="https://img.shields.io/chrome-web-store/v/lmpcajpkjcclkjbliapfjfolocffednm.svg?label=%20">][link-chrome] and other Chromium browsers
 
 [<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fedifollow.svg?label=%20">][link-firefox] including Firefox for Android
 
@@ -100,6 +100,7 @@ I included all of the default add-ons in the custom collection, so you will not 
 2. The whitelist mode can be useful if you do not want the extension to run basic checks on every site (since it needs to determine if it is a Mastodon site). Not sure if the blacklist feature is good for anything but I still included it.
 3. It can have several reasons why resolving/executing actions/redirection might not work:
     - You are not logged in to your home instance (can't fix, log in)
+    - You are scrolling really fast and posts are not resolved instantly (a delay is implemented to prevent 429 API errors - wait shortly and try again)
     - There are instances that use custom layouts/flavours (additional identifiers need to be added to extension)
     - It's not a Mastodon instance (not supported yet)
     - Element identifiers might change over time (extension needs to be updated)
@@ -109,15 +110,18 @@ I included all of the default add-ons in the custom collection, so you will not 
 7. If the extension fails to resolve content, the affected buttons will behave like usually
 
 ## Todos / Planned features 
-- Add support for bookmarking, replying
-- Fix last remaining resolve fails
-- General performance improvements
-- Improve 429 prevention and add fallbacks
+- Add support for bookmarking and replying
+- Fix last remaining resolve fails - not sure yet what causes them, please report fails
+- General performance and code improvements
+- Add indicator for content that failed to resolve
+- Update settings in content script instantly (so no page reload is needed)
+- Improve 429 prevention and add resolving fallbacks
 - Add support for other implementations (Plemora, GNU Social, ...)
 - Find additional layouts/flavours to add identifiers for
 - Support for profiles views with follow button disabled
+- Implement caching where applicable to decrease required requests
 - If I find myself to be bored, probably more
 
 ## Thanks to...
-@raikasdev because I stole his fix for cross-browser storage API support
-@rosemarydotworld because I customized and use his awesome jQuery.DOMNodeAppear
+@raikasdev because I stole his fix for cross-browser storage API support  
+@rosemarydotworld because I customized and use his awesome jQuery.DOMNodeAppear where MutationObservers and delegation failed
