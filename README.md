@@ -1,11 +1,12 @@
-# FediFollow (v0.8.2)
+# FediFollow (v0.8.3)
 A Chrome/Firefox extension that simplifies following and post interactions on other Mastodon instances than your own.
 
 **Features**:
 - Supports Mastodon v3 + v4
-- Follow, reblog, bookmark and favourite on external instances (and vice-versa)
-- Show following status and toot status (reblogged, faved, bookmarked) on external instances
-- Single click to execute action, double click to redirect to content on home instance
+- Follow, boost, bookmark, reply and favourite on external instances (and vice-versa)
+- Show following status and toot status (boosted, faved, bookmarked) on external instances
+- Single click to execute action, double click to redirect to content on home instance (bookmark, favourite, boost)
+- Reply button on external instances always redirects to home instance and enters reply-mode
 - Customizable
 
 **Supported browsers**:
@@ -31,7 +32,7 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 [link-chrome]: https://chrome.google.com/webstore/detail/fedifollow/lmpcajpkjcclkjbliapfjfolocffednm 'Version published on Chrome Web Store'
 [link-firefox]: https://addons.mozilla.org/en-US/firefox/addon/fedifollow/ 'Version published on Mozilla Add-ons'
 
-[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/chrome/chrome.svg" width="48" alt="Chrome" valign="middle">][link-chrome] [<img valign="middle" src="https://img.shields.io/chrome-web-store/v/lmpcajpkjcclkjbliapfjfolocffednm.svg?label=%20">][link-chrome] and other Chromium browsers
+[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/chrome/chrome.svg" width="48" alt="Chrome" valign="middle">][link-chrome] [<img valign="middle" src="https://img.shields.io/chrome-web-store/v/lmpcajpkjcclkjbliapfjfolocffednm.svg?label=%20">][link-chrome] and other Chromium browsers (v0.8.3 in review)
 
 [<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fedifollow.svg?label=%20">][link-firefox] including Firefox for Android
 
@@ -106,7 +107,7 @@ I included all of the default add-ons in the custom collection, so you will not 
     - Element identifiers might change over time (extension needs to be updated)
     - **Your home instance has strong rate limiting and blocks the API requests**
 5. There can be a short delay before you are redirected since an API call to the respective external instance must be made. In general, performance of this addon depends on the performance of the external instance and your home instance.
-6. If you only want redirects, simply turn off auto-action and leave redirect on - double click will then only redirect, not execute the action
+6. If you only want redirects, simply turn off auto-action and leave redirect on - double click will then only redirect, not execute the action (alternatively, you can simply use the reply button, as it will always redirect to your home instance if redirects are enabled)
 7. If the extension fails to resolve content, the affected buttons will behave like usually
 
 ## Todos / Planned features 
