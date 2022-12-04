@@ -678,9 +678,9 @@ async function processToots() {
 						e.stopImmediatePropagation();
 						redirectTo(resolveAndAction[0]+"?fedireply")
 					})
-					var clicks = 0;
-					var timer;
 					$([favButton, boostButton, bookmarkButton]).each(function() {
+						var clicks = 0;
+						var timer;
 						$(this).on("click", async function(e) {
 							// prevent default and immediate propagation
 							e.preventDefault();
