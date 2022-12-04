@@ -655,7 +655,7 @@ async function processToots() {
 					var favButton = $(el).find("button:has(i.fa-star), a.icon-button:has(i.fa-star)")
 					var boostButton = $(el).find("button:has(i.fa-retweet), a.icon-button:has(i.fa-retweet)")
 					var bookmarkButton = $(el).find("button:has(i.fa-bookmark)")
-					var replyButton = $(el).find("button:has(i.fa-reply), button:has(i.fa-reply-all)")
+					var replyButton = $(el).find("button:has(i.fa-reply), button:has(i.fa-reply-all), a.icon-button:has(i.fa-reply), a.icon-button:has(i.fa-reply-all)")
 					$(bookmarkButton).removeClass("disabled").removeAttr("disabled")
 					if (resolveAndAction[2]) {
 						if (!$(favButton).hasClass("fediactive")) {
