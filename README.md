@@ -100,6 +100,7 @@ I included all of the default add-ons in the custom collection, so you will not 
 2. The whitelist mode can be useful if you do not want the extension to run basic checks on every site (since it needs to determine if it is a Mastodon site). Not sure if the blacklist feature is good for anything but I still included it.
 3. It can have several reasons why resolving/executing actions/redirection might not work:
     - You are not logged in to your home instance (can't fix, log in)
+    - You are scrolling really fast and posts are not resolved instantly (a delay is implemented to prevent 429 API errors - wait shortly and try again)
     - There are instances that use custom layouts/flavours (additional identifiers need to be added to extension)
     - It's not a Mastodon instance (not supported yet)
     - Element identifiers might change over time (extension needs to be updated)
