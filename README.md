@@ -122,5 +122,5 @@ I included all of the default add-ons in the custom collection, so you will not 
 - If I find myself to be bored, probably more
 
 ## Thanks to...
-@raikasdev because I stole his fix for cross-browser storage API support
+@raikasdev because I stole his fix for cross-browser storage API support  
 @rosemarydotworld because I customized and use his awesome jQuery.DOMNodeAppear where MutationObservers and delegation failed
