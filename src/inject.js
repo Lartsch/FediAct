@@ -275,6 +275,48 @@ async function unfavouriteHomeInstance(id) {
 	}
 }
 
+async function bookmarkHomeInstance(id) {
+	// if auto actions are enbaled...
+	if (settings.fedifollow_autoaction) {
+		// build follow post request
+		var requestUrl = 'https://' + settings.fedifollow_homeinstance + statusApi + "/"  + id + "/bookmark";
+		var responseBookmark = await makeRequest("POST",requestUrl,settings.tokenheader);
+		// check if it worked (it is ignored if the user was already followed)
+		if (responseBookmark) {
+			responseBookmark = JSON.parse(responseBookmark);
+			if (!responseBookmark.bookmarked) {
+				log("Bookmark failed.");
+				return false;
+			} else {
+				return true;
+			}
+		}
+	} else {
+		log("Auto-action disabled.")
+	}
+}
+
+async function unbookmarkHomeInstance(id) {
+	// if auto actions are enbaled...
+	if (settings.fedifollow_autoaction) {
+		// build follow post request
+		var requestUrl = 'https://' + settings.fedifollow_homeinstance + statusApi + "/" + id + "/unbookmark";
+		var responseUnbookmark = await makeRequest("POST",requestUrl,settings.tokenheader);
+		// check if it worked (it is ignored if the user was already followed)
+		if (responseUnbookmark) {
+			responseUnbookmark = JSON.parse(responseUnbookmark);
+			if (responseUnbookmark.bookmarked) {
+				log("Unbookmark failed.");
+				return false;
+			} else {
+				return true;
+			}
+		}
+	} else {
+		log("Auto-action disabled.")
+	}
+}
+
 async function isFollowingHomeInstance(ids) {
 	var requestUrl = 'https://' + settings.fedifollow_homeinstance + accountsApi + "/relationships?"
 	for (const id of ids) {
@@ -376,17 +418,22 @@ async function resolveHomeInstance(searchstring, action) {
 				actionExecuted = await boostHomeInstance(status.id)
 			} else if (action == "favourite") {
 				actionExecuted = await favouriteHomeInstance(status.id)
+			} else if (action == "bookmark") {
+				actionExecuted = await bookmarkHomeInstance(status.id)
 			} else if (action == "unboost") {
 				actionExecuted = await unboostHomeInstance(status.id)
 			} else if (action == "unfavourite") {
 				actionExecuted = await unfavouriteHomeInstance(status.id)
-			}
+			} else if (action == "unbookmark") {
+				actionExecuted = await unbookmarkHomeInstance(status.id)
+			} 
 			faved = status.favourited;
 			boosted = status.reblogged;
+			bookmarked = status.bookmarked;
 		}
 		// if we got a redirect url...
 		if (redirect) {
-			return [redirect, actionExecuted, faved, boosted]
+			return [redirect, actionExecuted, faved, boosted, bookmarked]
 		} else {
 			return false;
 		}
@@ -467,9 +514,11 @@ async function processToots() {
 				if(resolveAndAction[1]) {
 					if (action == "boost" || action == "unboost") {
 						toggleInlineCss($(e.currentTarget).find("i"),[["color","!remove","rgb(140, 141, 255)"],["transition-duration", "!remove", "0.9s"],["background-position", "!remove", "0px 100%"]], "fediactive")
-					} else {
+					} else if (action == "favourite" || action == "unfavourite") {
 						toggleInlineCss($(e.currentTarget),[["color","!remove","rgb(202, 143, 4)"]], "fediactive")
-					}						
+					} else {
+						toggleInlineCss($(e.currentTarget),[["color","!remove","rgb(255, 80, 80)"]], "fediactive")
+					}			
 				}
 				return resolveAndAction[0]
 			} else {
@@ -492,6 +541,12 @@ async function processToots() {
 				action = "unfavourite";
 			} else {
 				action = "favourite";
+			}
+		} else if ($(e.currentTarget).children("i.fa-bookmark").length) {
+			if ($(e.currentTarget).hasClass("fediactive")) {
+				action = "unbookmark";
+			} else {
+				action = "bookmark";
 			}
 		} else if ($(e.currentTarget).attr("href")) {
 			if (~$(e.currentTarget).attr("href").indexOf("type=reblog")) {
@@ -575,10 +630,12 @@ async function processToots() {
 			if (homeResolveString) {
 				// redirect to home instance
 				// resolve url on home instance and execute action
-				resolveAndAction = await resolveHomeInstance(homeResolveString, null); // redirect, actionExecuted, faved, boosted
+				resolveAndAction = await resolveHomeInstance(homeResolveString, null);
 				if (resolveAndAction) {
 					var favButton = $(el).find("button:has(i.fa-star), a.icon-button:has(i.fa-star)")
 					var boostButton = $(el).find("button:has(i.fa-retweet), a.icon-button:has(i.fa-retweet)")
+					var bookmarkButton = $(el).find("button:has(i.fa-bookmark)")
+					$(bookmarkButton).removeClass("disabled").removeAttr("disabled")
 					if (resolveAndAction[2]) {
 						if (!$(favButton).hasClass("fediactive")) {
 							toggleInlineCss($(favButton),[["color","!remove","rgb(202, 143, 4)"]], "fediactive")
@@ -589,30 +646,37 @@ async function processToots() {
 							toggleInlineCss($(boostButton).find("i"),[["color","!remove","rgb(140, 141, 255)"],["transition-duration", "!remove", "0.9s"],["background-position", "!remove", "0px 100%"]], "fediactive")
 						}
 					}
+					if (resolveAndAction[4]) {
+						if (!$(bookmarkButton).hasClass("fediactive")) {
+							toggleInlineCss($(bookmarkButton),[["color","!remove","rgb(255, 80, 80)"]], "fediactive")
+						}
+					}
 					// continue with click handling...
 					var clicks = 0;
 					var timer;
-					$(favButton).add(boostButton).on("click", async function(e) {
-						// prevent default and immediate propagation
-						e.preventDefault();
-						e.stopImmediatePropagation();
-						clicks++;
-						if (clicks == 1) {
-							timer = setTimeout(async function() {
-								await clickAction(homeResolveString, e); // TODO: replace postUri with resolveAndAction[0] and make a separate function for action execute, so we do not need to resolve two times
+					$([favButton, boostButton, bookmarkButton]).each(function() {
+						$(this).on("click", async function(e) {
+							// prevent default and immediate propagation
+							e.preventDefault();
+							e.stopImmediatePropagation();
+							clicks++;
+							if (clicks == 1) {
+								timer = setTimeout(async function() {
+									await clickAction(homeResolveString, e);
+									clicks = 0;
+								}, 350);
+							} else {
+								clearTimeout(timer);
+								url = await clickAction(homeResolveString, e);
+								if (url) {
+									redirectTo(url)
+								}
 								clicks = 0;
-							}, 350);
-						} else {
-							clearTimeout(timer);
-							url = await clickAction(homeResolveString, e);
-							if (url) {
-								redirectTo(url)
 							}
-							clicks = 0;
-						}
-					}).on("dblclick", function(e) {
-						e.preventDefault();
-						e.stopImmediatePropagation();
+						}).on("dblclick", function(e) {
+							e.preventDefault();
+							e.stopImmediatePropagation();
+						});
 					});
 				} else {
 					log("Failed to resolve: "+homeResolveString)
