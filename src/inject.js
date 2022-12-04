@@ -519,7 +519,7 @@ function extractHandle(selectors) {
 // process any toots found on supported sites
 async function processReply() {
 	$(document).DOMNodeAppear(function(e) {
-		$(e.target).find("button:has(i.fa-reply").click()
+		$(e.target).find("button:has(i.fa-reply), button:has(i.fa-reply-all)").click()
 	}, "div.detailed-status__action-bar")
 }
 
@@ -650,12 +650,12 @@ async function processToots() {
 			if (homeResolveString) {
 				// redirect to home instance
 				// resolve url on home instance and execute action
-				resolveAndAction = await resolveHomeInstance(homeResolveString, null);
+				var resolveAndAction = await resolveHomeInstance(homeResolveString, null);
 				if (resolveAndAction) {
 					var favButton = $(el).find("button:has(i.fa-star), a.icon-button:has(i.fa-star)")
 					var boostButton = $(el).find("button:has(i.fa-retweet), a.icon-button:has(i.fa-retweet)")
 					var bookmarkButton = $(el).find("button:has(i.fa-bookmark)")
-					var replyButton = $(el).find("button:has(i.fa-reply)")
+					var replyButton = $(el).find("button:has(i.fa-reply), button:has(i.fa-reply-all)")
 					$(bookmarkButton).removeClass("disabled").removeAttr("disabled")
 					if (resolveAndAction[2]) {
 						if (!$(favButton).hasClass("fediactive")) {
