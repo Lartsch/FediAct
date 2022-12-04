@@ -107,7 +107,7 @@ I included all of the default add-ons in the custom collection, so you will not 
     - Element identifiers might change over time (extension needs to be updated)
     - **Your home instance has strong rate limiting and blocks the API requests**
 5. There can be a short delay before you are redirected since an API call to the respective external instance must be made. In general, performance of this addon depends on the performance of the external instance and your home instance.
-6. If you only want redirects, simply turn off auto-action and leave redirect on - double click will then only redirect, not execute the action
+6. If you only want redirects, simply turn off auto-action and leave redirect on - double click will then only redirect, not execute the action (alternatively, you can simply use the reply button, as it will always redirect to your home instance if redirects are enabled)
 7. If the extension fails to resolve content, the affected buttons will behave like usually
 
 ## Todos / Planned features 
