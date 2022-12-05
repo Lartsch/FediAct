@@ -1,6 +1,6 @@
 /*  
     We insert these styles for the DOMNodeAppeared function as separate stylesheet (see manifest) to fix
-    Firefox blocking script-inserted <style> elements due to the site's CPS
+    Firefox blocking script-inserted <style> elements due to the site's CSP (long time bug)
 */
 
 @-moz-keyframes nodeInserted { 
