@@ -17,7 +17,7 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 - This is still a beta, there will be issues!
 - All data is processed locally only
 - Performance depends on the performance (and rate limiting) of your home instance (read more [below](#additional-notes))
-- Toot resolving does not work for some external instances, in the same way where entering the toot URL in your home instance search manually will not work
+- Toot resolving does not work for some external instances - this is the same if you entered the toot URL in your home instance search manually and it won't return a result
 
 ## Navigation
   * [Installation](#installation)
