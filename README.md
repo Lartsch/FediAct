@@ -1,4 +1,4 @@
-# FediFollow (v0.8.3)
+# FediFollow (v0.8.4)
 A Chrome/Firefox extension that simplifies following and post interactions on other Mastodon instances than your own.
 
 **Features**:
