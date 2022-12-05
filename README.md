@@ -49,8 +49,6 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 4. Check the other settings (optional)
 5. Click the "Submit" button to save
 
-**It can take 1-2 minutes after you have set your home instance to sync your API token for the extension to work.**
-
 **Please read the [additional notes](#additional-notes).**
 
 ## Screenshots / GIFs
