@@ -354,6 +354,21 @@ async function isFollowingHomeInstance(ids) {
 	return follows
 }
 
+async function executeTootAction(id, action) {
+	var actionExecuted
+	switch (action) {
+		case 'boost': actionExecuted = await boostHomeInstance(id); break;
+		case 'favourite': actionExecuted = await favouriteHomeInstance(id); break;
+		case 'bookmark': actionExecuted = await bookmarkHomeInstance(id); break;
+		case 'unboost': actionExecuted = await unboostHomeInstance(id); break;
+		case 'unfavourite': actionExecuted = await unfavouriteHomeInstance(id); break;
+		case 'unbookmark': actionExecuted = await unbookmarkHomeInstance(id); break;
+		default:
+		  log("No valid action specified.");
+	}
+	return actionExecuted
+}
+
 
 // =-=-=-=-==-=-=-=-==-=-=-=-==-=-=
 // =-=-=-=-=-= RESOLVING =-=-==-=-=
@@ -361,7 +376,7 @@ async function isFollowingHomeInstance(ids) {
 
 // Return the user id on the home instance
 async function resolveHandleToHome(handle) {
-	var requestUrl = 'https://' + settings.fedifollow_homeinstance + accountsApi + "/search?q=" + handle
+	var requestUrl = 'https://' + settings.fedifollow_homeinstance + accountsApi + "/search?q=" + handle + "&resolve=true&limit=1"
 	var searchResponse = await makeRequest("GET",requestUrl,settings.tokenheader)
 	if (searchResponse) {
 		searchResponse = JSON.parse(searchResponse)
@@ -372,8 +387,27 @@ async function resolveHandleToHome(handle) {
 	return false
 }
 
+async function resolveTootToHome(searchstring) {
+	var requestUrl = 'https://' + settings.fedifollow_homeinstance + searchApi + "/?q=" + searchstring + "&resolve=true&limit=1";
+	var response = await makeRequest("GET", requestUrl, settings.tokenheader);
+	if (response) {
+		response = JSON.parse(response);
+		if (!response.accounts.length && response.statuses.length) {
+			var status = response.statuses[0];
+			return [status.account.acct, status.id, status.reblogged, status.favourited, status.bookmarked]
+		} else {
+			log("No toot result found.")
+			return false
+		}
+	} else {
+		log("API call failed...")
+		return false
+	}
+}
+
 // Get a toot's (external) home instance url
 function resolveTootToExternalHome(tooturl) {
+	// TODO: check if a delay is necessary here tooo
 	if (tooturl) {
 		return new Promise(resolve => {
 			chrome.runtime.sendMessage({url: tooturl}, function(response) {
@@ -388,74 +422,6 @@ function resolveTootToExternalHome(tooturl) {
 		return false
 	}
 }
-
-// resolve content uri on home instance
-async function resolveHomeInstance(searchstring, action) {
-	var requestUrl = 'https://' + settings.fedifollow_homeinstance + searchApi + "/?q="+searchstring+"&resolve=true&limit=10";
-	// api request: search endpoint, resolve search string locally (best support for edge cases (for ex. where subdomain does not equal the handle domain) and prevents uncached profile issue)
-	var response = await makeRequest("GET", requestUrl, settings.tokenheader);
-	if (response) {
-		response = JSON.parse(response);
-		// if we got no data (failed resolve) we can at least try to resolve a user by swapping the domain in case we got a domain in the handle
-		// this does not work for resolving post IDs so we check against the handle regex
-		if (!response.accounts.length && !response.statuses.length && handleExtractRegex.test(searchstring)) {
-			// get matches
-			var matches = searchstring.match(handleExtractRegex);
-			if (matches.groups.handle && matches.groups.handledomain) {
-				// we got handle + handledomain, so try to put the handle domain as host for this fallback (not guaranteed to resolve)
-				var searchstring = "https://" + matches.groups.handledomain + "/@" + matches.groups.handle;
-				var requestUrl = 'https://' + settings.fedifollow_homeinstance + searchApi + "/?q="+searchstring+"&resolve=true&limit=10";
-				// update response var
-				response = await makeRequest("GET", requestUrl, settings.tokenheader);
-				response = JSON.parse(response);
-			}
-		}
-		// set to false initially
-		var actionExecuted, faved, boosted;
-		// if we got an account but no statuses, redirect to profile (first result)
-		if (response.accounts.length && !response.statuses.length) {
-			// build redirect url
-			var redirect = 'https://' + settings.fedifollow_homeinstance + "/@" + response.accounts[0].acct;
-			if (action == "follow") {
-				actionExecuted = await followHomeInstance(response.accounts[0].id);
-			} else if (action == "unfollow") {
-				actionExecuted = await unfollowHomeInstance(response.accounts[0].id);
-			}
-		} else if (!response.accounts.length && response.statuses.length) {
-			// if statuses but no accounts, redirect to status (first result)
-			var status = response.statuses[0];
-			// build redirect url
-			var redirect = 'https://' + settings.fedifollow_homeinstance + "/@" + status.account.acct + "/" + status.id;
-			// perform action if set
-			if (action == "boost") {
-				actionExecuted = await boostHomeInstance(status.id)
-			} else if (action == "favourite") {
-				actionExecuted = await favouriteHomeInstance(status.id)
-			} else if (action == "bookmark") {
-				actionExecuted = await bookmarkHomeInstance(status.id)
-			} else if (action == "unboost") {
-				actionExecuted = await unboostHomeInstance(status.id)
-			} else if (action == "unfavourite") {
-				actionExecuted = await unfavouriteHomeInstance(status.id)
-			} else if (action == "unbookmark") {
-				actionExecuted = await unbookmarkHomeInstance(status.id)
-			} 
-			faved = status.favourited;
-			boosted = status.reblogged;
-			bookmarked = status.bookmarked;
-		}
-		// if we got a redirect url...
-		if (redirect) {
-			return [redirect, actionExecuted, faved, boosted, bookmarked]
-		} else {
-			return false;
-		}
-	} else {
-		log("API call failed...");
-		return false;
-	}
-}
-
 
 // =-=-=-=-==-=-=-=-==-=-=-=-==-=-=-=
 // =-=-=-=-= SITE PROCESSING =-==-=-=
@@ -525,27 +491,27 @@ async function processReply() {
 
 // process any toots found on supported sites
 async function processToots() {
-	async function clickAction(searchstring, e) {
+	async function clickAction(id, e) {
 		var action = getTootAction(e);
 		if (action) {
-			// resolve url on home instance and execute action
-			var resolveAndAction = await resolveHomeInstance(searchstring, action);
-			if (resolveAndAction) {
-				if(resolveAndAction[1]) {
-					if (action == "boost" || action == "unboost") {
-						toggleInlineCss($(e.currentTarget).find("i"),[["color","!remove","rgb(140, 141, 255)"],["transition-duration", "!remove", "0.9s"],["background-position", "!remove", "0px 100%"]], "fediactive")
-					} else if (action == "favourite" || action == "unfavourite") {
-						toggleInlineCss($(e.currentTarget),[["color","!remove","rgb(202, 143, 4)"]], "fediactive")
-					} else {
-						toggleInlineCss($(e.currentTarget),[["color","!remove","rgb(255, 80, 80)"]], "fediactive")
-					}			
-				}
-				return resolveAndAction[0]
+			// resolve url on home instance to get local toot/author identifiers and toot status
+			var actionExecuted = await executeTootAction(id, action)
+			if (actionExecuted) {
+				if (action == "boost" || action == "unboost") {
+					toggleInlineCss($(e.currentTarget).find("i"),[["color","!remove","rgb(140, 141, 255)"],["transition-duration", "!remove", "0.9s"],["background-position", "!remove", "0px 100%"]], "fediactive")
+				} else if (action == "favourite" || action == "unfavourite") {
+					toggleInlineCss($(e.currentTarget),[["color","!remove","rgb(202, 143, 4)"]], "fediactive")
+				} else {
+					toggleInlineCss($(e.currentTarget),[["color","!remove","rgb(255, 80, 80)"]], "fediactive")
+				}			
+				return true
 			} else {
-				log("Could not resolve action on home instance.")
+				log("Could not execute action on home instance.")
+				return false
 			}
 		} else {
 			log("Could not determine action.")
+			return false
 		}
 	}
 	function getTootAction(e) {
@@ -648,35 +614,35 @@ async function processToots() {
 				homeResolveString += tootData[1] + "/" + tootData[0]
 			}
 			if (homeResolveString) {
-				// redirect to home instance
-				// resolve url on home instance and execute action
-				var resolveAndAction = await resolveHomeInstance(homeResolveString, null);
-				if (resolveAndAction) {
+				// resolve toot on home instance
+				var resolvedToot = await resolveTootToHome(homeResolveString) // [status.account.acct, status.id, status.reblogged, status.favourited, status.bookmarked]
+				if (resolvedToot) {
 					var favButton = $(el).find("button:has(i.fa-star), a.icon-button:has(i.fa-star)")
 					var boostButton = $(el).find("button:has(i.fa-retweet), a.icon-button:has(i.fa-retweet)")
 					var bookmarkButton = $(el).find("button:has(i.fa-bookmark)")
 					var replyButton = $(el).find("button:has(i.fa-reply), button:has(i.fa-reply-all), a.icon-button:has(i.fa-reply), a.icon-button:has(i.fa-reply-all)")
 					$(bookmarkButton).removeClass("disabled").removeAttr("disabled")
-					if (resolveAndAction[2]) {
+					if (resolvedToot[3]) {
 						if (!$(favButton).hasClass("fediactive")) {
 							toggleInlineCss($(favButton),[["color","!remove","rgb(202, 143, 4)"]], "fediactive")
 						}
 					}
-					if (resolveAndAction[3]) {
+					if (resolvedToot[2]) {
 						if (!$(boostButton).find("i.fediactive").length) {
 							toggleInlineCss($(boostButton).find("i"),[["color","!remove","rgb(140, 141, 255)"],["transition-duration", "!remove", "0.9s"],["background-position", "!remove", "0px 100%"]], "fediactive")
 						}
 					}
-					if (resolveAndAction[4]) {
+					if (resolvedToot[4]) {
 						if (!$(bookmarkButton).hasClass("fediactive")) {
 							toggleInlineCss($(bookmarkButton),[["color","!remove","rgb(255, 80, 80)"]], "fediactive")
 						}
 					}
+					var redirectUrl = 'https://' + settings.fedifollow_homeinstance + "/@" + resolvedToot[0] + "/" + resolvedToot[1]
 					// continue with click handling...
 					$(replyButton).on("click", function(e){
 						e.preventDefault();
 						e.stopImmediatePropagation();
-						redirectTo(resolveAndAction[0]+"?fedireply")
+						redirectTo(redirectUrl+"?fedireply")
 					})
 					$([favButton, boostButton, bookmarkButton]).each(function() {
 						var clicks = 0;
@@ -688,14 +654,19 @@ async function processToots() {
 							clicks++;
 							if (clicks == 1) {
 								timer = setTimeout(async function() {
-									await clickAction(homeResolveString, e);
+									var actionExecuted = await clickAction(resolvedToot[1], e);
+									if (!actionExecuted) {
+										log("Action failed.")
+									}
 									clicks = 0;
 								}, 350);
 							} else {
 								clearTimeout(timer);
-								url = await clickAction(homeResolveString, e);
-								if (url) {
-									redirectTo(url)
+								var actionExecuted = await clickAction(resolvedToot[1], e);
+								if (!actionExecuted) {
+									log("Action failed.")
+								} else {
+									redirectTo(redirectUrl)
 								}
 								clicks = 0;
 							}
@@ -791,27 +762,6 @@ async function processToots() {
 // main function to listen for the follow button pressed and open a new tab with the home instance
 // TODO: this is still an old implementation, update in accordance with processToots as far as possible
 async function processFollow() {
-	async function clickAction(result, handle, handleDomain, action) {
-		if (result) {
-			// add the handle
-			var redirectUrl = result + "/@" + handle;
-			var resolveAndAction = await resolveHomeInstance(redirectUrl, action);
-			if (resolveAndAction) {
-				return resolveAndAction
-			}
-		} else {
-			log("Could not get instance URL from API search, resolve probability will be lower.");
-			var rawRedirect = lastUrl;
-			// dirty fix for some v3 views
-			if (~rawRedirect.indexOf("/explore") || tootRegex.test(rawRedirect)) {
-				rawRedirect = "https://" + handleDomain + "/@" + handle;
-			}
-			var resolveAndAction = await resolveHomeInstance(rawRedirect, action);
-			if (resolveAndAction) {
-				return resolveAndAction
-			}
-		}
-	}
 	// for mastodon v3 - v4 does not show follow buttons / account cards on /explore
 	async function process(el) {
 		var fullHandle
