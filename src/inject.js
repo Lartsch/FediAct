@@ -554,7 +554,7 @@ async function processToots() {
 	function getTootIdAndAuthor(el) {
 		var [closestTootId, closestTootAuthor] = [false, false]
 		if ($(el).find("span.display-name__account").length) {
-			closestTootAuthor = $(el).find("span.display-name__account").text().trim()
+			closestTootAuthor = $(el).find("span.display-name__account").first().text().trim()
 		}
 		if ($(el).is(".detailed-status__wrapper")) {
 			closestTootId = lastUrl.split("?")[0].split("/")[4]
@@ -590,6 +590,7 @@ async function processToots() {
 		var homeResolveString = location.protocol + "//" + location.hostname + "/"
 		var tootData = getTootIdAndAuthor($(el))
 		if (tootData) {
+			console.log(tootData)
 			// get handle/handledomain without @
 			var matches = tootData[1].match(handleExtractRegex);
 			// if we have a handledomain...
