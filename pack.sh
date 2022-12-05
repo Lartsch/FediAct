@@ -1,4 +1,5 @@
 # RUN FROM MAIN DIR
+# USE ./pack.sh <VERSION>
 
 # remove all minified files (excluding lib folder) and zip files
 find . -type d -name lib -prune -o -type f -name "*.min.js" -o -type f -name "*.min.css" -o -type f -name "*.zip" | grep -v "/lib" | tr '\n' '\0' | xargs -r0 rm
