@@ -641,10 +641,10 @@ async function processToots() {
 			}
 			if (homeResolveString) {
 				// get all button elements of this toot
-				var favButton = $(el).find("button:has(i.fa-star), a.icon-button:has(i.fa-star)")
-				var boostButton = $(el).find("button:has(i.fa-retweet), a.icon-button:has(i.fa-retweet)")
-				var bookmarkButton = $(el).find("button:has(i.fa-bookmark)")
-				var replyButton = $(el).find("button:has(i.fa-reply), button:has(i.fa-reply-all), a.icon-button:has(i.fa-reply), a.icon-button:has(i.fa-reply-all)")
+				var favButton = $(el).find("button:has(i.fa-star), a.icon-button:has(i.fa-star)").first()
+				var boostButton = $(el).find("button:has(i.fa-retweet), a.icon-button:has(i.fa-retweet)").first()
+				var bookmarkButton = $(el).find("button:has(i.fa-bookmark)").first()
+				var replyButton = $(el).find("button:has(i.fa-reply), button:has(i.fa-reply-all), a.icon-button:has(i.fa-reply), a.icon-button:has(i.fa-reply-all)").first()
 				// resolve toot on actual home instance
 				var resolvedToot = await resolveTootToHome(homeResolveString) // [status.account.acct, status.id, status.reblogged, status.favourited, status.bookmarked]
 				if (resolvedToot) {
@@ -712,7 +712,9 @@ async function processToots() {
 					});
 				} else {
 					log("Failed to resolve: "+homeResolveString)
-					$("<span style='color: orange; padding-right: 5px'>Not resolved</span>").insertAfter($(favButton))
+					console.log($(el))
+					console.log($(favButton))
+					$("<span style='color: orange; padding-right: 10px; padding-left: 10px'>Not resolved</span>").insertAfter($(favButton))
 				}
 			} else {
 				log("Could not identify a post URI for home resolving.")
