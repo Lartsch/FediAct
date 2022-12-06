@@ -1,13 +1,13 @@
 var browser, chrome, settings;
 var enableConsoleLog = true;
-var logPrepend = "[FediFollow]";
+var logPrepend = "[FediAct]";
 
 var tokenRegex = /"access_token":".*?",/gm;
 
 // required settings keys with defauls
 var settingsDefaults = {
-	fedifollow_homeinstance: null,
-    fedifollow_showfollows: true
+	fediact_homeinstance: null,
+    fediact_showfollows: true
 }
 
 // create alarm every 3 minutes
@@ -37,7 +37,7 @@ async function resolveToot(url) {
 }
 
 async function fetchBearerToken() {
-    var url = "https://" + settings.fedifollow_homeinstance;
+    var url = "https://" + settings.fediact_homeinstance;
     var res = await fetch(url);
     var text = await res.text();
     if (text) {
@@ -52,20 +52,20 @@ async function fetchBearerToken() {
                 var token = content[0].substring(indexOne, indexTwo);
                 console.log(token)
                 if (token.length > 16) {
-                    settings.fedifollow_token = token;
+                    settings.fediact_token = token;
                     return;
                 }
             }
         }
     }
     // reset token for inject.js to know
-    settings.fedifollow_token = null;
+    settings.fediact_token = null;
     log("Token could not be found.");
 }
 
 async function fetchData() {
     settings = await (browser || chrome).storage.local.get(settingsDefaults);
-    if (settings.fedifollow_homeinstance) {
+    if (settings.fediact_homeinstance) {
         await fetchBearerToken()
     } else {
         log("Home instance not set");

@@ -1,23 +1,23 @@
 
 // required settings keys with defauls
 var settings = {
-	fedifollow_homeinstance: null,
-	fedifollow_alert: false,
-	fedifollow_mode: "blacklist",
-	fedifollow_whitelist: null,
-	fedifollow_blacklist: null,
-	fedifollow_target: "_self",
-	fedifollow_autoaction: true,
-	fedifollow_showfollows: true,
-	fedifollow_redirects: true,
-	fedifollow_enabledelay: true
+	fediact_homeinstance: null,
+	fediact_alert: false,
+	fediact_mode: "blacklist",
+	fediact_whitelist: null,
+	fediact_blacklist: null,
+	fediact_target: "_self",
+	fediact_autoaction: true,
+	fediact_showfollows: true,
+	fediact_redirects: true,
+	fediact_enabledelay: true
 }
 
 // fix for cross-browser storage api compatibility
 var browser, chrome;
 
 function onError(error){
-	console.error(`[FediFollow] Error: ${error}`);
+	console.error(`[FediAct] Error: ${error}`);
 }
 
 // this performs loading the settings into the popup, reacting to changes and saving changes
@@ -32,16 +32,16 @@ function popupTasks(settings) {
 
 	function updateSettings(){
 		// update settings values
-		settings.fedifollow_homeinstance = $("input#homeinstance").val().trim();
-		settings.fedifollow_alert = $("input#alert").is(':checked');
-		settings.fedifollow_mode = $("select#mode").val();
-		settings.fedifollow_whitelist = $("textarea#whitelist_content").val();
-		settings.fedifollow_blacklist = $("textarea#blacklist_content").val();
-		settings.fedifollow_target = $("select#target").val();
-		settings.fedifollow_autoaction = $("input#autoaction").is(':checked');
-		settings.fedifollow_showfollows = $("input#showfollows").is(':checked');
-		settings.fedifollow_redirects = $("input#redirects").is(':checked');
-		settings.fedifollow_enabledelay = $("input#delay").is(':checked');
+		settings.fediact_homeinstance = $("input#homeinstance").val().trim();
+		settings.fediact_alert = $("input#alert").is(':checked');
+		settings.fediact_mode = $("select#mode").val();
+		settings.fediact_whitelist = $("textarea#whitelist_content").val();
+		settings.fediact_blacklist = $("textarea#blacklist_content").val();
+		settings.fediact_target = $("select#target").val();
+		settings.fediact_autoaction = $("input#autoaction").is(':checked');
+		settings.fediact_showfollows = $("input#showfollows").is(':checked');
+		settings.fediact_redirects = $("input#redirects").is(':checked');
+		settings.fediact_enabledelay = $("input#delay").is(':checked');
 		// write to storage
 		const waitForSaved = (browser || chrome).storage.local.set(settings);
 		// show saved indicator after successful save
@@ -50,16 +50,16 @@ function popupTasks(settings) {
 
 	function restoreForm() {
 		// set all default/configured values and show fields accordingly
-		$("input#homeinstance").val(settings.fedifollow_homeinstance);
-		$("textarea#blacklist_content").val(settings.fedifollow_blacklist);
-		$("textarea#whitelist_content").val(settings.fedifollow_whitelist);
-		$("select#mode").val(settings.fedifollow_mode);
-		$("select#target").val(settings.fedifollow_target);
-		$("input#alert").prop('checked', settings.fedifollow_alert);
-		$("input#autoaction").prop('checked', settings.fedifollow_autoaction);
-		$("input#showfollows").prop('checked', settings.fedifollow_showfollows);
-		$("input#redirects").prop('checked', settings.fedifollow_redirects);
-		$("input#delay").prop('checked', settings.fedifollow_enabledelay);
+		$("input#homeinstance").val(settings.fediact_homeinstance);
+		$("textarea#blacklist_content").val(settings.fediact_blacklist);
+		$("textarea#whitelist_content").val(settings.fediact_whitelist);
+		$("select#mode").val(settings.fediact_mode);
+		$("select#target").val(settings.fediact_target);
+		$("input#alert").prop('checked', settings.fediact_alert);
+		$("input#autoaction").prop('checked', settings.fediact_autoaction);
+		$("input#showfollows").prop('checked', settings.fediact_showfollows);
+		$("input#redirects").prop('checked', settings.fediact_redirects);
+		$("input#delay").prop('checked', settings.fediact_enabledelay);
 		// both containers are hidden by default
 		if ($("select#mode").val() == "whitelist") {
 			$("div#whitelist_input").show();
@@ -82,7 +82,7 @@ function popupTasks(settings) {
 		// restore the form values
 		restoreForm();
 		// perform storage actions on form submit
-		$("form#fedifollow-settings").on('submit', function(e){
+		$("form#fediact-settings").on('submit', function(e){
 			// prevent default
 			e.preventDefault();
 			// update settings
