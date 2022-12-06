@@ -1,5 +1,8 @@
-# FediFollow (v0.8.4)
+# FediAct (v0.8.4)
 A Chrome/Firefox extension that simplifies following and post interactions on other Mastodon instances than your own.
+
+> **Note**
+> Renamed from "FediFollow" to "FediAct" to prevent a naming issue with an existing Fedi account.
 
 **Features**:
 - Supports Mastodon v3 + v4
@@ -17,11 +20,11 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 - This is still a beta, there will be issues!
 - All data is processed locally only
 - Performance depends on the performance (and rate limiting) of your home instance (read more [below](#additional-notes))
-- Toot resolving does not work for some external instances - this is the same if you manually entered the toot URL in your home instance search and it wouldn't return a result (for ex. local toots on toot.site)
 
 ## Navigation
   * [Installation](#installation)
   * [Setup](#setup)
+  * [Known bugs](#known-bugs)
   * [Screenshots / GIFs](#screenshots--gifs)
   * [Manual installation](#manual-installation)
       * [Install in Firefox for Android](#install-in-firefox-for-android)
@@ -51,6 +54,11 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 5. Click the "Submit" button to save
 
 **Please read the [additional notes](#additional-notes).**
+
+## Known bugs
+- Toot resolving does not work for some external instances - this is the same if you manually entered the toot URL in your home instance search and it wouldn't return a result (for ex. local toots on toot.site). Not sure if this can be fixed at all, as the official method for resolving by entering the URL in the search does not work either.
+- In some rare cases, when the toot ID on an external instance is grabbed using a.status__relative-time element, it can happen that this is already the toot ID on the originating external instance and resolving on the home instance is therefore failing (will be fixed until 08/12/2022)
+- Read the [additional notes](#additional-notes) for good-to-know behaviour that is not considered as bugs
 
 ## Screenshots / GIFs
 <details>
