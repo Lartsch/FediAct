@@ -14,7 +14,6 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 - Up-to-date Firefox, including Firefox Nightly on Android
 
 **Important notes**:
-- This is still a beta, there will be issues!
 - All data is processed locally only
 - Performance depends on the performance (and rate limiting) of your home instance and to some degree of the external instance you are browsing (read more [below](#additional-notes))
 - Some toots cannot be resolved to your home (in cases where searching the post manually would also not work)
