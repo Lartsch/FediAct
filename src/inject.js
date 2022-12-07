@@ -5,7 +5,6 @@
 const followButtonPaths = ["div.account__header button.logo-button","div.public-account-header a.logo-button","div.account-card a.logo-button","div.directory-card a.icon-button", "div.detailed-status a.logo-button"];
 const profileNamePaths = ["div.account__header__tabs__name small", "div.public-account-header__tabs__name small", "div.detailed-status span.display-name__account", "div.display-name > span"];
 const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/;
-const followPageRegex = /^(https?:\/\/(www\.)?.*\..*?\/)((@\w+(@([\w-]+\.)+?\w+)?)|explore|following|followers)\/?(\d+)?\/?$/;
 const handleExtractRegex = /^[^@]*@(?<handle>\w+)(@(?<handledomain>([\w-]+\.)+?\w+))?(\/(?<tootid>\d+))?\/?$/;
 const enableConsoleLog = true;
 const logPrepend = "[FediAct]";
@@ -855,16 +854,10 @@ async function processFollow() {
 			}
 		}
 	}
-	// check if this is a profile url or explore page with account cards
-	if (followPageRegex.test(window.location.href.split("?")[0])) {
-		// dirty fix for some v3 instance views
-		var allFollowPaths = followButtonPaths.join(",")
-		$(document).DOMNodeAppear(async function(e) {
-			process($(e.target))
-		}, allFollowPaths)
-	} else {
-		log("Not a profile URL.");
-	}
+	var allFollowPaths = followButtonPaths.join(",")
+	$(document).DOMNodeAppear(async function(e) {
+		process($(e.target))
+	}, allFollowPaths)
 }
 
 // =-=-=-=-==-=-=-=-==-=-=-=-==-=-=-=
