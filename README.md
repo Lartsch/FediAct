@@ -1,8 +1,5 @@
-# FediAct (v0.8.4)
+# FediAct (v0.9.0)
 A Chrome/Firefox extension that simplifies following and post interactions on other Mastodon instances than your own.
-
-> **Note**
-> Renamed from "FediFollow" to "FediAct" to prevent a naming issue with an existing Fedi account.
 
 **Features**:
 - Supports Mastodon v3 + v4
@@ -36,9 +33,9 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 [link-chrome]: https://chrome.google.com/webstore/detail/fedifollow/lmpcajpkjcclkjbliapfjfolocffednm 'Version published on Chrome Web Store'
 [link-firefox]: https://addons.mozilla.org/en-US/firefox/addon/fedifollow/ 'Version published on Mozilla Add-ons'
 
-[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/chrome/chrome.svg" width="48" alt="Chrome" valign="middle">][link-chrome] [<img valign="middle" src="https://img.shields.io/chrome-web-store/v/lmpcajpkjcclkjbliapfjfolocffednm.svg?label=%20">][link-chrome] and other Chromium browsers (v0.8.3 in review)
+[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/chrome/chrome.svg" width="48" alt="Chrome" valign="middle">][link-chrome] [<img valign="middle" src="https://img.shields.io/chrome-web-store/v/lmpcajpkjcclkjbliapfjfolocffednm.svg?label=%20%20">][link-chrome] and other Chromium browsers (**currently in review** by Google)
 
-[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fedifollow.svg?label=%20">][link-firefox] including Firefox for Android
+[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fedifollow.svg?label=%20%20">][link-firefox] including Firefox for Android
 
 > **Note**
 > 
@@ -76,6 +73,8 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 2. Unzip the downloaded file somewhere
 3. Go to your Chrome extension page (URL: chrome://extensions) and enable developer mode
 4. Click the "Load unpacked" button and then select the unzipped folder (should be "fedifollow-X.X.X-chrome")
+
+Note: Some Chromium browsers allow to directly load a .zip file - you can use it if available for you
 ### Firefox
 2. Open the debugging page (URL: about:debugging)
 3. Select "This Firefox"
@@ -118,10 +117,8 @@ I included all of the default add-ons in the custom collection, so you will not 
 7. If the extension fails to resolve content, the affected buttons will behave like usually
 
 ## Todos / Planned features 
-- Add support for replying
-- Fix last remaining resolve fails - not sure yet what causes them, please report fails
+- Fix last remaining resolve fails as far as **possible**
 - General performance and code improvements
-- Add indicator for content that failed to resolve
 - Update settings in content script instantly (so no page reload is needed)
 - Improve 429 prevention and add resolving fallbacks
 - Add support for other implementations (Plemora, GNU Social, ...)
