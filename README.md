@@ -117,10 +117,8 @@ I included all of the default add-ons in the custom collection, so you will not 
 7. If the extension fails to resolve content, the affected buttons will behave like usually
 
 ## Todos / Planned features 
-- Add support for replying
-- Fix last remaining resolve fails - not sure yet what causes them, please report fails
+- Fix last remaining resolve fails as far as **possible**
 - General performance and code improvements
-- Add indicator for content that failed to resolve
 - Update settings in content script instantly (so no page reload is needed)
 - Improve 429 prevention and add resolving fallbacks
 - Add support for other implementations (Plemora, GNU Social, ...)
