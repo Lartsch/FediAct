@@ -40,6 +40,7 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 > 
 > - **If webstore release is outdated, use the [manual installation method](#manual-installation) to install the latest version**  
 > - **Special installation steps for [Firefox on Android](#install-in-firefox-for-android)**
+> - Reload Mastodon sites after extension updates
 
 ## Setup
 
@@ -69,6 +70,7 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 4. Click the "Load unpacked" button and then select the unzipped folder (should be "fedifollow-X.X.X-chrome")
 
 Note: Some Chromium browsers allow to directly load a .zip file - you can use it if available for you
+
 ### Firefox
 2. Open the debugging page (URL: about:debugging)
 3. Select "This Firefox"
