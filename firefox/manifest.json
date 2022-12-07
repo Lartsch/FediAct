@@ -1,34 +1,43 @@
 {
   "name": "FediAct",
-  "version": "0.8.5",
+  "version": "0.9.0",
   "description": "Simplifies interactions on other Mastodon instances than your own. Visit https://github.com/lartsch/FediFollow-Chrome for more.",
   "manifest_version": 2,
   "content_scripts": [
-	{
-		"matches": ["*://*/*"],
-		"js": ["src/lib/jquery-3.6.1.min.js","src/inject.min.js"],
-    "css": ["src/nodeinserted.min.css"],
-		"run_at": "document_start"
-	}
+    {
+      "matches": [
+        "*://*/*"
+      ],
+      "js": [
+        "src/lib/jquery-3.6.1.min.js",
+        "src/inject.min.js"
+      ],
+      "css": [
+        "src/nodeinserted.min.css"
+      ],
+      "run_at": "document_start"
+    }
   ],
   "background": {
-    "scripts": ["src/background.min.js"],
+    "scripts": [
+      "src/background.min.js"
+    ],
     "persistent": false
   },
   "permissions": [
-	  "storage",
+    "storage",
     "alarms",
+    "tabs",
     "https://*/*",
     "http://*/*"
   ],
   "options_ui": {
     "page": "src/popup.html"
   },
-  "browser_action":
-  {
-	  "default_popup": "src/popup.html",
-	  "default_icon": "src/icon/48.png",
-	  "default_title": "FediFollow settings"
+  "browser_action": {
+    "default_popup": "src/popup.html",
+    "default_icon": "src/icon/48.png",
+    "default_title": "FediFollow settings"
   },
   "icons": {
     "48": "src/icon/48.png"

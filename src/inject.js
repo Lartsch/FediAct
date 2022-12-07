@@ -6,8 +6,6 @@ const followButtonPaths = ["div.account__header button.logo-button","div.public-
 const profileNamePaths = ["div.account__header__tabs__name small", "div.public-account-header__tabs__name small", "div.detailed-status span.display-name__account", "div.display-name > span"];
 const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/;
 const followPageRegex = /^(https?:\/\/(www\.)?.*\..*?\/)((@\w+(@([\w-]+\.)+?\w+)?)|explore|following|followers)\/?(\d+)?\/?$/;
-const tootsPageRegex = /^(https?:\/\/(www\.)?.*\..*?\/)((@\w+(@([\w-]+\.)+?\w+)?)|explore|public|public\/local)\/?(\d+)?\/?$/;
-const tootRegex = /^(?:https?:\/\/(www\.)?.*\..*?\/)(@\w+(?:@([\w-]+\.)+?\w+)?)\/\d+\/?$/;
 const handleExtractRegex = /^[^@]*@(?<handle>\w+)(@(?<handledomain>([\w-]+\.)+?\w+))?(\/(?<tootid>\d+))?\/?$/;
 const enableConsoleLog = true;
 const logPrepend = "[FediAct]";
@@ -36,8 +34,9 @@ const settingsDefaults = {
 
 // fix for cross-browser storage api compatibility and other global vars
 var browser, chrome, lasthomerequest, fedireply;
-var lastUrl = window.location.href;
-
+// currently, the only reliable way to detect all toots etc. has the drawback that the same element could be processed multiple times
+// this will store already processed elements to compare prior to processing and will reset as soon as the site context changes
+var processed = {}
 
 // =-=-=-=-==-=-=-=-==-=-=-=-=-
 // =-=-=-=-=-= UTILS =-==-=-=-=
@@ -52,7 +51,7 @@ function log(text) {
 
 // Custom solution for detecting inserted nodes
 // Works in combination with nodeinserted.css (fixes Firefox blocking addon-inserted <style> elements for sites with CSP)
-// Is more reliable in certain situation than mutationobserver
+// Is more reliable/practicable in certain situations than mutationobserver, who will ignore any node that was inserted with its parent node at once
 (function($) {
     $.fn.DOMNodeAppear = function(callback, selector) {
       var $this = $(this)
@@ -69,7 +68,7 @@ function log(text) {
       });
     };
     jQuery.fn.onAppear = jQuery.fn.DOMNodeAppear;
-  })(jQuery);
+})(jQuery);
 
 // extract given url parameter value
 var getUrlParameter = function getUrlParameter(sParam) {
@@ -405,9 +404,12 @@ async function resolveTootToHome(searchstring) {
 	}
 }
 
-// Get a toot's (external) home instance url
+// Get a toot's (external) home instance url by using the 302 redirect feature of mastodon
+// we send a message with the toot url to the background script, which will perform the HEAD request
+// since XMLHttpRequest/fetch do not allow access to the location header
+// TODO: FALLBACK IF 302 IS NOT SUPPORTED
 function resolveTootToExternalHome(tooturl) {
-	// TODO: check if a delay is necessary here tooo
+	// TODO: check if a delay is necessary here too
 	if (tooturl) {
 		return new Promise(resolve => {
 			chrome.runtime.sendMessage({url: tooturl}, function(response) {
@@ -427,7 +429,7 @@ function resolveTootToExternalHome(tooturl) {
 // =-=-=-=-= SITE PROCESSING =-==-=-=
 // =-=-=-=-==-=-=-=-==-=-=-=-==-=-=-=
 
-// custom implementation for allowing to toggle inline css - .css etc. are not working for all layouts
+// custom implementation for allowing to toggle inline css - .css() etc. are not working for some mastodon instances
 function toggleInlineCss(el, styles, toggleclass) {
 	var active = $(el).toggleClass(toggleclass).hasClass(toggleclass);
 	for (var style of styles) {
@@ -482,7 +484,7 @@ function extractHandle(selectors) {
 	return false;
 }
 
-// process any toots found on supported sites
+// trigger the reply button click - will only run when we are on a home instance url with fedireply parameter
 async function processReply() {
 	$(document).DOMNodeAppear(function(e) {
 		$(e.target).find("button:has(i.fa-reply), button:has(i.fa-reply-all)").click()
@@ -491,7 +493,7 @@ async function processReply() {
 
 // process any toots found on supported sites
 async function processToots() {
-	async function clickAction(id, e) {
+	async function clickAction(originalTootId, id, e) {
 		var action = getTootAction(e);
 		if (action) {
 			// resolve url on home instance to get local toot/author identifiers and toot status
@@ -499,10 +501,19 @@ async function processToots() {
 			if (actionExecuted) {
 				if (action == "boost" || action == "unboost") {
 					toggleInlineCss($(e.currentTarget).find("i"),[["color","!remove","rgb(140, 141, 255)"],["transition-duration", "!remove", "0.9s"],["background-position", "!remove", "0px 100%"]], "fediactive")
+					if (originalTootId in processed) {
+						processed[originalTootId][2] = !processed[originalTootId][2]
+					}
 				} else if (action == "favourite" || action == "unfavourite") {
 					toggleInlineCss($(e.currentTarget),[["color","!remove","rgb(202, 143, 4)"]], "fediactive")
+					if (originalTootId in processed) {
+						processed[originalTootId][3] = !processed[originalTootId][3]
+					}
 				} else {
 					toggleInlineCss($(e.currentTarget),[["color","!remove","rgb(255, 80, 80)"]], "fediactive")
+					if (originalTootId in processed) {
+						processed[originalTootId][4] = !processed[originalTootId][4]
+					}
 				}			
 				return true
 			} else {
@@ -552,249 +563,201 @@ async function processToots() {
 		return action
 	}
 	function getTootIdAndAuthor(el) {
-		var [closestTootId, closestTootAuthorm, alreadyResolved] = [false, false, false]
+		var [closestTootId, closestTootAuthor, alreadyResolved] = [false, false, false]
 		if ($(el).find("span.display-name__account").length) {
 			closestTootAuthor = $(el).find("span.display-name__account").first().text().trim()
 		}
 		if ($(el).is(".detailed-status__wrapper")) {
-			closestTootId = lastUrl.split("?")[0].split("/")[4]
+			// we will use the last part of the URL path - this should be more universal than always selecting the fifth "/" slice
+			var temp = window.location.href.split("?")[0].split("/")
+			// needs to go in a extra var
+			var tempLast = temp.pop() || temp.pop()
+			// take care of possible trailing slash and set tootid
+			closestTootId = tempLast
 		} else if ($(el).find("a.status__relative-time").attr("href")) {
 			var temp = $(el).find("a.status__relative-time").attr("href").split("?")[0]
 			if (temp.startsWith("http")) {
 				var tempUrl = new URL(temp)
-				if (location.hostname == temp.hostname) {
-					closestTootId = temp.split("/")[4]
+				if (location.hostname == tempUrl.hostname) {
+					temp = temp.split("/")
+					var tempLast = temp.pop() || temp.pop()
+					closestTootId = tempLast
 				} else {
 					// return full URL, since this is already a resolved link to the toot's home instance
 					closestTootId = temp
 					alreadyResolved = true
 				}
 			} else {
-				closestTootId = temp.split("/")[2]
+				temp = temp.split("/")
+				var tempLast = temp.pop() || temp.pop()
+				closestTootId = tempLast
 			}
 		} else if ($(el).find("a.detailed-status__datetime").attr("href")) {
-			var temp = $(el).find("a.detailed-status__datetime").attr("href").split("?")[0]
-			if (temp.startsWith("http")) {
-				closestTootId = temp.split("/")[4]
-			} else {
-				closestTootId = temp.split("/")[2]
-			}
+			var temp = $(el).find("a.detailed-status__datetime").attr("href").split("?")[0].split("/")
+			var tempLast = temp.pop() || temp.pop()
+			closestTootId = tempLast
 		} else if ($(el).attr("data-id")) {
 			closestTootId = $(el).attr("data-id").split("-").slice(-1)[0];
 		} else if ($(el).closest("article[data-id], div[data-id]").length) {
 			closestTootId = $(el).closest("article[data-id], div[data-id]")[0].attr("data-id").split("-").slice(-1)[0];
 		} else if ($(el).find("a.modal-button").length) {
-			var temp = $(el).find("a.modal-button").attr("href").split("?")[0]
-			if (temp.startsWith("http")) {
-				closestTootId = temp.split("/")[4]
-			} else {
-				closestTootId = temp.split("/")[2]
-			}
+			var temp = $(el).find("a.modal-button").attr("href").split("?")[0].split("/")
+			var tempLast = temp.pop() || temp.pop()
+			closestTootId = tempLast
 		}
 		return [closestTootId, closestTootAuthor, alreadyResolved]
 	}
 	async function process(el) {
 		var homeResolveString
+		if ($(el).is("div.detailed-status")) {
+			el = $(el).closest("div.focusable")
+		}
 		var tootData = getTootIdAndAuthor($(el))
 		if (tootData) {
-			console.log(tootData)
-			// if this is set, we got a toot url that is already resolved to its home instance
-			if (tootData[2]) {
-				homeResolveString = tootData[0]
-			// otherwise, we need to build the homeResolveString manually
-			} else {
-				// get handle/handledomain without @
-				var matches = tootData[1].match(handleExtractRegex);
-				// if we have a handledomain...
-				if (matches.groups.handledomain) {
-					// check if the current hostname includes that handle domain...
-					if (~location.hostname.indexOf(matches.groups.handledomain)) {
-						// yes? then its a toot local to the current ext. instance, build the according resolveString
-						homeResolveString = location.protocol + "//" + location.hostname + "/users/" + matches.groups.handle + "/statuses/" + tootData[0]
-					} else {
-						// otherwise this is an external handle and we will use external home URI resolving (need to use @user@domain.com format here)
-						var resolveString = location.protocol + '//' + location.hostname + "/" + tootData[1] + "/" + tootData[0]
-						var resolveTootHome = await resolveTootToExternalHome(resolveString)
-						if (resolveTootHome) {
-							if (~resolveTootHome.indexOf("/users/")) {
-								// in this case, it's already in the /users/ format
-								homeResolveString = resolveTootHome
-							} else if (handleExtractRegex.test(resolveTootHome)) {
-								// in this case, it's not, so we extract the handle + tootid from the URL
-								var tootMatches = resolveTootHome.match(handleExtractRegex)
-								if (tootMatches) {
-									// ... and then build a string in /users/ format...
-									homeResolveString = resolveTootHome.split("@")[0] + "users/" + tootMatches.groups.handle + "/statuses/" + tootMatches.groups.tootid
-								}
-							}
-						} else {
-							// in this case, toot home instance resolving failed, likely since the site does not use 302 redirects (should rarely reach this point since these instances seem to use fully resolved urls in a.status__relative-time)
-							// so we try with a resolve string in @user@domain.com format as fallback (less probability for resolving)
-							log("Resolve fallback #1")
-							homeResolveString = location.protocol + "//" + location.hostname + "/" + tootData[1] + "/" + tootData[0]
-						}
+			// get all button elements of this toot
+			var favButton = $(el).find("button:has(i.fa-star), a.icon-button:has(i.fa-star)").first()
+			var boostButton = $(el).find("button:has(i.fa-retweet), a.icon-button:has(i.fa-retweet)").first()
+			var bookmarkButton = $(el).find("button:has(i.fa-bookmark)").first()
+			var replyButton = $(el).find("button:has(i.fa-reply), button:has(i.fa-reply-all), a.icon-button:has(i.fa-reply), a.icon-button:has(i.fa-reply-all)").first()
+			function initStyles(reblogged, favourited, bookmarked) {
+				$(el).find(".feditriggered").remove()
+				// enable the bookmark button
+				$(bookmarkButton).removeClass("disabled").removeAttr("disabled")
+				// set the toot buttons to active, depending on its state
+				if (favourited) {
+					if (!$(favButton).hasClass("fediactive")) {
+						toggleInlineCss($(favButton),[["color","!remove","rgb(202, 143, 4)"]], "fediactive")
 					}
-				} else {
-					// this means it is a toot local to the current ext. instance as well
-					homeResolveString = location.protocol + "//" + location.hostname + "/users/" + matches.groups.handle + "/statuses/" + tootData[0]
+				}
+				if (reblogged) {
+					if (!$(boostButton).find("i.fediactive").length) {
+						toggleInlineCss($(boostButton).find("i"),[["color","!remove","rgb(140, 141, 255)"],["transition-duration", "!remove", "0.9s"],["background-position", "!remove", "0px 100%"]], "fediactive")
+					}
+				}
+				if (bookmarked) {
+					if (!$(bookmarkButton).hasClass("fediactive")) {
+						toggleInlineCss($(bookmarkButton),[["color","!remove","rgb(255, 80, 80)"]], "fediactive")
+					}
 				}
 			}
-			if (homeResolveString) {
-				// get all button elements of this toot
-				var favButton = $(el).find("button:has(i.fa-star), a.icon-button:has(i.fa-star)").first()
-				var boostButton = $(el).find("button:has(i.fa-retweet), a.icon-button:has(i.fa-retweet)").first()
-				var bookmarkButton = $(el).find("button:has(i.fa-bookmark)").first()
-				var replyButton = $(el).find("button:has(i.fa-reply), button:has(i.fa-reply-all), a.icon-button:has(i.fa-reply), a.icon-button:has(i.fa-reply-all)").first()
-				// resolve toot on actual home instance
-				var resolvedToot = await resolveTootToHome(homeResolveString) // [status.account.acct, status.id, status.reblogged, status.favourited, status.bookmarked]
-				if (resolvedToot) {
-					// enable the bookmark button
-					$(bookmarkButton).removeClass("disabled").removeAttr("disabled")
-					// set the toot buttons to active, depending on its state
-					if (resolvedToot[3]) {
-						if (!$(favButton).hasClass("fediactive")) {
-							toggleInlineCss($(favButton),[["color","!remove","rgb(202, 143, 4)"]], "fediactive")
-						}
-					}
-					if (resolvedToot[2]) {
-						if (!$(boostButton).find("i.fediactive").length) {
-							toggleInlineCss($(boostButton).find("i"),[["color","!remove","rgb(140, 141, 255)"],["transition-duration", "!remove", "0.9s"],["background-position", "!remove", "0px 100%"]], "fediactive")
-						}
-					}
-					if (resolvedToot[4]) {
-						if (!$(bookmarkButton).hasClass("fediactive")) {
-							toggleInlineCss($(bookmarkButton),[["color","!remove","rgb(255, 80, 80)"]], "fediactive")
-						}
-					}
-					// set the redirect to home instance URL in @ format
-					var redirectUrl = 'https://' + settings.fediact_homeinstance + "/@" + resolvedToot[0] + "/" + resolvedToot[1]
-					// continue with click handling...
-					$(replyButton).on("click", function(e){
-						// reply button is handle specially (always redirects with reply parameter set)
+			function clickBinder(originalTootId, tootdata) {
+				$(replyButton).on("click", function(e){
+					// reply button is handle specially (always redirects with reply parameter set)
+					e.preventDefault();
+					e.stopImmediatePropagation();
+					redirectTo(tootdata[5]+"?fedireply")
+				})
+				$([favButton, boostButton, bookmarkButton]).each(function() {
+					// all other buttons will behave differently with single / double click
+					var clicks = 0;
+					var timer;
+					$(this).on("click", async function(e) {
+						// prevent default and immediate propagation
 						e.preventDefault();
 						e.stopImmediatePropagation();
-						redirectTo(redirectUrl+"?fedireply")
-					})
-					$([favButton, boostButton, bookmarkButton]).each(function() {
-						// all other buttons will behave differently with single / double click
-						var clicks = 0;
-						var timer;
-						$(this).on("click", async function(e) {
-							// prevent default and immediate propagation
-							e.preventDefault();
-							e.stopImmediatePropagation();
-							clicks++;
-							if (clicks == 1) {
-								timer = setTimeout(async function() {
-									// execute action on click and get result (fail/success)
-									var actionExecuted = await clickAction(resolvedToot[1], e);
-									if (!actionExecuted) {
-										log("Action failed.")
-									}
-									clicks = 0;
-								}, 350);
-							} else {
-								clearTimeout(timer);
-								// same as above, but we redirect if the result is successful
-								var actionExecuted = await clickAction(resolvedToot[1], e);
+						clicks++;
+						if (clicks == 1) {
+							timer = setTimeout(async function() {
+								// execute action on click and get result (fail/success)
+								var actionExecuted = await clickAction(originalTootId, tootdata[1], e);
 								if (!actionExecuted) {
 									log("Action failed.")
-								} else {
-									redirectTo(redirectUrl)
 								}
 								clicks = 0;
+							}, 350);
+						} else {
+							clearTimeout(timer);
+							// same as above, but we redirect if the result is successful
+							var actionExecuted = await clickAction(originalTootId, tootdata[1], e);
+							if (!actionExecuted) {
+								log("Action failed.")
+							} else {
+								redirectTo(tootdata[5])
 							}
-						}).on("dblclick", function(e) {
-							// default dblclick event must be prevented
-							e.preventDefault();
-							e.stopImmediatePropagation();
-						});
+							clicks = 0;
+						}
+					}).on("dblclick", function(e) {
+						// default dblclick event must be prevented
+						e.preventDefault();
+						e.stopImmediatePropagation();
 					});
+				});
+			}
+			if (!(tootData[0] in processed)) {
+				// if this is set, we got a toot url that is already resolved to its home instance
+				if (tootData[2]) {
+					homeResolveString = tootData[0]
+				// otherwise, we need to build the homeResolveString manually
 				} else {
-					log("Failed to resolve: "+homeResolveString)
-					console.log($(el))
-					console.log($(favButton))
-					$("<span style='color: orange; padding-right: 10px; padding-left: 10px'>Not resolved</span>").insertAfter($(favButton))
+					// get handle/handledomain without @
+					var matches = tootData[1].match(handleExtractRegex);
+					// if we have a handledomain...
+					if (matches.groups.handledomain) {
+						// check if the current hostname includes that handle domain...
+						if (~location.hostname.indexOf(matches.groups.handledomain)) {
+							// yes? then its a toot local to the current ext. instance, build the according resolveString
+							homeResolveString = location.protocol + "//" + location.hostname + "/users/" + matches.groups.handle + "/statuses/" + tootData[0]
+						} else {
+							// otherwise this is an external handle and we will use external home URI resolving (need to use @user@domain.com format here)
+							var resolveString = location.protocol + '//' + location.hostname + "/" + tootData[1] + "/" + tootData[0]
+							var resolveTootHome = await resolveTootToExternalHome(resolveString)
+							if (resolveTootHome) {
+								if (~resolveTootHome.indexOf("/users/")) {
+									// in this case, it's already in the /users/ format
+									homeResolveString = resolveTootHome
+								} else if (handleExtractRegex.test(resolveTootHome)) {
+									// in this case, it's not, so we extract the handle + tootid from the URL
+									var tootMatches = resolveTootHome.match(handleExtractRegex)
+									if (tootMatches) {
+										// ... and then build a string in /users/ format...
+										homeResolveString = resolveTootHome.split("@")[0] + "users/" + tootMatches.groups.handle + "/statuses/" + tootMatches.groups.tootid
+									}
+								}
+							} else {
+								// in this case, toot home instance resolving failed, likely since the site does not use 302 redirects (should rarely reach this point since these instances seem to use fully resolved urls in a.status__relative-time)
+								// so we try with a resolve string in @user@domain.com format as fallback (less probability for resolving)
+								log("Resolve fallback #1")
+								homeResolveString = location.protocol + "//" + location.hostname + "/" + tootData[1] + "/" + tootData[0]
+							}
+						}
+					} else {
+						// this means it is a toot local to the current ext. instance as well
+						homeResolveString = location.protocol + "//" + location.hostname + "/users/" + matches.groups.handle + "/statuses/" + tootData[0]
+					}
+				}
+				if (homeResolveString) {
+					// resolve toot on actual home instance
+					var resolvedToot = await resolveTootToHome(homeResolveString) // [status.account.acct, status.id, status.reblogged, status.favourited, status.bookmarked]
+					if (resolvedToot) {
+						initStyles(resolvedToot[2],resolvedToot[3],resolvedToot[4])
+						// set the redirect to home instance URL in @ format
+						var redirectUrl = 'https://' + settings.fediact_homeinstance + "/@" + resolvedToot[0] + "/" + resolvedToot[1]
+						resolvedToot.push(redirectUrl)
+						processed[tootData[0]] = resolvedToot
+						// continue with click handling...
+						clickBinder(tootData[0], resolvedToot)
+					} else {
+						log("Failed to resolve: "+homeResolveString)
+						processed[tootData[0]] = false
+						$(el).find(".feditriggered").remove() // ugly fix, we want each status to processed only ONCE per page url change
+						$("<span class='feditriggered' style='color: orange; padding-right: 10px; padding-left: 10px'>Not resolved</span>").insertAfter($(favButton))
+					}
+				} else {
+					log("Could not identify a post URI for home resolving.")
 				}
 			} else {
-				log("Could not identify a post URI for home resolving.")
+				var toot = processed[tootData[0]]
+				initStyles(toot[2], toot[3], toot[4])
+				clickBinder(tootData[0], toot)
 			}
 		} else {
 			log("Could not get toot data.")
 		}
 	}
-	// TODO: ADD MASTODON v3 IDENTIFIERS + MASTODON v4 ALTERNATIVE IDENTIFIERS
-	if (tootsPageRegex.test(lastUrl.split("?")[0])) {
-		// single toot pages load all replies instantly, so this is easy
-		if (tootRegex.test(lastUrl)) {
-			// on page changes, the detailed status (either reply or original toot) are on the page right away
-			$(document).find("div.detailed-status__wrapper").each(function() {
-				process($(this))
-			})
-			// all others will be inserted
-			$(document).DOMNodeAppear(async function(e) {
-				process($(e.target))
-			}, "div.status, div.detailed-status__wrapper");
-		// OTHERWISE (/explore and profile pages), we need additional steps.
-		} else {
-			// this is for v3 only
-			$(document).ready(async function() {
-				var lasthtml = $("body").html()
-				// wait for the html to not change anymore
-				await new Promise(resolve => {
-					// check all 100ms
-					var i = setInterval(function() {
-						let currenthtml = $("body").html()
-						if (currenthtml == lasthtml) {
-							changing = false
-							resolve(true)
-							clearInterval(i)
-						} else {
-							lasthtml = currenthtml
-						}
-					},100)
-				})
-				$(document).find("div.entry > div.status").each(function() {
-					process($(this))
-				})
-			})
-			// wait for any articles to appear
-			// this solution utilizes css animation events and is WAY more reliable than a) DOMInsertedNode (depcrecated), b) on ready delegation and c) MutationObserver (will not observe childs if only their parent was inserted)
-			$(document).DOMNodeAppear(async function(e) {
-				let article = $(e.target)
-				var lasthtml = $("body").html()
-				// wait for the html to not change anymore
-				// mastodon 4 feeds will have all div.status elements on load BUT will replace them after a short time, leading to the found div.status being gone
-				await new Promise(resolve => {
-					// check all 100ms
-					var i = setInterval(function() {
-						let currenthtml = $("body").html()
-						if (currenthtml == lasthtml) {
-							changing = false
-							resolve(true)
-							clearInterval(i)
-						} else {
-							lasthtml = currenthtml
-						}
-					},100)
-				})
-				// okay, now we look for ACTUAL div.status elements that are still there and will not be catched by below mutation observer
-				article.find("div.status").each(async function() {
-					// one last check if it really exists...
-					if (document.body.contains($(this)[0])) {
-						// okay, lets go
-						process($(this))
-					}
-				})
-				// all other div.status elements will be updated/inserted/replaced when the user is scrolling, so here the mutationobserver is a great choice
-				let observe = getMutationObserver(article, {subtree: true, childList: true}, ["div.status"], function(el, mutation) {
-					process($(el))
-				})
-			}, "article, div.entry > div.status");
-		}
-	} else {
-		log("There are no toots on this site");
-	}
+	// One DOMNodeAppear to rule them all
+	$(document).DOMNodeAppear(async function(e) {
+		process($(e.target))
+	}, "div.status, div.detailed-status");
 }
 
 // main function to listen for the follow button pressed and open a new tab with the home instance
@@ -893,7 +856,7 @@ async function processFollow() {
 		}
 	}
 	// check if this is a profile url or explore page with account cards
-	if (followPageRegex.test(lastUrl.split("?")[0])) {
+	if (followPageRegex.test(window.location.href.split("?")[0])) {
 		// dirty fix for some v3 instance views
 		var allFollowPaths = followButtonPaths.join(",")
 		$(document).DOMNodeAppear(async function(e) {
@@ -903,23 +866,6 @@ async function processFollow() {
 		log("Not a profile URL.");
 	}
 }
-
-// for some reason, locationchange event did not work for me so lets use this ugly thing...
-async function urlChangeLoop() {
-	// run every 100ms, can probably be reduced
-	setTimeout(function() {
-		// compare last to current url
-		if (!(lastUrl == window.location.href)) {
-			// update lastUrl and run main script
-			lastUrl = window.location.href;
-			processFollow();
-			processToots();
-		}
-		// repeat
-		urlChangeLoop();
-	}, 300);
-}
-
 
 // =-=-=-=-==-=-=-=-==-=-=-=-==-=-=-=
 // =-=-=-=-=-= SETUP / RUN =-==-=-=-=
@@ -1023,6 +969,18 @@ async function checkSite() {
 	return false;
 }
 
+function urlChangeMonitor() {
+	// send message to initialize onUpdated listener (this way we do not need to bind the listener for ALL sites)
+	chrome.runtime.sendMessage({running: true})
+	// then wait for any url changes
+	chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+		  if (request.urlchanged) {
+			// reset already processed elements
+			processed = []
+		  }
+	  });
+}
+
 // run wrapper
 async function run() {
 	// get settings
@@ -1035,9 +993,9 @@ async function run() {
 				if (fedireply) {
 					processReply()
 				} else {
+					urlChangeMonitor();
 					processFollow();
 					processToots();
-					urlChangeLoop();
 				}
 			} else {
 				log("Will not process this site.")

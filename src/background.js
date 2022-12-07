@@ -10,9 +10,6 @@ var settingsDefaults = {
     fediact_showfollows: true
 }
 
-// create alarm every 3 minutes
-chrome.alarms.create('refresh', { periodInMinutes: 1 });
-
 function onError(error){
 	console.error(`${logPrepend} Error: ${error}`);
 }
@@ -36,6 +33,7 @@ async function resolveToot(url) {
     });
 }
 
+// fetch API token here (will use logged in session automatically)
 async function fetchBearerToken() {
     var url = "https://" + settings.fediact_homeinstance;
     var res = await fetch(url);
@@ -73,15 +71,32 @@ async function fetchData() {
     await (browser || chrome).storage.local.set(settings);
 }
 
+// fetch api token right after install (mostly for debugging, when the ext. is reloaded)
 chrome.runtime.onInstalled.addListener(fetchData);
+// and also every 5 minutes
+chrome.alarms.create('refresh', { periodInMinutes: 1 });
 chrome.alarms.onAlarm.addListener(fetchData);
 
+// different listeners for inter-script communication
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    // the content script gave us an url to perform a 302 redirect with
     if(request.url) {
         resolveToot(request.url).then(sendResponse)
         return true
     }
+    // immediately fetch api token after settings are updated
     if (request.updatedsettings) {
         fetchData()
+    }
+    // when the content script starts to process on a site, listen for tab changes (url)
+    if (request.running) {
+        chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+            // chrome tabs api does not support listener filters here
+            // if the tabId of the update event is the same like the tabId that started the listener in the first place AND when the update event is an URL
+            if (tabId === sender.tab.id && changeInfo.url) {
+                // ... then let the content script know about the change
+                chrome.tabs.sendMessage(tabId, {urlchanged: changeInfo.url})
+            }
+        });
     }
 });
