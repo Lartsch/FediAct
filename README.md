@@ -14,14 +14,13 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 - Up-to-date Firefox, including Firefox Nightly on Android
 
 **Important notes**:
-- This is still a beta, there will be issues!
 - All data is processed locally only
-- Performance depends on the performance (and rate limiting) of your home instance (read more [below](#additional-notes))
+- Performance depends on the performance (and rate limiting) of your home instance and to some degree of the external instance you are browsing (read more [below](#additional-notes))
+- Some toots cannot be resolved to your home (in cases where searching the post manually would also not work)
 
 ## Navigation
   * [Installation](#installation)
   * [Setup](#setup)
-  * [Known bugs](#known-bugs)
   * [Screenshots / GIFs](#screenshots--gifs)
   * [Manual installation](#manual-installation)
       * [Install in Firefox for Android](#install-in-firefox-for-android)
@@ -41,6 +40,7 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 > 
 > - **If webstore release is outdated, use the [manual installation method](#manual-installation) to install the latest version**  
 > - **Special installation steps for [Firefox on Android](#install-in-firefox-for-android)**
+> - Reload Mastodon sites after extension updates
 
 ## Setup
 
@@ -52,12 +52,8 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 
 **Please read the [additional notes](#additional-notes).**
 
-## Known bugs
-- Toot resolving does not work for some external instances - this is the same if you manually entered the toot URL in your home instance search and it wouldn't return a result (for ex. local toots on toot.site). Not sure if this can be fixed at all, as the official method for resolving by entering the URL in the search does not work either.
-- In some rare cases, when the toot ID on an external instance is grabbed using a.status__relative-time element, it can happen that this is already the toot ID on the originating external instance and resolving on the home instance is therefore failing (will be fixed until 08/12/2022)
-- Read the [additional notes](#additional-notes) for good-to-know behaviour that is not considered as bugs
-
 ## Screenshots / GIFs
+v0.8.0
 <details>
   <summary>Extension popup / settings</summary>
   <img src="https://github.com/lartsch/FediFollow-Chrome/blob/main/img/settings.png?raw=true">
@@ -75,6 +71,7 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 4. Click the "Load unpacked" button and then select the unzipped folder (should be "fedifollow-X.X.X-chrome")
 
 Note: Some Chromium browsers allow to directly load a .zip file - you can use it if available for you
+
 ### Firefox
 2. Open the debugging page (URL: about:debugging)
 3. Select "This Firefox"
@@ -102,17 +99,20 @@ I included all of the default add-ons in the custom collection, so you will not 
 
 ## Additional notes
 1. Currently supports external Mastodon instances v3 + v4
-    - **I have not tested if Mastodon v3 works as home instance! In general, Mastodon v4 support is the main objective.**
+    - **I have not tested if Mastodon v3 works as home instance! v4 support is the main objective**
     - Support for other Fedi software is still planned
-2. The whitelist mode can be useful if you do not want the extension to run basic checks on every site (since it needs to determine if it is a Mastodon site). Not sure if the blacklist feature is good for anything but I still included it.
+2. The whitelist mode can be useful if you do not want the extension to run basic checks on every site (since it needs to determine if its a Mastodon site). Not sure if blacklist is good for anything but I still included it.
 3. It can have several reasons why resolving/executing actions/redirection might not work:
-    - You are not logged in to your home instance (can't fix, log in)
-    - You are scrolling really fast and posts are not resolved instantly (a delay is implemented to prevent 429 API errors - wait shortly and try again)
-    - There are instances that use custom layouts/flavours (additional identifiers need to be added to extension)
-    - It's not a Mastodon instance (not supported yet)
-    - Element identifiers might change over time (extension needs to be updated)
-    - **Your home instance has strong rate limiting and blocks the API requests**
-5. There can be a short delay before you are redirected since an API call to the respective external instance must be made. In general, performance of this addon depends on the performance of the external instance and your home instance.
+    - You're not logged in to your home instance (can't fix, log in lol)
+    - You're scrolling fast and posts are not resolved instantly (a delay is implemented to prevent 429 API errors - wait shortly and check again)
+    - Element identifiers have changed / instance uses a custom layout/flavour (identifiers need to be added / updated)
+    - The external instance you are browsing is not Mastodon (not supported yet)
+    - **Your home instance has strong rate limiting and blocks the API requests** (looking for a way to improve 429 prevention)
+    - The toot that was tried to resolve is from an original instance that is not Mastodon(-like) (not supported yet, at leat a fallback will be added)
+    - Your home instance or the original instance of a toot have defederated / are moderated in a way that affects the API search endpoint (can't fix)
+    - The instance you are browsing does not use 302 redirects for external toots (fallback will be added)
+    - Maybe it also plays a role if the toot is set to unlisted on its original instance (not sure yet)
+5. There can be short delays since external API calls have to be made
 6. If you only want redirects, simply turn off auto-action and leave redirect on - double click will then only redirect, not execute the action (alternatively, you can simply use the reply button, as it will always redirect to your home instance if redirects are enabled)
 7. If the extension fails to resolve content, the affected buttons will behave like usually
 
