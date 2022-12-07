@@ -53,6 +53,7 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 **Please read the [additional notes](#additional-notes).**
 
 ## Screenshots / GIFs
+v0.8.0
 <details>
   <summary>Extension popup / settings</summary>
   <img src="https://github.com/lartsch/FediFollow-Chrome/blob/main/img/settings.png?raw=true">
