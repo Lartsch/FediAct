@@ -445,32 +445,6 @@ function toggleInlineCss(el, styles, toggleclass) {
 	}
 }
 
-// returns a mutation observer for custom selectors
-function getMutationObserver(targetparentselector, options, targetchildselectors, callback) {
-	// Create an observer instance
-	if (targetchildselectors) {
-		targetchildselectors = targetchildselectors.join(",");
-	}
-	var observer = new MutationObserver(function( mutations ) {
-		mutations.forEach(function( mutation ) {
-			var newNodes = mutation.addedNodes; // DOM NodeList
-			if( newNodes !== null ) { // If there are new nodes added
-				var $nodes = $( newNodes ); // jQuery set
-				$nodes.each(function(){
-					if(targetchildselectors) {
-						if ($(this).is(targetchildselectors)) {
-							callback(this, mutation);
-						}
-					} else {
-						callback(this, mutation);
-					}
-				});
-			}
-		});    
-	});
-	return observer.observe($(targetparentselector)[0], options);
-}
-
 // extract handle from elements
 function extractHandle(selectors) {
 	// check all of the selectors
