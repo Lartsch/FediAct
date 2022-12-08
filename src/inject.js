@@ -875,13 +875,6 @@ function checkSettings() {
 		log("Instance setting is not a valid domain name.");
 		return false;
 	}
-	// set default if wrong value
-	if ($.inArray(settings.fediact_mode, ["blacklist","whitelist"]) < 0) {
-		settings.fediact_mode = "blacklist";
-	}
-	if ($.inArray(settings.fediact_target, ["_blank","_self"]) < 0) {
-		settings.fediact_target = "_blank";
-	}
 	if (settings.fediact_mode == "whitelist") {
 		// if in whitelist mode and the cleaned whitelist is empty, return false
 		settings.fediact_whitelist = processDomainList(settings.fediact_whitelist);
