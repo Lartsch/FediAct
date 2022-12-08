@@ -743,7 +743,6 @@ async function processToots() {
 					}
 				} else {
 					log("Could not identify a post URI for home resolving.")
-					console.log(tootData)
 					addToProcessedToots([tootData[0], false])
 					initStyles([tootData[0], false])
 				}
