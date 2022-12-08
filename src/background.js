@@ -1,6 +1,7 @@
 var browser, chrome, settings;
 var enableConsoleLog = true;
 var logPrepend = "[FediAct]";
+var tokenInterval = 5
 
 var tokenRegex = /"access_token":".*?",/gm;
 
@@ -74,7 +75,7 @@ async function fetchData() {
 // fetch api token right after install (mostly for debugging, when the ext. is reloaded)
 chrome.runtime.onInstalled.addListener(fetchData);
 // and also every 5 minutes
-chrome.alarms.create('refresh', { periodInMinutes: 1 });
+chrome.alarms.create('refresh', { periodInMinutes: tokenInterval });
 chrome.alarms.onAlarm.addListener(fetchData);
 
 // different listeners for inter-script communication
