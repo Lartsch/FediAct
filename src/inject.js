@@ -419,8 +419,9 @@ function resolveTootToExternalHome(tooturl) {
 					}
 				});
 			} catch (e) {
-				log(e);
-				resolve(false)
+				log(e)
+				log("Reloading page, extension likely got updated.")
+				location.reload()
 			}
 		});
 	} else {
@@ -616,22 +617,26 @@ async function processToots() {
 			}
 			function initStyles(tootdata) {
 				$(el).find(".feditriggered").remove()
-				// enable the bookmark button
-				$(bookmarkButton).removeClass("disabled").removeAttr("disabled")
-				// set the toot buttons to active, depending on its state
-				if (tootdata[4]) {
-					if (!$(favButton).hasClass("fediactive")) {
-						toggleInlineCss($(favButton),[["color","!remove","rgb(202, 143, 4)"]], "fediactive")
+				if (!tootdata[1]) {
+					$("<span class='feditriggered' style='color: orange; padding-right: 10px; padding-left: 10px'>Not resolved</span>").insertAfter($(favButton))
+				} else {
+					// enable the bookmark button
+					$(bookmarkButton).removeClass("disabled").removeAttr("disabled")
+					// set the toot buttons to active, depending on its state
+					if (tootdata[4]) {
+						if (!$(favButton).hasClass("fediactive")) {
+							toggleInlineCss($(favButton),[["color","!remove","rgb(202, 143, 4)"]], "fediactive")
+						}
 					}
-				}
-				if (tootdata[3]) {
-					if (!$(boostButton).find("i.fediactive").length) {
-						toggleInlineCss($(boostButton).find("i"),[["color","!remove","rgb(140, 141, 255)"],["transition-duration", "!remove", "0.9s"],["background-position", "!remove", "0px 100%"]], "fediactive")
+					if (tootdata[3]) {
+						if (!$(boostButton).find("i.fediactive").length) {
+							toggleInlineCss($(boostButton).find("i"),[["color","!remove","rgb(140, 141, 255)"],["transition-duration", "!remove", "0.9s"],["background-position", "!remove", "0px 100%"]], "fediactive")
+						}
 					}
-				}
-				if (tootdata[5]) {
-					if (!$(bookmarkButton).hasClass("fediactive")) {
-						toggleInlineCss($(bookmarkButton),[["color","!remove","rgb(255, 80, 80)"]], "fediactive")
+					if (tootdata[5]) {
+						if (!$(bookmarkButton).hasClass("fediactive")) {
+							toggleInlineCss($(bookmarkButton),[["color","!remove","rgb(255, 80, 80)"]], "fediactive")
+						}
 					}
 				}
 			}
@@ -726,24 +731,28 @@ async function processToots() {
 					if (resolvedToot) {
 						// set the redirect to home instance URL in @ format
 						var redirectUrl = 'https://' + settings.fediact_homeinstance + "/@" + resolvedToot[0] + "/" + resolvedToot[1]
-						var fullEntry = [tootData[0], ...resolvedToot, redirectUrl]
+						var fullEntry = [tootData[0], ...resolvedToot, redirectUrl, true]
 						addToProcessedToots(fullEntry)
 						// continue with click handling...
 						clickBinder(fullEntry)
 						initStyles(fullEntry)
 					} else {
 						log("Failed to resolve: "+homeResolveString)
-						processed[cacheIndex][1] = false
-						$(el).find(".feditriggered").remove() // ugly fix, we want each status to processed only ONCE per page url change
-						$("<span class='feditriggered' style='color: orange; padding-right: 10px; padding-left: 10px'>Not resolved</span>").insertAfter($(favButton))
+						addToProcessedToots([tootData[0], false])
+						initStyles([tootData[0], false])
 					}
 				} else {
 					log("Could not identify a post URI for home resolving.")
+					console.log(tootData)
+					addToProcessedToots([tootData[0], false])
+					initStyles([tootData[0], false])
 				}
 			} else {
 				var toot = processed[cacheIndex]
 				initStyles(toot)
-				clickBinder(toot)
+				if (toot[1]) {
+					clickBinder(toot)
+				}
 			}
 		} else {
 			log("Could not get toot data.")
@@ -758,10 +767,12 @@ async function processToots() {
 // main function to listen for the follow button pressed and open a new tab with the home instance
 // TODO: this is still an old implementation, update in accordance with processToots as far as possible
 async function processFollow() {
+	var fullHandle
+	var action = "follow"
 	// for mastodon v3 - v4 does not show follow buttons / account cards on /explore
 	async function process(el) {
 		// wrapper for follow/unfollow action
-		async function execFollow(action, id) {
+		async function execFollow(id) {
 			if (action == "follow") {
 				var followed = await followHomeInstance(id)
 				if (followed) {
@@ -778,8 +789,6 @@ async function processFollow() {
 				}
 			}
 		}
-		var fullHandle
-		var action = "follow"
 		// for mastodon v3 explore page
 		if ($(el).closest("div.account-card").length) {
 			fullHandle = $(el).closest("div.account-card").find("div.display-name > span").text().trim()
@@ -811,12 +820,12 @@ async function processFollow() {
 					clicks++;
 					if (clicks == 1) {
 						timer = setTimeout(async function() {
-							execFollow(action, resolvedHandle[0])
+							execFollow(resolvedHandle[0])
 							clicks = 0;
 						}, 350);
 					} else {
 						clearTimeout(timer);
-						var done = await execFollow(action, resolvedHandle[0])
+						var done = await execFollow(resolvedHandle[0])
 						if (done) {
 							var saveText = $(el).text()
 							var redirectUrl = 'https://' + settings.fediact_homeinstance + '/@' + resolvedHandle[1]
