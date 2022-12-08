@@ -91,13 +91,13 @@ function popupTasks() {
 		// restore the form values
 		restoreForm();
 		// perform storage actions on form submit
-		$("form#fediact-settings").on('submit', function(e){
+		$("form#fediact-settings").on('submit', async function(e){
 			// prevent default
 			e.preventDefault()
 			// update settings
 			updateSettings()
 			try {
-				chrome.runtime.sendMessage({updatedsettings: true})
+				await chrome.runtime.sendMessage({updatedsettings: true})
 			} catch(e) {
 				log(e)
 			}

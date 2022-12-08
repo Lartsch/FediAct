@@ -86,11 +86,24 @@ async function fetchData() {
     }
 }
 
+async function reloadListeningScripts() {
+    chrome.tabs.query({}, async function(tabs) {
+        for (var i=0; i<tabs.length; ++i) {
+            try {
+                await chrome.tabs.sendMessage(tabs[i].id, {updatedfedisettings: true})
+            } catch(e) {
+                // all non-listening tabs will throw an error, we can ignore it
+                continue
+            }
+       }
+    });
+}
+
 // fetch api token right after install (mostly for debugging, when the ext. is reloaded)
-chrome.runtime.onInstalled.addListener(fetchData);
-// and also every 5 minutes
-chrome.alarms.create('refresh', { periodInMinutes: tokenInterval });
-chrome.alarms.onAlarm.addListener(fetchData);
+chrome.runtime.onInstalled.addListener(fetchData)
+// and also every 3 minutes
+chrome.alarms.create('refresh', { periodInMinutes: tokenInterval })
+chrome.alarms.onAlarm.addListener(fetchData)
 
 // different listeners for inter-script communication
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -102,20 +115,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     // immediately fetch api token after settings are updated
     if (request.updatedsettings) {
         fetchData()
+        reloadListeningScripts()
     }
     // when the content script starts to process on a site, listen for tab changes (url)
     if (request.running) {
-        chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+        chrome.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
             // chrome tabs api does not support listener filters here
             // if the tabId of the update event is the same like the tabId that started the listener in the first place AND when the update event is an URL
             if (tabId === sender.tab.id && changeInfo.url) {
                 // ... then let the content script know about the change
                 try {
-                    chrome.tabs.sendMessage(tabId, {urlchanged: changeInfo.url})
+                    await chrome.tabs.sendMessage(tabId, {urlchanged: changeInfo.url})
                 } catch(e) {
                     log(e)
                 }
             }
-        });
+        })
     }
-});
+})

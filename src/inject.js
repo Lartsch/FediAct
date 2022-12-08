@@ -14,6 +14,7 @@ const statusApi = "/api/v1/statuses";
 const searchApi = "/api/v2/search";
 const accountsApi = "/api/v1/accounts";
 const apiDelay = 500
+const maxTootCache = 200
 
 // settings keys with defauls
 var settings = {}
@@ -35,7 +36,7 @@ const settingsDefaults = {
 var browser, chrome, lasthomerequest, fedireply;
 // currently, the only reliable way to detect all toots etc. has the drawback that the same element could be processed multiple times
 // this will store already processed elements to compare prior to processing and will reset as soon as the site context changes
-var processed = {}
+var processed = []
 
 // =-=-=-=-==-=-=-=-==-=-=-=-=-
 // =-=-=-=-=-= UTILS =-==-=-=-=
@@ -98,10 +99,10 @@ async function makeRequest(method, url, extraheaders) {
 		}
 		lasthomerequest = currenttime
 	} 
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (resolve) {
         let xhr = new XMLHttpRequest();
-        xhr.open(method, url);
-        xhr.timeout = 3000;
+        xhr.open(method, url)
+        xhr.timeout = 3000
 		if (extraheaders) {
 			for (var key in extraheaders) {
 				xhr.setRequestHeader(key, extraheaders[key])
@@ -109,24 +110,17 @@ async function makeRequest(method, url, extraheaders) {
 		}
         xhr.onload = function () {
             if (this.status >= 200 && this.status < 300) {
-                resolve(xhr.responseText);
+                resolve(xhr.responseText)
             } else {
-                resolve(false);
+                resolve(false)
             }
-        };
-        xhr.onerror = function () {
-            reject({
-                status: this.status,
-                statusText: xhr.statusText
-            });
-        };
-		try {
-			xhr.send()
-		} catch(e) {
-			log(e)
+        }
+		xhr.onerror = function() {
+			log("Request to " + url + " failed.")
 			resolve(false)
 		}
-    });
+		xhr.send()
+    })
 }
 
 // Escape characters used for regex
@@ -415,9 +409,9 @@ async function resolveTootToHome(searchstring) {
 function resolveTootToExternalHome(tooturl) {
 	// TODO: check if a delay is necessary here too
 	if (tooturl) {
-		return new Promise(resolve => {
+		return new Promise(async function(resolve) {
 			try {
-				chrome.runtime.sendMessage({url: tooturl}, function(response) {
+				await chrome.runtime.sendMessage({url: tooturl}, function(response) {
 					if(response) {
 						resolve(response);
 					} else {
@@ -467,6 +461,23 @@ function extractHandle(selectors) {
 	return false;
 }
 
+function isInProcessedToots(id) {
+	for (var i = 0; i < processed.length; i++) {
+		if (processed[i][0] == id) {
+			return i
+		}
+	}
+	return false
+}
+
+function addToProcessedToots(toot) {
+	processed.push(toot)
+	var diff = processed.length - maxTootCache
+	if (diff > 0) {
+		processed = processed.splice(0,diff)
+	}
+}
+
 // trigger the reply button click - will only run when we are on a home instance url with fedireply parameter
 async function processReply() {
 	$(document).DOMNodeAppear(function(e) {
@@ -476,38 +487,6 @@ async function processReply() {
 
 // process any toots found on supported sites
 async function processToots() {
-	async function clickAction(originalTootId, id, e) {
-		var action = getTootAction(e);
-		if (action) {
-			// resolve url on home instance to get local toot/author identifiers and toot status
-			var actionExecuted = await executeTootAction(id, action)
-			if (actionExecuted) {
-				if (action == "boost" || action == "unboost") {
-					toggleInlineCss($(e.currentTarget).find("i"),[["color","!remove","rgb(140, 141, 255)"],["transition-duration", "!remove", "0.9s"],["background-position", "!remove", "0px 100%"]], "fediactive")
-					if (originalTootId in processed) {
-						processed[originalTootId][2] = !processed[originalTootId][2]
-					}
-				} else if (action == "favourite" || action == "unfavourite") {
-					toggleInlineCss($(e.currentTarget),[["color","!remove","rgb(202, 143, 4)"]], "fediactive")
-					if (originalTootId in processed) {
-						processed[originalTootId][3] = !processed[originalTootId][3]
-					}
-				} else {
-					toggleInlineCss($(e.currentTarget),[["color","!remove","rgb(255, 80, 80)"]], "fediactive")
-					if (originalTootId in processed) {
-						processed[originalTootId][4] = !processed[originalTootId][4]
-					}
-				}			
-				return true
-			} else {
-				log("Could not execute action on home instance.")
-				return false
-			}
-		} else {
-			log("Could not determine action.")
-			return false
-		}
-	}
 	function getTootAction(e) {
 		var action = false
 		if ($(e.currentTarget).children("i.fa-retweet").length) {
@@ -597,38 +576,72 @@ async function processToots() {
 		}
 		var tootData = getTootIdAndAuthor($(el))
 		if (tootData) {
+			var cacheIndex = isInProcessedToots(tootData[0])
 			// get all button elements of this toot
 			var favButton = $(el).find("button:has(i.fa-star), a.icon-button:has(i.fa-star)").first()
 			var boostButton = $(el).find("button:has(i.fa-retweet), a.icon-button:has(i.fa-retweet)").first()
 			var bookmarkButton = $(el).find("button:has(i.fa-bookmark)").first()
 			var replyButton = $(el).find("button:has(i.fa-reply), button:has(i.fa-reply-all), a.icon-button:has(i.fa-reply), a.icon-button:has(i.fa-reply-all)").first()
-			function initStyles(reblogged, favourited, bookmarked) {
+			async function clickAction(id, e) {
+				console.log(e)
+				var action = getTootAction(e);
+				if (action) {
+					// resolve url on home instance to get local toot/author identifiers and toot status
+					var actionExecuted = await executeTootAction(id, action)
+					if (actionExecuted) {
+						if (action == "boost" || action == "unboost") {
+							toggleInlineCss($(e.currentTarget).find("i"),[["color","!remove","rgb(140, 141, 255)"],["transition-duration", "!remove", "0.9s"],["background-position", "!remove", "0px 100%"]], "fediactive")
+							if (cacheIndex) {
+								processed[cacheIndex][3] = !processed[cacheIndex][3]
+							}
+						} else if (action == "favourite" || action == "unfavourite") {
+							toggleInlineCss($(e.currentTarget),[["color","!remove","rgb(202, 143, 4)"]], "fediactive")
+							if (cacheIndex) {
+								processed[cacheIndex][4] = !processed[cacheIndex][4]
+							}
+						} else {
+							toggleInlineCss($(e.currentTarget),[["color","!remove","rgb(255, 80, 80)"]], "fediactive")
+							if (cacheIndex) {
+								processed[cacheIndex][5] = !processed[cacheIndex][5]
+							}
+						}			
+						return true
+					} else {
+						log("Could not execute action on home instance.")
+						return false
+					}
+				} else {
+					log("Could not determine action.")
+					return false
+				}
+			}
+			function initStyles(tootdata) {
 				$(el).find(".feditriggered").remove()
 				// enable the bookmark button
 				$(bookmarkButton).removeClass("disabled").removeAttr("disabled")
 				// set the toot buttons to active, depending on its state
-				if (favourited) {
+				if (tootdata[4]) {
 					if (!$(favButton).hasClass("fediactive")) {
 						toggleInlineCss($(favButton),[["color","!remove","rgb(202, 143, 4)"]], "fediactive")
 					}
 				}
-				if (reblogged) {
+				if (tootdata[3]) {
 					if (!$(boostButton).find("i.fediactive").length) {
 						toggleInlineCss($(boostButton).find("i"),[["color","!remove","rgb(140, 141, 255)"],["transition-duration", "!remove", "0.9s"],["background-position", "!remove", "0px 100%"]], "fediactive")
 					}
 				}
-				if (bookmarked) {
+				if (tootdata[5]) {
 					if (!$(bookmarkButton).hasClass("fediactive")) {
 						toggleInlineCss($(bookmarkButton),[["color","!remove","rgb(255, 80, 80)"]], "fediactive")
 					}
 				}
 			}
-			function clickBinder(originalTootId, tootdata) {
+			function clickBinder(tootdata) {
 				$(replyButton).on("click", function(e){
 					// reply button is handle specially (always redirects with reply parameter set)
 					e.preventDefault();
 					e.stopImmediatePropagation();
-					redirectTo(tootdata[5]+"?fedireply")
+					redirectTo(tootdata[6]+"?fedireply")
 				})
 				$([favButton, boostButton, bookmarkButton]).each(function() {
 					// all other buttons will behave differently with single / double click
@@ -642,7 +655,7 @@ async function processToots() {
 						if (clicks == 1) {
 							timer = setTimeout(async function() {
 								// execute action on click and get result (fail/success)
-								var actionExecuted = await clickAction(originalTootId, tootdata[1], e);
+								var actionExecuted = await clickAction(tootdata[2], e);
 								if (!actionExecuted) {
 									log("Action failed.")
 								}
@@ -651,11 +664,11 @@ async function processToots() {
 						} else {
 							clearTimeout(timer);
 							// same as above, but we redirect if the result is successful
-							var actionExecuted = await clickAction(originalTootId, tootdata[1], e);
+							var actionExecuted = await clickAction(tootdata[2], e);
 							if (!actionExecuted) {
 								log("Action failed.")
 							} else {
-								redirectTo(tootdata[5])
+								redirectTo(tootdata[6])
 							}
 							clicks = 0;
 						}
@@ -666,7 +679,7 @@ async function processToots() {
 					});
 				});
 			}
-			if (!(tootData[0] in processed)) {
+			if (!cacheIndex) {
 				// if this is set, we got a toot url that is already resolved to its home instance
 				if (tootData[2]) {
 					homeResolveString = tootData[0]
@@ -712,16 +725,16 @@ async function processToots() {
 					// resolve toot on actual home instance
 					var resolvedToot = await resolveTootToHome(homeResolveString) // [status.account.acct, status.id, status.reblogged, status.favourited, status.bookmarked]
 					if (resolvedToot) {
-						initStyles(resolvedToot[2],resolvedToot[3],resolvedToot[4])
 						// set the redirect to home instance URL in @ format
 						var redirectUrl = 'https://' + settings.fediact_homeinstance + "/@" + resolvedToot[0] + "/" + resolvedToot[1]
-						resolvedToot.push(redirectUrl)
-						processed[tootData[0]] = resolvedToot
+						var fullEntry = [tootData[0], ...resolvedToot, redirectUrl]
+						addToProcessedToots(fullEntry)
 						// continue with click handling...
-						clickBinder(tootData[0], resolvedToot)
+						clickBinder(fullEntry)
+						initStyles(fullEntry)
 					} else {
 						log("Failed to resolve: "+homeResolveString)
-						processed[tootData[0]] = false
+						processed[cacheIndex][1] = false
 						$(el).find(".feditriggered").remove() // ugly fix, we want each status to processed only ONCE per page url change
 						$("<span class='feditriggered' style='color: orange; padding-right: 10px; padding-left: 10px'>Not resolved</span>").insertAfter($(favButton))
 					}
@@ -729,9 +742,9 @@ async function processToots() {
 					log("Could not identify a post URI for home resolving.")
 				}
 			} else {
-				var toot = processed[tootData[0]]
-				initStyles(toot[2], toot[3], toot[4])
-				clickBinder(tootData[0], toot)
+				var toot = processed[cacheIndex]
+				initStyles(toot)
+				clickBinder(toot)
 			}
 		} else {
 			log("Could not get toot data.")
@@ -792,8 +805,6 @@ async function processFollow() {
 				}
 				var clicks = 0;
 				var timer;
-				$(el).off()
-				$(el).unbind()
 				$(el).on("click", async function(e) {
 					// prevent default and immediate propagation
 					e.preventDefault();
@@ -850,10 +861,12 @@ function processDomainList(newLineList) {
 	for (var domain of arrayFromList) {
 		// remove whitespace
 		domain = domain.trim();
-		if (domainRegex.test(domain)) {
-			cleanedArray.push(domain)
-		} else {
-			log("Removed invalid domain " + domain + " from blacklist/whitelist.")
+		if (domain.length) {
+			if (domainRegex.test(domain)) {
+				cleanedArray.push(domain)
+			} else {
+				log("Removed invalid domain " + domain + " from blacklist/whitelist.")
+			}
 		}
 	}
 	// return newly created set (remvoes duplicates)
@@ -932,17 +945,20 @@ async function checkSite() {
 	return false;
 }
 
-function urlChangeMonitor() {
+async function backgroundProcessor() {
 	// wait for any url change messages from background script
 	chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-		  if (request.urlchanged) {
+		if (request.urlchanged) {
 			// reset already processed elements
 			processed = []
-		  }
-	  });
+		}
+		if (request.updatedfedisettings) {
+			location.reload()
+		}
+	})
 	// send message to initialize onUpdated listener in background script (this way it gets the tabid and we do not need to bind the listener for ALL sites)
 	try {
-		chrome.runtime.sendMessage({running: true})
+		await chrome.runtime.sendMessage({running: true})
 		return true
 	} catch(e) {
 		log(e)
@@ -967,7 +983,7 @@ async function run() {
 				if (fedireply) {
 					processReply()
 				} else {
-					if (urlChangeMonitor()) {
+					if (backgroundProcessor()) {
 						processFollow()
 						processToots()
 					} else {
