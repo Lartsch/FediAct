@@ -1,18 +1,14 @@
 var browser, chrome, settings;
-var enableConsoleLog = true;
-var logPrepend = "[FediAct]";
-var tokenInterval = 5
+const enableConsoleLog = true;
+const logPrepend = "[FediAct]";
+const tokenInterval = 3 // minutes
 
-var tokenRegex = /"access_token":".*?",/gm;
+const tokenRegex = /"access_token":".*?",/gm;
 
 // required settings keys with defauls
-var settingsDefaults = {
+const settingsDefaults = {
 	fediact_homeinstance: null,
     fediact_showfollows: true
-}
-
-function onError(error){
-	console.error(`${logPrepend} Error: ${error}`);
 }
 
 // wrapper to prepend to log messages
@@ -25,10 +21,15 @@ function log(text) {
 // get redirect url (it will be the url on the toot authors home instance)
 async function resolveToot(url) {
     return new Promise(async function(resolve) {
-        var res = await fetch(url, {method: 'HEAD'})
-        if (res.redirected) {
-            resolve(res.url)
-        } else {
+        try {
+            var res = await fetch(url, {method: 'HEAD'})
+            if (res.redirected) {
+             resolve(res.url)
+            } else {
+                resolve(false)
+            }
+        } catch(e) {
+            log(e)
             resolve(false)
         }
     });
@@ -37,8 +38,13 @@ async function resolveToot(url) {
 // fetch API token here (will use logged in session automatically)
 async function fetchBearerToken() {
     var url = "https://" + settings.fediact_homeinstance;
-    var res = await fetch(url);
-    var text = await res.text();
+    try {
+        var res = await fetch(url);
+        var text = await res.text();
+    } catch(e) {
+        log(e)
+        return false
+    }
     if (text) {
         // dom parser is not available in background workers, so we use regex to parse the html....
         // for some reason, regex groups do also not seem to work in chrome background workers... the following is ugly but should work fine
@@ -49,10 +55,9 @@ async function fetchBearerToken() {
             if (indexOne > -1 && indexTwo > -1) {
                 indexOne = indexOne + 16
                 var token = content[0].substring(indexOne, indexTwo);
-                console.log(token)
                 if (token.length > 16) {
                     settings.fediact_token = token;
-                    return;
+                    return true
                 }
             }
         }
@@ -63,13 +68,22 @@ async function fetchBearerToken() {
 }
 
 async function fetchData() {
-    settings = await (browser || chrome).storage.local.get(settingsDefaults);
+    try {
+        settings = await (browser || chrome).storage.local.get(settingsDefaults)
+    } catch(e) {
+        log(e)
+        return false
+    }
     if (settings.fediact_homeinstance) {
         await fetchBearerToken()
     } else {
         log("Home instance not set");
     }
-    await (browser || chrome).storage.local.set(settings);
+    try {
+        await (browser || chrome).storage.local.set(settings)
+    } catch {
+        log(e)
+    }
 }
 
 // fetch api token right after install (mostly for debugging, when the ext. is reloaded)
@@ -96,7 +110,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             // if the tabId of the update event is the same like the tabId that started the listener in the first place AND when the update event is an URL
             if (tabId === sender.tab.id && changeInfo.url) {
                 // ... then let the content script know about the change
-                chrome.tabs.sendMessage(tabId, {urlchanged: changeInfo.url})
+                try {
+                    chrome.tabs.sendMessage(tabId, {urlchanged: changeInfo.url})
+                } catch(e) {
+                    log(e)
+                }
             }
         });
     }

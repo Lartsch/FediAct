@@ -120,7 +120,12 @@ async function makeRequest(method, url, extraheaders) {
                 statusText: xhr.statusText
             });
         };
-		xhr.send();
+		try {
+			xhr.send()
+		} catch(e) {
+			log(e)
+			resolve(false)
+		}
     });
 }
 
@@ -411,13 +416,18 @@ function resolveTootToExternalHome(tooturl) {
 	// TODO: check if a delay is necessary here too
 	if (tooturl) {
 		return new Promise(resolve => {
-			chrome.runtime.sendMessage({url: tooturl}, function(response) {
-				if(response) {
-					resolve(response);
-				} else {
-					resolve(false);
-				}
-			});
+			try {
+				chrome.runtime.sendMessage({url: tooturl}, function(response) {
+					if(response) {
+						resolve(response);
+					} else {
+						resolve(false);
+					}
+				});
+			} catch (e) {
+				log(e);
+				resolve(false)
+			}
 		});
 	} else {
 		return false
@@ -738,6 +748,24 @@ async function processToots() {
 async function processFollow() {
 	// for mastodon v3 - v4 does not show follow buttons / account cards on /explore
 	async function process(el) {
+		// wrapper for follow/unfollow action
+		async function execFollow(action, id) {
+			if (action == "follow") {
+				var followed = await followHomeInstance(id)
+				if (followed) {
+					$(el).text("Unfollow");
+					action = "unfollow"
+					return true
+				}
+			} else {
+				var unfollowed = await unfollowHomeInstance(id)
+				if (unfollowed) {
+					$(el).text("Follow");
+					action = "follow"
+					return true
+				}
+			}
+		}
 		var fullHandle
 		var action = "follow"
 		// for mastodon v3 explore page
@@ -773,39 +801,12 @@ async function processFollow() {
 					clicks++;
 					if (clicks == 1) {
 						timer = setTimeout(async function() {
-							if (action == "follow") {
-								var followed = await followHomeInstance(resolvedHandle[0])
-								if (followed) {
-									$(el).text("Unfollow");
-									action = "unfollow"
-								}
-							} else {
-								var unfollowed = await unfollowHomeInstance(resolvedHandle[0])
-								if (unfollowed) {
-									$(el).text("Follow");
-									action = "follow"
-								}
-							}
+							execFollow(action, resolvedHandle[0])
 							clicks = 0;
 						}, 350);
 					} else {
 						clearTimeout(timer);
-						var done
-						if (action == "follow") {
-							var followed = await followHomeInstance(resolvedHandle[0])
-							if (followed) {
-								$(el).text("Unfollow");
-								action = "unfollow"
-								done = true
-							}
-						} else {
-							var unfollowed = await unfollowHomeInstance(resolvedHandle[0])
-							if (unfollowed) {
-								$(el).text("Follow");
-								action = "follow"
-								done = true
-							}
-						}
+						var done = await execFollow(action, resolvedHandle[0])
 						if (done) {
 							var saveText = $(el).text()
 							var redirectUrl = 'https://' + settings.fediact_homeinstance + '/@' + resolvedHandle[1]
@@ -828,7 +829,9 @@ async function processFollow() {
 			}
 		}
 	}
+	// create css selector from selector array
 	var allFollowPaths = followButtonPaths.join(",")
+	// one domnodeappear to rule them all
 	$(document).DOMNodeAppear(async function(e) {
 		process($(e.target))
 	}, allFollowPaths)
@@ -930,21 +933,32 @@ async function checkSite() {
 }
 
 function urlChangeMonitor() {
-	// send message to initialize onUpdated listener (this way we do not need to bind the listener for ALL sites)
-	chrome.runtime.sendMessage({running: true})
-	// then wait for any url changes
+	// wait for any url change messages from background script
 	chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 		  if (request.urlchanged) {
 			// reset already processed elements
 			processed = []
 		  }
 	  });
+	// send message to initialize onUpdated listener in background script (this way it gets the tabid and we do not need to bind the listener for ALL sites)
+	try {
+		chrome.runtime.sendMessage({running: true})
+		return true
+	} catch(e) {
+		log(e)
+	}
+	return false
 }
 
 // run wrapper
 async function run() {
-	// get settings
-	settings = await (browser || chrome).storage.local.get(settingsDefaults);
+	// get setting
+	try {
+		settings = await (browser || chrome).storage.local.get(settingsDefaults)
+	} catch(e) {
+		log(e)
+		return false
+	}
 	if (settings) {
 		// validate settings
 		if (checkSettings()) {
@@ -953,9 +967,12 @@ async function run() {
 				if (fedireply) {
 					processReply()
 				} else {
-					urlChangeMonitor();
-					processFollow();
-					processToots();
+					if (urlChangeMonitor()) {
+						processFollow()
+						processToots()
+					} else {
+						log("Failed to initialize background script.")
+					}
 				}
 			} else {
 				log("Will not process this site.")

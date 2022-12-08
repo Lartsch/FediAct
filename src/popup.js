@@ -1,6 +1,6 @@
 
 // required settings keys with defauls
-var settings = {
+const settingsDefaults = {
 	fediact_homeinstance: null,
 	fediact_alert: false,
 	fediact_mode: "blacklist",
@@ -14,23 +14,28 @@ var settings = {
 }
 
 // fix for cross-browser storage api compatibility
-var browser, chrome;
+var browser, chrome, settings;
+const enableConsoleLog = true;
+const logPrepend = "[FediAct]";
 
-function onError(error){
-	console.error(`[FediAct] Error: ${error}`);
+// wrapper to prepend to log messages
+function log(text) {
+	if (enableConsoleLog) {
+		console.log(logPrepend + ' ' + text)
+	}
 }
 
 // this performs loading the settings into the popup, reacting to changes and saving changes
-function popupTasks(settings) {
-
+function popupTasks() {
+	// function to show confirmation when settings were updated successfully
 	function showConfirmation() {
 		$("span#indicator").show();
 		setTimeout(function() {
 			$("span#indicator").hide();
 		}, 1500);
 	}
-
-	function updateSettings(){
+	// get all current values and write them to the local storage
+	async function updateSettings(){
 		// update settings values
 		settings.fediact_homeinstance = $("input#homeinstance").val().trim();
 		settings.fediact_alert = $("input#alert").is(':checked');
@@ -43,11 +48,16 @@ function popupTasks(settings) {
 		settings.fediact_redirects = $("input#redirects").is(':checked');
 		settings.fediact_enabledelay = $("input#delay").is(':checked');
 		// write to storage
-		const waitForSaved = (browser || chrome).storage.local.set(settings);
+		try {
+			await (browser || chrome).storage.local.set(settings)
+		} catch {
+			log(e)
+			return false
+		}
 		// show saved indicator after successful save
-		waitForSaved.then(showConfirmation(), onError);
+		showConfirmation()
 	}
-
+	// restore form based on loaded settings
 	function restoreForm() {
 		// set all default/configured values and show fields accordingly
 		$("input#homeinstance").val(settings.fediact_homeinstance);
@@ -77,20 +87,34 @@ function popupTasks(settings) {
 			}
 		});
 	}
-
-	$(document).ready(async function() {
+	$(document).ready(function() {
 		// restore the form values
 		restoreForm();
 		// perform storage actions on form submit
 		$("form#fediact-settings").on('submit', function(e){
 			// prevent default
-			e.preventDefault();
+			e.preventDefault()
 			// update settings
-			updateSettings();
-			chrome.runtime.sendMessage({updatedsettings: true});
-		});
-	});
-
+			updateSettings()
+			try {
+				chrome.runtime.sendMessage({updatedsettings: true})
+			} catch(e) {
+				log(e)
+			}
+		})
+	})
 }
 
-(browser || chrome).storage.local.get(settings).then(popupTasks, onError)
+async function loadAndRun() {
+	try {
+		settings = await (browser || chrome).storage.local.get(settingsDefaults)
+	} catch(e) {
+		log(e)
+		return false
+	}
+	if (settings) {
+		popupTasks()
+	}
+}
+
+loadAndRun()
