@@ -583,7 +583,6 @@ async function processToots() {
 			var bookmarkButton = $(el).find("button:has(i.fa-bookmark)").first()
 			var replyButton = $(el).find("button:has(i.fa-reply), button:has(i.fa-reply-all), a.icon-button:has(i.fa-reply), a.icon-button:has(i.fa-reply-all)").first()
 			async function clickAction(id, e) {
-				console.log(e)
 				var action = getTootAction(e);
 				if (action) {
 					// resolve url on home instance to get local toot/author identifiers and toot status
