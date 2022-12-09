@@ -1,4 +1,4 @@
-# FediAct (v0.9.1)
+# FediAct (v0.9.3)
 A Chrome/Firefox extension that simplifies following and post interactions on other Mastodon instances than your own.
 
 **Features**:
@@ -29,18 +29,17 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 
 ## Installation
 
-[link-chrome]: https://chrome.google.com/webstore/detail/fedifollow/lmpcajpkjcclkjbliapfjfolocffednm 'Version published on Chrome Web Store'
-[link-firefox]: https://addons.mozilla.org/en-US/firefox/addon/fedifollow/ 'Version published on Mozilla Add-ons'
+[link-chrome]: https://chrome.google.com/webstore/detail/fediact/lmpcajpkjcclkjbliapfjfolocffednm 'Version published on Chrome Web Store'
+[link-firefox]: https://addons.mozilla.org/en-US/firefox/addon/fediact/ 'Version published on Mozilla Add-ons'
 
 [<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/chrome/chrome.svg" width="48" alt="Chrome" valign="middle">][link-chrome] [<img valign="middle" src="https://img.shields.io/chrome-web-store/v/lmpcajpkjcclkjbliapfjfolocffednm.svg?label=%20%20">][link-chrome] and other Chromium browsers (**currently in review** by Google)
 
-[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fedifollow.svg?label=%20%20">][link-firefox] including Firefox for Android
+[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fediact.svg?label=%20%20">][link-firefox] including Firefox for Android
 
 > **Note**
 > 
 > - **If webstore release is outdated, use the [manual installation method](#manual-installation) to install the latest version**  
 > - **Special installation steps for [Firefox on Android](#install-in-firefox-for-android)**
-> - Reload Mastodon sites after extension updates
 
 ## Setup
 
@@ -56,19 +55,19 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 v0.8.0
 <details>
   <summary>Extension popup / settings</summary>
-  <img src="https://github.com/lartsch/FediFollow-Chrome/blob/main/img/settings.png?raw=true">
+  <img src="https://github.com/lartsch/FediAct/blob/main/img/settings.png?raw=true">
 </details>
 <details>
   <summary>Showcase</summary>
-  <img src="https://github.com/lartsch/FediFollow-Chrome/blob/main/img/showcase.gif?raw=true">
+  <img src="https://github.com/lartsch/FediAct/blob/main/img/showcase.gif?raw=true">
 </details>
 
 ## Manual installation
-1. Download the [latest Github release](https://github.com/Lartsch/FediFollow-Chrome/releases/latest) for your browser (chrome or firefox)
+1. Download the [latest Github release](https://github.com/Lartsch/FediAct/releases/latest) for your browser (chrome or firefox)
 ### Chrome
 2. Unzip the downloaded file somewhere
 3. Go to your Chrome extension page (URL: chrome://extensions) and enable developer mode
-4. Click the "Load unpacked" button and then select the unzipped folder (should be "fedifollow-X.X.X-chrome")
+4. Click the "Load unpacked" button and then select the unzipped folder (should be "fediact-X.X.X-chrome")
 
 Note: Some Chromium browsers allow to directly load a .zip file - you can use it if available for you
 
@@ -89,9 +88,9 @@ Since a while, Firefox on Android only allows a [curated list](https://addons.mo
 3. Go back to Settings > Custom Add-on Collection
 4. Enter the following data:
     - ID: 17665294
-    - Name: FediFollow
+    - Name: FediAct
 5. Click OK, Firefox will close - reopen it
-6. FediFollow will now be available in the Add-ons menu of Firefox Nightly
+6. FediAct will now be available in the Add-ons menu of Firefox Nightly
 
 To update the addon instantly, simply remove and re-install it. Not sure when/if auto-update triggers in Firefox.
   
