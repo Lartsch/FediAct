@@ -746,10 +746,9 @@ async function processToots() {
 										homeResolveStrings.push(tmpmatches.groups.domain + "/users/" + tmpmatches.groups.handle + "/statuses/" + tmpmatches.groups.tootid)
 									}
 								}
-							} else {
-								// fallback to current external instance URL (for external handles, there is no /users/... format)
-								homeResolveStrings.push(location.protocol + "//" + location.hostname + "/" + tootAuthor + "/" + internalTootId)
 							}
+							// always add fallback to current external instance URL (for external handles, there is no /users/... format)
+							homeResolveStrings.push(location.protocol + "//" + location.hostname + "/" + tootAuthor + "/" + internalTootId)
 						}
 					}
 				}
