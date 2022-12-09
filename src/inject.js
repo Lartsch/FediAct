@@ -34,7 +34,7 @@ const settingsDefaults = {
 }
 
 // fix for cross-browser storage api compatibility and other global vars
-var browser, chrome, lasthomerequest, fedireply;
+var browser, chrome, lasthomerequest, fedireply
 // currently, the only reliable way to detect all toots etc. has the drawback that the same element could be processed multiple times
 // this will store already processed elements to compare prior to processing and will reset as soon as the site context changes
 var processed = []
@@ -63,26 +63,26 @@ function log(text) {
       $(document).on('animationstart webkitAnimationStart oanimationstart MSAnimationStart', function(e){
         if (e.originalEvent.animationName == 'nodeInserted' && $(e.target).is(selector)) {
           if (typeof callback == 'function') {
-            callback(e);
+            callback(e)
           }
         }
-      });
-    };
-    jQuery.fn.onAppear = jQuery.fn.DOMNodeAppear;
-})(jQuery);
+      })
+    }
+    jQuery.fn.onAppear = jQuery.fn.DOMNodeAppear
+})(jQuery)
 
 // extract given url parameter value
 var getUrlParameter = function getUrlParameter(sParam) {
     var sPageURL = window.location.search.substring(1),
-        sURLVariables = sPageURL.split('&'), sParameterName, i;
+        sURLVariables = sPageURL.split('&'), sParameterName, i
     for (i = 0; i < sURLVariables.length; i++) {
-        sParameterName = sURLVariables[i].split('=');
+        sParameterName = sURLVariables[i].split('=')
         if (sParameterName[0] === sParam) {
-            return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+            return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1])
         }
     }
-    return false;
-};
+    return false
+}
 
 // promisified xhr for api calls
 async function makeRequest(method, url, extraheaders) {
@@ -101,7 +101,7 @@ async function makeRequest(method, url, extraheaders) {
 		lasthomerequest = currenttime
 	} 
     return new Promise(function (resolve) {
-        let xhr = new XMLHttpRequest();
+        let xhr = new XMLHttpRequest()
         xhr.open(method, url)
         xhr.timeout = 3000
 		if (extraheaders) {
@@ -131,7 +131,7 @@ function escapeRegExp(string) {
 
 // Replace all occurrences of a substring
 function replaceAll(str, find, replace) {
-	return str.replace(new RegExp(escapeRegExp(find), 'g'), replace);
+	return str.replace(new RegExp(escapeRegExp(find), 'g'), replace)
 }
 
 // handles redirects to home instance
@@ -141,14 +141,14 @@ function redirectTo(url) {
 			alert("Redirecting...")
 		}
 		// open the url in same/new tab
-		var win = window.open(url, settings.fediact_target);
+		var win = window.open(url, settings.fediact_target)
 		log("Redirected to " + url)
 		// focus the new tab if open was successfull
 		if (win) {
-			win.focus();
+			win.focus()
 		} else {
 			// otherwise notify user...
-			log('Could not open new window. Please allow popups for this website.');
+			log('Could not open new window. Please allow popups for this website.')
 		}
 	} else {
 		log("Redirects disabled.")
@@ -164,16 +164,16 @@ async function followHomeInstance(id) {
 	// if auto actions are enbaled...
 	if (settings.fediact_autoaction) {
 		// build follow post request
-		var requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + id + "/follow";
-		var responseFollow = await makeRequest("POST",requestUrl,settings.tokenheader);
+		var requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + id + "/follow"
+		var responseFollow = await makeRequest("POST",requestUrl,settings.tokenheader)
 		// check if it worked (it is ignored if the user was already followed)
 		if (responseFollow) {
-			responseFollow = JSON.parse(responseFollow);
+			responseFollow = JSON.parse(responseFollow)
 			if (!responseFollow.following && !responseFollow.requested) {
 				log("Follow failed.")
-				return false;
+				return false
 			} else {
-				return true;
+				return true
 			}
 		}
 	} else {
@@ -185,16 +185,16 @@ async function unfollowHomeInstance(id) {
 	// if auto actions are enbaled...
 	if (settings.fediact_autoaction) {
 		// build follow post request
-		var requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + id + "/unfollow";
-		var responseUnfollow = await makeRequest("POST",requestUrl,settings.tokenheader);
+		var requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + id + "/unfollow"
+		var responseUnfollow = await makeRequest("POST",requestUrl,settings.tokenheader)
 		// check if it worked (it is ignored if the user was already followed)
 		if (responseUnfollow) {
-			responseUnfollow = JSON.parse(responseUnfollow);
+			responseUnfollow = JSON.parse(responseUnfollow)
 			if (responseUnfollow.following || responseUnfollow.requested) {
 				log("Unfollow failed.")
-				return false;
+				return false
 			} else {
-				return true;
+				return true
 			}
 		}
 	} else {
@@ -206,16 +206,16 @@ async function boostHomeInstance(id) {
 	// if auto actions are enbaled...
 	if (settings.fediact_autoaction) {
 		// build follow post request
-		var requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/" + id + "/reblog";
-		var responseBoost = await makeRequest("POST",requestUrl,settings.tokenheader);
+		var requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/" + id + "/reblog"
+		var responseBoost = await makeRequest("POST",requestUrl,settings.tokenheader)
 		// check if it worked (it is ignored if the user was already followed)
 		if (responseBoost) {
-			responseBoost = JSON.parse(responseBoost);
+			responseBoost = JSON.parse(responseBoost)
 			if (!responseBoost.reblogged) {
-				log("Boost failed.");
-				return false;
+				log("Boost failed.")
+				return false
 			} else {
-				return true;
+				return true
 			}
 		}
 	} else {
@@ -227,16 +227,16 @@ async function unboostHomeInstance(id) {
 	// if auto actions are enbaled...
 	if (settings.fediact_autoaction) {
 		// build follow post request
-		var requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + id + "/unreblog";
-		var responseUnboost = await makeRequest("POST",requestUrl,settings.tokenheader);
+		var requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + id + "/unreblog"
+		var responseUnboost = await makeRequest("POST",requestUrl,settings.tokenheader)
 		// check if it worked (it is ignored if the user was already followed)
 		if (responseUnboost) {
-			responseUnboost = JSON.parse(responseUnboost);
+			responseUnboost = JSON.parse(responseUnboost)
 			if (responseUnboost.reblogged) {
-				log("Unboost failed.");
-				return false;
+				log("Unboost failed.")
+				return false
 			} else {
-				return true;
+				return true
 			}
 		}
 	} else {
@@ -248,16 +248,16 @@ async function favouriteHomeInstance(id) {
 	// if auto actions are enbaled...
 	if (settings.fediact_autoaction) {
 		// build follow post request
-		var requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + id + "/favourite";
-		var responseFav = await makeRequest("POST",requestUrl,settings.tokenheader);
+		var requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + id + "/favourite"
+		var responseFav = await makeRequest("POST",requestUrl,settings.tokenheader)
 		// check if it worked (it is ignored if the user was already followed)
 		if (responseFav) {
-			responseFav = JSON.parse(responseFav);
+			responseFav = JSON.parse(responseFav)
 			if (!responseFav.favourited) {
-				log("Favourite failed.");
-				return false;
+				log("Favourite failed.")
+				return false
 			} else {
-				return true;
+				return true
 			}
 		}
 	} else {
@@ -269,16 +269,16 @@ async function unfavouriteHomeInstance(id) {
 	// if auto actions are enbaled...
 	if (settings.fediact_autoaction) {
 		// build follow post request
-		var requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/" + id + "/unfavourite";
-		var responseUnFav = await makeRequest("POST",requestUrl,settings.tokenheader);
+		var requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/" + id + "/unfavourite"
+		var responseUnFav = await makeRequest("POST",requestUrl,settings.tokenheader)
 		// check if it worked (it is ignored if the user was already followed)
 		if (responseUnFav) {
-			responseUnFav = JSON.parse(responseUnFav);
+			responseUnFav = JSON.parse(responseUnFav)
 			if (responseUnFav.favourited) {
-				log("Unfavourite failed.");
-				return false;
+				log("Unfavourite failed.")
+				return false
 			} else {
-				return true;
+				return true
 			}
 		}
 	} else {
@@ -290,16 +290,16 @@ async function bookmarkHomeInstance(id) {
 	// if auto actions are enbaled...
 	if (settings.fediact_autoaction) {
 		// build follow post request
-		var requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + id + "/bookmark";
-		var responseBookmark = await makeRequest("POST",requestUrl,settings.tokenheader);
+		var requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + id + "/bookmark"
+		var responseBookmark = await makeRequest("POST",requestUrl,settings.tokenheader)
 		// check if it worked (it is ignored if the user was already followed)
 		if (responseBookmark) {
-			responseBookmark = JSON.parse(responseBookmark);
+			responseBookmark = JSON.parse(responseBookmark)
 			if (!responseBookmark.bookmarked) {
-				log("Bookmark failed.");
-				return false;
+				log("Bookmark failed.")
+				return false
 			} else {
-				return true;
+				return true
 			}
 		}
 	} else {
@@ -311,16 +311,16 @@ async function unbookmarkHomeInstance(id) {
 	// if auto actions are enbaled...
 	if (settings.fediact_autoaction) {
 		// build follow post request
-		var requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/" + id + "/unbookmark";
-		var responseUnbookmark = await makeRequest("POST",requestUrl,settings.tokenheader);
+		var requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/" + id + "/unbookmark"
+		var responseUnbookmark = await makeRequest("POST",requestUrl,settings.tokenheader)
 		// check if it worked (it is ignored if the user was already followed)
 		if (responseUnbookmark) {
-			responseUnbookmark = JSON.parse(responseUnbookmark);
+			responseUnbookmark = JSON.parse(responseUnbookmark)
 			if (responseUnbookmark.bookmarked) {
-				log("Unbookmark failed.");
-				return false;
+				log("Unbookmark failed.")
+				return false
 			} else {
-				return true;
+				return true
 			}
 		}
 	} else {
@@ -334,11 +334,11 @@ async function isFollowingHomeInstance(ids) {
 		// trailing & is no issue
 		requestUrl += "id[]=" + id.toString() + "&"
 	}
-	var responseFollowing = await makeRequest("GET",requestUrl,settings.tokenheader);
-	const follows = Array(ids.length).fill(false);
+	var responseFollowing = await makeRequest("GET",requestUrl,settings.tokenheader)
+	const follows = Array(ids.length).fill(false)
 	// check if it worked (it is ignored if the user was already followed)
 	if (responseFollowing) {
-		responseFollowing = JSON.parse(responseFollowing);
+		responseFollowing = JSON.parse(responseFollowing)
 		for (var i = 0; i < ids.length; i++) {
 			for (account of responseFollowing) {
 				if (account.id == ids[i]) {
@@ -355,14 +355,14 @@ async function isFollowingHomeInstance(ids) {
 async function executeTootAction(id, action) {
 	var actionExecuted
 	switch (action) {
-		case 'boost': actionExecuted = await boostHomeInstance(id); break;
-		case 'favourite': actionExecuted = await favouriteHomeInstance(id); break;
-		case 'bookmark': actionExecuted = await bookmarkHomeInstance(id); break;
-		case 'unboost': actionExecuted = await unboostHomeInstance(id); break;
-		case 'unfavourite': actionExecuted = await unfavouriteHomeInstance(id); break;
-		case 'unbookmark': actionExecuted = await unbookmarkHomeInstance(id); break;
+		case 'boost': actionExecuted = await boostHomeInstance(id); break
+		case 'favourite': actionExecuted = await favouriteHomeInstance(id); break
+		case 'bookmark': actionExecuted = await bookmarkHomeInstance(id); break
+		case 'unboost': actionExecuted = await unboostHomeInstance(id); break
+		case 'unfavourite': actionExecuted = await unfavouriteHomeInstance(id); break
+		case 'unbookmark': actionExecuted = await unbookmarkHomeInstance(id); break
 		default:
-		  log("No valid action specified.");
+		  log("No valid action specified.")
 	}
 	return actionExecuted
 }
@@ -386,19 +386,17 @@ async function resolveHandleToHome(handle) {
 }
 
 async function resolveTootToHome(searchstring) {
-	var requestUrl = 'https://' + settings.fediact_homeinstance + searchApi + "/?q=" + searchstring + "&resolve=true&limit=1";
-	var response = await makeRequest("GET", requestUrl, settings.tokenheader);
+	var requestUrl = 'https://' + settings.fediact_homeinstance + searchApi + "/?q=" + searchstring + "&resolve=true&limit=1"
+	var response = await makeRequest("GET", requestUrl, settings.tokenheader)
 	if (response) {
-		response = JSON.parse(response);
+		response = JSON.parse(response)
 		if (!response.accounts.length && response.statuses.length) {
-			var status = response.statuses[0];
+			var status = response.statuses[0]
 			return [status.account.acct, status.id, status.reblogged, status.favourited, status.bookmarked]
 		} else {
-			log("No toot result found.")
 			return false
 		}
 	} else {
-		log("API call failed...")
 		return false
 	}
 }
@@ -414,17 +412,17 @@ function resolveTootToExternalHome(tooturl) {
 			try {
 				await chrome.runtime.sendMessage({url: tooturl}, function(response) {
 					if(response) {
-						resolve(response);
+						resolve(response)
 					} else {
-						resolve(false);
+						resolve(false)
 					}
-				});
+				})
 			} catch (e) {
 				log(e)
 				log("Reloading page, extension likely got updated.")
 				location.reload()
 			}
-		});
+		})
 	} else {
 		return false
 	}
@@ -436,7 +434,7 @@ function resolveTootToExternalHome(tooturl) {
 
 // custom implementation for allowing to toggle inline css - .css() etc. are not working for some mastodon instances
 function toggleInlineCss(el, styles, toggleclass) {
-	var active = $(el).toggleClass(toggleclass).hasClass(toggleclass);
+	var active = $(el).toggleClass(toggleclass).hasClass(toggleclass)
 	for (var style of styles) {
 		if (active) {
 			$(el).css(style[0], style[2])
@@ -457,10 +455,10 @@ function extractHandle(selectors) {
 	for (const selector of selectors) {
 		// if found
 		if ($(selector).length) {
-			return $(selector).text().trim();
+			return $(selector).text().trim()
 		}
 	}
-	return false;
+	return false
 }
 
 function isInProcessedToots(id) {
@@ -494,34 +492,34 @@ async function processToots() {
 		var action = false
 		if ($(e.currentTarget).children("i.fa-retweet").length) {
 			if ($(e.currentTarget).children("i.fa-retweet").hasClass("fediactive")) {
-				action = "unboost";
+				action = "unboost"
 			} else {
-				action = "boost";
+				action = "boost"
 			}
 		} else if ($(e.currentTarget).children("i.fa-star").length) {
 			if ($(e.currentTarget).hasClass("fediactive")) {
-				action = "unfavourite";
+				action = "unfavourite"
 			} else {
-				action = "favourite";
+				action = "favourite"
 			}
 		} else if ($(e.currentTarget).children("i.fa-bookmark").length) {
 			if ($(e.currentTarget).hasClass("fediactive")) {
-				action = "unbookmark";
+				action = "unbookmark"
 			} else {
-				action = "bookmark";
+				action = "bookmark"
 			}
 		} else if ($(e.currentTarget).attr("href")) {
 			if (~$(e.currentTarget).attr("href").indexOf("type=reblog")) {
 				if ($(e.currentTarget).hasClass("fediactive")) {
-					action = "unboost";
+					action = "unboost"
 				} else {
-					action = "boost";
+					action = "boost"
 				}
 			} else if (~$(e.currentTarget).attr("href").indexOf("type=favourite")) {
 				if ($(e.currentTarget).hasClass("fediactive")) {
-					action = "unfavourite";
+					action = "unfavourite"
 				} else {
-					action = "favourite";
+					action = "favourite"
 				}
 			}
 		}
@@ -559,9 +557,9 @@ async function processToots() {
 			return (temp.pop() || temp.pop())
 		} else if ($(el).attr("data-id")) {
 			// split by "-" to respect some ids startin with "f-"
-			return $(el).attr("data-id").split("-").slice(-1)[0];
+			return $(el).attr("data-id").split("-").slice(-1)[0]
 		} else if ($(el).closest("article[data-id], div[data-id]").length) {
-			return $(el).closest("article[data-id], div[data-id]").first().attr("data-id").split("-").slice(-1)[0];
+			return $(el).closest("article[data-id], div[data-id]").first().attr("data-id").split("-").slice(-1)[0]
 		}
 	}
 	// check elements that can contain an href (either resolved external link or internal reference)
@@ -594,7 +592,7 @@ async function processToots() {
 			var bookmarkButton = $(el).find("button:has(i.fa-bookmark)").first()
 			var replyButton = $(el).find("button:has(i.fa-reply), button:has(i.fa-reply-all), a.icon-button:has(i.fa-reply), a.icon-button:has(i.fa-reply-all)").first()
 			async function clickAction(id, e) {
-				var action = getTootAction(e);
+				var action = getTootAction(e)
 				if (action) {
 					// resolve url on home instance to get local toot/author identifiers and toot status
 					var actionExecuted = await executeTootAction(id, action)
@@ -653,45 +651,45 @@ async function processToots() {
 			function clickBinder(tootdata) {
 				$(replyButton).on("click", function(e){
 					// reply button is handle specially (always redirects with reply parameter set)
-					e.preventDefault();
-					e.stopImmediatePropagation();
+					e.preventDefault()
+					e.stopImmediatePropagation()
 					redirectTo(tootdata[6]+"?fedireply")
 				})
 				$([favButton, boostButton, bookmarkButton]).each(function() {
 					// all other buttons will behave differently with single / double click
-					var clicks = 0;
-					var timer;
+					var clicks = 0
+					var timer
 					$(this).on("click", async function(e) {
 						// prevent default and immediate propagation
-						e.preventDefault();
-						e.stopImmediatePropagation();
-						clicks++;
+						e.preventDefault()
+						e.stopImmediatePropagation()
+						clicks++
 						if (clicks == 1) {
 							timer = setTimeout(async function() {
 								// execute action on click and get result (fail/success)
-								var actionExecuted = await clickAction(tootdata[2], e);
+								var actionExecuted = await clickAction(tootdata[2], e)
 								if (!actionExecuted) {
 									log("Action failed.")
 								}
-								clicks = 0;
-							}, 350);
+								clicks = 0
+							}, 350)
 						} else {
-							clearTimeout(timer);
+							clearTimeout(timer)
 							// same as above, but we redirect if the result is successful
-							var actionExecuted = await clickAction(tootdata[2], e);
+							var actionExecuted = await clickAction(tootdata[2], e)
 							if (!actionExecuted) {
 								log("Action failed.")
 							} else {
 								redirectTo(tootdata[6])
 							}
-							clicks = 0;
+							clicks = 0
 						}
 					}).on("dblclick", function(e) {
 						// default dblclick event must be prevented
-						e.preventDefault();
-						e.stopImmediatePropagation();
-					});
-				});
+						e.preventDefault()
+						e.stopImmediatePropagation()
+					})
+				})
 			}
 			// if element is not in cache, resolve it
 			if (!cacheIndex) {
@@ -801,7 +799,7 @@ async function processToots() {
 	// One DOMNodeAppear to rule them all
 	$(document).DOMNodeAppear(async function(e) {
 		process($(e.target))
-	}, "div.status, div.detailed-status");
+	}, "div.status, div.detailed-status")
 }
 
 // main function to listen for the follow button pressed and open a new tab with the home instance
@@ -815,14 +813,14 @@ async function processFollow() {
 			if (action == "follow") {
 				var followed = await followHomeInstance(id)
 				if (followed) {
-					$(el).text("Unfollow");
+					$(el).text("Unfollow")
 					action = "unfollow"
 					return true
 				}
 			} else {
 				var unfollowed = await unfollowHomeInstance(id)
 				if (unfollowed) {
-					$(el).text("Follow");
+					$(el).text("Follow")
 					action = "follow"
 					return true
 				}
@@ -846,42 +844,42 @@ async function processFollow() {
 				if (settings.fediact_showfollows) {
 					var isFollowing = await isFollowingHomeInstance([resolvedHandle[0]])
 					if (isFollowing[0]) {
-						$(el).text("Unfollow");
-						action = "unfollow";
+						$(el).text("Unfollow")
+						action = "unfollow"
 					}
 				}
-				var clicks = 0;
-				var timer;
+				var clicks = 0
+				var timer
 				$(el).on("click", async function(e) {
 					// prevent default and immediate propagation
-					e.preventDefault();
-					e.stopImmediatePropagation();
-					clicks++;
+					e.preventDefault()
+					e.stopImmediatePropagation()
+					clicks++
 					if (clicks == 1) {
 						timer = setTimeout(async function() {
 							execFollow(resolvedHandle[0])
-							clicks = 0;
-						}, 350);
+							clicks = 0
+						}, 350)
 					} else {
-						clearTimeout(timer);
+						clearTimeout(timer)
 						var done = await execFollow(resolvedHandle[0])
 						if (done) {
 							var saveText = $(el).text()
 							var redirectUrl = 'https://' + settings.fediact_homeinstance + '/@' + resolvedHandle[1]
-							$(el).text("Redirecting...");
+							$(el).text("Redirecting...")
 							setTimeout(function() {
-								redirectTo(redirectUrl);
+								redirectTo(redirectUrl)
 								$(el).text(saveText)
-							}, 1000);
+							}, 1000)
 						} else {
 							log("Action failed.")
 						}
-						clicks = 0;
+						clicks = 0
 					}
 				}).on("dblclick", function(e) {
-					e.preventDefault();
-					e.stopImmediatePropagation();
-				});
+					e.preventDefault()
+					e.stopImmediatePropagation()
+				})
 			} else {
 				log("Could not resolve user home ID.")
 			}
@@ -891,7 +889,6 @@ async function processFollow() {
 	var allFollowPaths = followButtonPaths.join(",")
 	// one domnodeappear to rule them all
 	$(document).DOMNodeAppear(async function(e) {
-		console.log($(e.target))
 		process($(e.target))
 	}, allFollowPaths)
 }
@@ -903,12 +900,12 @@ async function processFollow() {
 // process white/blacklist from ext settings
 function processDomainList(newLineList) {
 	// split by new line
-	var arrayFromList = newLineList.split(/\r?\n/);
+	var arrayFromList = newLineList.split(/\r?\n/)
 	// array to put checked domains into
-	var cleanedArray = [];
+	var cleanedArray = []
 	for (var domain of arrayFromList) {
 		// remove whitespace
-		domain = domain.trim();
+		domain = domain.trim()
 		if (domain.length) {
 			if (domainRegex.test(domain)) {
 				cleanedArray.push(domain)
@@ -918,39 +915,39 @@ function processDomainList(newLineList) {
 		}
 	}
 	// return newly created set (remvoes duplicates)
-	return [...new Set(cleanedArray)];;
+	return [...new Set(cleanedArray)];
 }
 
 function checkSettings() {
 	// if the home instance is undefined/null/empty
 	if (settings.fediact_homeinstance == null || !settings.fediact_homeinstance) {
-		log("Mastodon home instance is not set.");
-		return false;
+		log("Mastodon home instance is not set.")
+		return false
 	}
 	// no token for api available (see background.js)
 	if (!settings.fediact_token) {
-		log("No API token available. Are you logged in to your home instance? If yes, wait for 1-2 minutes and reload page.");
-		return false;
+		log("No API token available. Are you logged in to your home instance? If yes, wait for 1-2 minutes and reload page.")
+		return false
 	} else {
-		settings.tokenheader = {"Authorization":"Bearer " + settings.fediact_token,};
+		settings.tokenheader = {"Authorization":"Bearer " + settings.fediact_token,}
 	}
 	// if the value looks like a domain...
 	if (!(domainRegex.test(settings.fediact_homeinstance))) {
-		log("Instance setting is not a valid domain name.");
-		return false;
+		log("Instance setting is not a valid domain name.")
+		return false
 	}
 	if (settings.fediact_mode == "whitelist") {
 		// if in whitelist mode and the cleaned whitelist is empty, return false
-		settings.fediact_whitelist = processDomainList(settings.fediact_whitelist);
+		settings.fediact_whitelist = processDomainList(settings.fediact_whitelist)
 		if (settings.fediact_whitelist.length < 1) {
 			log("Whitelist is empty or invalid.")
-			return false;
+			return false
 		}
 	} else {
 		// also process the blacklist if in blacklist mode, but an empty blacklist is OK so we do not return false
-		settings.fediact_blacklist = processDomainList(settings.fediact_blacklist);
+		settings.fediact_blacklist = processDomainList(settings.fediact_blacklist)
 	}
-	return true;
+	return true
 }
 
 // test if the current site should be processed or not
@@ -960,37 +957,37 @@ async function checkSite() {
 	if (location.hostname == settings.fediact_homeinstance) {
 		fedireply = getUrlParameter("fedireply")
 		if (!fedireply) {
-			log("Current site is your home instance.");
-			return false;
+			log("Current site is your home instance.")
+			return false
 		}
 	}
 	// are we in whitelist mode?
 	if (settings.fediact_mode == "whitelist") {
 		// if so, check if site is NOT in whitelist
 		if ($.inArray(location.hostname, settings.fediact_whitelist) < 0) {
-			log("Current site is not in whitelist.");
-			return false;
+			log("Current site is not in whitelist.")
+			return false
 		}
 	} else {
 		// otherwise we are in blacklist mode, so check if site is on blacklist
 		if ($.inArray(location.hostname, settings.fediact_blacklist) > -1) {
-			log("Current site is in blacklist.");
-			return false;
+			log("Current site is in blacklist.")
+			return false
 		}
 	}
 	// last check - and probably the most accurate to determine if it actually is mastadon
-	var requestUrl = location.protocol + '//' + location.hostname + instanceApi;
+	var requestUrl = location.protocol + '//' + location.hostname + instanceApi
 	// call instance api to confirm its mastodon and get normalized handle uri
-	var response = await makeRequest("GET", requestUrl, null);
+	var response = await makeRequest("GET", requestUrl, null)
 	if (response) {
-		var uri = JSON.parse(response).uri;
+		var uri = JSON.parse(response).uri
 		if (uri) {
 			// run external mode
-			return true;
+			return true
 		}
 	}
-	log("Does not look like a Mastodon instance.");
-	return false;
+	log("Does not look like a Mastodon instance.")
+	return false
 }
 
 async function backgroundProcessor() {

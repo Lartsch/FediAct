@@ -1,9 +1,9 @@
-var browser, chrome, settings;
-const enableConsoleLog = true;
-const logPrepend = "[FediAct]";
+var browser, chrome, settings
+const enableConsoleLog = true
+const logPrepend = "[FediAct]"
 const tokenInterval = 3 // minutes
 
-const tokenRegex = /"access_token":".*?",/gm;
+const tokenRegex = /"access_token":".*?",/gm
 
 // required settings keys with defauls
 const settingsDefaults = {
@@ -32,15 +32,15 @@ async function resolveToot(url) {
             log(e)
             resolve(false)
         }
-    });
+    })
 }
 
 // fetch API token here (will use logged in session automatically)
 async function fetchBearerToken() {
-    var url = "https://" + settings.fediact_homeinstance;
+    var url = "https://" + settings.fediact_homeinstance
     try {
-        var res = await fetch(url);
-        var text = await res.text();
+        var res = await fetch(url)
+        var text = await res.text()
     } catch(e) {
         log(e)
         return false
@@ -48,23 +48,23 @@ async function fetchBearerToken() {
     if (text) {
         // dom parser is not available in background workers, so we use regex to parse the html....
         // for some reason, regex groups do also not seem to work in chrome background workers... the following is ugly but should work fine
-        var content = text.match(tokenRegex);
+        var content = text.match(tokenRegex)
         if (content) {
-            var indexOne = content[0].search(/"access_token":"/);
-            var indexTwo = content[0].search(/",/);
+            var indexOne = content[0].search(/"access_token":"/)
+            var indexTwo = content[0].search(/",/)
             if (indexOne > -1 && indexTwo > -1) {
                 indexOne = indexOne + 16
-                var token = content[0].substring(indexOne, indexTwo);
+                var token = content[0].substring(indexOne, indexTwo)
                 if (token.length > 16) {
-                    settings.fediact_token = token;
+                    settings.fediact_token = token
                     return true
                 }
             }
         }
     }
     // reset token for inject.js to know
-    settings.fediact_token = null;
-    log("Token could not be found.");
+    settings.fediact_token = null
+    log("Token could not be found.")
 }
 
 async function fetchData() {
@@ -77,7 +77,7 @@ async function fetchData() {
     if (settings.fediact_homeinstance) {
         await fetchBearerToken()
     } else {
-        log("Home instance not set");
+        log("Home instance not set")
     }
     try {
         await (browser || chrome).storage.local.set(settings)
@@ -96,7 +96,7 @@ async function reloadListeningScripts() {
                 continue
             }
        }
-    });
+    })
 }
 
 // fetch api token right after install (mostly for debugging, when the ext. is reloaded)
