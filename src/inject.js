@@ -2,17 +2,18 @@
 // =-=-=-=-=-= CONSTANTS =-==-=-=-=
 // =-=-=-=-==-=-=-=-==-=-=-=-==-=-=
 
-const followButtonPaths = ["div.account__header button.logo-button","div.public-account-header a.logo-button","div.account-card a.logo-button","div.directory-card a.icon-button", "div.detailed-status a.logo-button"];
-const profileNamePaths = ["div.account__header__tabs__name small", "div.public-account-header__tabs__name small", "div.detailed-status span.display-name__account", "div.display-name > span"];
-const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/;
-const handleExtractRegex = /^[^@]*@(?<handle>\w+)(@(?<handledomain>([\w-]+\.)+?\w+))?(\/(?<tootid>\d+))?\/?$/;
-const enableConsoleLog = true;
-const logPrepend = "[FediAct]";
-const maxElementWaitFactor = 200; // x 100ms for total time
-const instanceApi = "/api/v1/instance";
-const statusApi = "/api/v1/statuses";
-const searchApi = "/api/v2/search";
-const accountsApi = "/api/v1/accounts";
+const followButtonPaths = ["div.account__header button.logo-button","div.public-account-header a.logo-button","div.account-card a.logo-button","div.directory-card a.icon-button", "div.detailed-status a.logo-button"]
+const profileNamePaths = ["div.account__header__tabs__name small", "div.public-account-header__tabs__name small", "div.detailed-status span.display-name__account", "div.display-name > span"]
+const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/
+const handleExtractUrlRegex = /^(?<domain>https?:\/\/(?:\.?[a-z0-9-]+)+(?:\.[a-z]+){1})?\/?@(?<handle>\w+)(?:@(?<handledomain>(?:[\w-]+\.)+?\w+))?(?:\/(?<tootid>\d+))?\/?$/
+const handleExtractUriRegex = /^(?<domain>https?:\/\/(?:\.?[a-z0-9-]+)+(?:\.[a-z]+){1})(?:\/users\/)(?<handle>\w+)(?:(?:\/statuses\/)(?<tootid>\d+))?\/?$/
+const enableConsoleLog = true
+const logPrepend = "[FediAct]"
+const maxElementWaitFactor = 200 // x 100ms for total time
+const instanceApi = "/api/v1/instance"
+const statusApi = "/api/v1/statuses"
+const searchApi = "/api/v2/search"
+const accountsApi = "/api/v1/accounts"
 const apiDelay = 500
 const maxTootCache = 200
 
@@ -488,6 +489,7 @@ async function processReply() {
 
 // process any toots found on supported sites
 async function processToots() {
+	// determine action when a button is clicked (except reply, which will always redirect)
 	function getTootAction(e) {
 		var action = false
 		if ($(e.currentTarget).children("i.fa-retweet").length) {
@@ -525,59 +527,67 @@ async function processToots() {
 		}
 		return action
 	}
-	function getTootIdAndAuthor(el) {
-		var [closestTootId, closestTootAuthor, alreadyResolved] = [false, false, false]
-		if ($(el).find("span.display-name__account").length) {
-			closestTootAuthor = $(el).find("span.display-name__account").first().text().trim()
+	// some toots contain an href which can be an already resolved external link or an internal reference
+	function tootHrefCheck(temp) {
+		if (temp.startsWith("http")) {
+			var tempUrl = new URL(temp)
+			if (location.hostname == tempUrl.hostname) {
+				temp = temp.split("/")
+				var tempLast = temp.pop() || temp.pop()
+				return [false, tempLast]
+			} else {
+				// return full URL, since this is already a resolved link to the toot's home instance
+				return [true, temp]
+			}
+		} else {
+			temp = temp.split("/")
+			var tempLast = temp.pop() || temp.pop()
+			return [false, tempLast]
 		}
+	}
+	// get only the toot author handle
+	function getTootAuthor(el) {
+		if ($(el).find("span.display-name__account").length) {
+			return $(el).find("span.display-name__account").first().text().trim()
+		}
+	}
+	// check elements that can contain the local toot id and return it if found
+	function getTootInternalId(el) {
 		if ($(el).is(".detailed-status__wrapper")) {
 			// we will use the last part of the URL path - this should be more universal than always selecting the fifth "/" slice
 			var temp = window.location.href.split("?")[0].split("/")
-			// needs to go in a extra var
-			var tempLast = temp.pop() || temp.pop()
-			// take care of possible trailing slash and set tootid
-			closestTootId = tempLast
-		} else if ($(el).find("a.status__relative-time").attr("href")) {
-			var temp = $(el).find("a.status__relative-time").attr("href").split("?")[0]
-			if (temp.startsWith("http")) {
-				var tempUrl = new URL(temp)
-				if (location.hostname == tempUrl.hostname) {
-					temp = temp.split("/")
-					var tempLast = temp.pop() || temp.pop()
-					closestTootId = tempLast
-				} else {
-					// return full URL, since this is already a resolved link to the toot's home instance
-					closestTootId = temp
-					alreadyResolved = true
-				}
-			} else {
-				temp = temp.split("/")
-				var tempLast = temp.pop() || temp.pop()
-				closestTootId = tempLast
-			}
-		} else if ($(el).find("a.detailed-status__datetime").attr("href")) {
-			var temp = $(el).find("a.detailed-status__datetime").attr("href").split("?")[0].split("/")
-			var tempLast = temp.pop() || temp.pop()
-			closestTootId = tempLast
+			return (temp.pop() || temp.pop())
 		} else if ($(el).attr("data-id")) {
-			closestTootId = $(el).attr("data-id").split("-").slice(-1)[0];
+			// split by "-" to respect some ids startin with "f-"
+			return $(el).attr("data-id").split("-").slice(-1)[0];
 		} else if ($(el).closest("article[data-id], div[data-id]").length) {
-			closestTootId = $(el).closest("article[data-id], div[data-id]")[0].attr("data-id").split("-").slice(-1)[0];
-		} else if ($(el).find("a.modal-button").length) {
-			var temp = $(el).find("a.modal-button").attr("href").split("?")[0].split("/")
-			var tempLast = temp.pop() || temp.pop()
-			closestTootId = tempLast
+			return $(el).closest("article[data-id], div[data-id]").first().attr("data-id").split("-").slice(-1)[0];
 		}
-		return [closestTootId, closestTootAuthor, alreadyResolved]
 	}
+	// check elements that can contain an href (either resolved external link or internal reference)
+	function getTootExtIntHref(el) {
+		if ($(el).find("a.status__relative-time").length) {
+			return tootHrefCheck($(el).find("a.status__relative-time").first().attr("href").split("?")[0])
+		} else if ($(el).find("a.detailed-status__datetime").length) {
+			return tootHrefCheck($(el).find("a.detailed-status__datetime").first().attr("href").split("?")[0])
+		} else if ($(el).find("a.modal-button").length) {
+			return tootHrefCheck($(el).find("a.modal-button").first().attr("href").split("?")[0])
+		}
+	}
+	// main function to process each detected toot element
 	async function process(el) {
-		var homeResolveString
+		// extra step for detailed status elements to select the correct parent
 		if ($(el).is("div.detailed-status")) {
 			el = $(el).closest("div.focusable")
 		}
-		var tootData = getTootIdAndAuthor($(el))
-		if (tootData) {
-			var cacheIndex = isInProcessedToots(tootData[0])
+		var tootAuthor = getTootAuthor($(el))
+		var tootInternalId = getTootInternalId($(el))
+		var [tootHrefIsExt, tootHrefOrId] = getTootExtIntHref($(el))
+		var internalIdentifier = tootInternalId || tootHrefOrId
+		if (internalIdentifier) {
+			var homeResolveStrings = []
+			// check if id is already cached
+			var cacheIndex = isInProcessedToots(internalIdentifier)
 			// get all button elements of this toot
 			var favButton = $(el).find("button:has(i.fa-star), a.icon-button:has(i.fa-star)").first()
 			var boostButton = $(el).find("button:has(i.fa-retweet), a.icon-button:has(i.fa-retweet)").first()
@@ -618,7 +628,7 @@ async function processToots() {
 			function initStyles(tootdata) {
 				$(el).find(".feditriggered").remove()
 				if (!tootdata[1]) {
-					$("<span class='feditriggered' style='color: orange; padding-right: 10px; padding-left: 10px'>Not resolved</span>").insertAfter($(favButton))
+					$("<span class='feditriggered' style='color: orange; padding-right: 10px; padding-left: 10px'>Unresolved</span>").insertAfter($(favButton))
 				} else {
 					// enable the bookmark button
 					$(bookmarkButton).removeClass("disabled").removeAttr("disabled")
@@ -683,68 +693,99 @@ async function processToots() {
 					});
 				});
 			}
+			// if element is not in cache, resolve it
 			if (!cacheIndex) {
-				// if this is set, we got a toot url that is already resolved to its home instance
-				if (tootData[2]) {
-					homeResolveString = tootData[0]
-				// otherwise, we need to build the homeResolveString manually
-				} else {
+				// we can only process internalTootIds if we also have a user handle
+				if (tootHrefIsExt) {
+					homeResolveStrings.push(tootHrefOrId)
+				}
+				if (tootAuthor) {
 					// get handle/handledomain without @
-					var matches = tootData[1].match(handleExtractRegex);
+					var matches = tootAuthor.match(handleExtractUrlRegex)
+					var [isExternalHandle, extHomeResolved] = [false, false]
 					// if we have a handledomain...
 					if (matches.groups.handledomain) {
 						// check if the current hostname includes that handle domain...
-						if (~location.hostname.indexOf(matches.groups.handledomain)) {
-							// yes? then its a toot local to the current ext. instance, build the according resolveString
-							homeResolveString = location.protocol + "//" + location.hostname + "/users/" + matches.groups.handle + "/statuses/" + tootData[0]
-						} else {
-							// otherwise this is an external handle and we will use external home URI resolving (need to use @user@domain.com format here)
-							var resolveString = location.protocol + '//' + location.hostname + "/" + tootData[1] + "/" + tootData[0]
-							var resolveTootHome = await resolveTootToExternalHome(resolveString)
+						if (!(~location.hostname.indexOf(matches.groups.handledomain))) {
+							isExternalHandle = true
+						}
+					}
+					// add ids
+					var internalTootIds = [tootInternalId]
+					if (!tootHrefIsExt) {
+						internalTootIds.push(tootHrefOrId)
+					}
+					// filter duplicates and undefined values (shorter than checking with if clauses when adding...)
+					internalTootIds = internalTootIds.filter((element, index) => {
+						return (element !== undefined && internalTootIds.indexOf(element) == index)
+					})
+					// loop through internal ids (will be only 1 normally, but we want to maximize our chances for resolving later on)
+					for (var internalTootId of internalTootIds) {
+						// if its not an external handle...
+						if (!isExternalHandle) {
+							// add resolve strings for both formats on the current external instance
+							homeResolveStrings.push(location.protocol + "//" + location.hostname + "/users/" + matches.groups.handle + "/statuses/" + internalTootId)
+							homeResolveStrings.push(location.protocol + "//" + location.hostname + "/@" + matches.groups.handle + "/" + internalTootId)
+						// otherwise, start external resolve process if not done already for one of the internalTootIds
+						} else if (!extHomeResolved) {
+							var extResolveString = location.protocol + '//' + location.hostname + "/" + tootAuthor + "/" + internalTootId
+							var resolveTootHome = await resolveTootToExternalHome(extResolveString)
 							if (resolveTootHome) {
-								if (~resolveTootHome.indexOf("/users/")) {
-									// in this case, it's already in the /users/ format
-									homeResolveString = resolveTootHome
-								} else if (handleExtractRegex.test(resolveTootHome)) {
-									// in this case, it's not, so we extract the handle + tootid from the URL
-									var tootMatches = resolveTootHome.match(handleExtractRegex)
-									if (tootMatches) {
-										// ... and then build a string in /users/ format...
-										homeResolveString = resolveTootHome.split("@")[0] + "users/" + tootMatches.groups.handle + "/statuses/" + tootMatches.groups.tootid
+								// update var so next tootid will not be resolved externally, if any more
+								extHomeResolved = true
+								// always push the originally returned url
+								homeResolveStrings.push(resolveTootHome)
+								// if it matches the URI format, also add the @ format
+								if (handleExtractUriRegex.test(resolveTootHome)) {
+									var tmpmatches = resolveTootHome.match(handleExtractUriRegex)
+									if (tmpmatches.groups.handle && tmpmatches.groups.tootid && tmpmatches.groups.domain) {
+										homeResolveStrings.push(tmpmatches.groups.domain + "/@" + tmpmatches.groups.handle + "/" + tmpmatches.groups.tootid)
+									}
+								// otherwise, if it matches the @ format, also add the URI format
+								} else if (handleExtractUrlRegex.test(resolveTootHome)) {
+									var tmpmatches = resolveTootHome.match(handleExtractUrlRegex)
+									if (tmpmatches.groups.handle && tmpmatches.groups.tootid && tmpmatches.groups.domain) {
+										homeResolveStrings.push(tmpmatches.groups.domain + "/users/" + tmpmatches.groups.handle + "/statuses/" + tmpmatches.groups.tootid)
 									}
 								}
 							} else {
-								// in this case, toot home instance resolving failed, likely since the site does not use 302 redirects (should rarely reach this point since these instances seem to use fully resolved urls in a.status__relative-time)
-								// so we try with a resolve string in @user@domain.com format as fallback (less probability for resolving)
-								log("Resolve fallback #1")
-								homeResolveString = location.protocol + "//" + location.hostname + "/" + tootData[1] + "/" + tootData[0]
+								// fallback to current external instance URL (for external handles, there is no /users/... format)
+								homeResolveStrings.push(location.protocol + "//" + location.hostname + "/" + tootAuthor + "/" + internalTootId)
 							}
 						}
-					} else {
-						// this means it is a toot local to the current ext. instance as well
-						homeResolveString = location.protocol + "//" + location.hostname + "/users/" + matches.groups.handle + "/statuses/" + tootData[0]
 					}
 				}
-				if (homeResolveString) {
-					// resolve toot on actual home instance
-					var resolvedToot = await resolveTootToHome(homeResolveString) // [status.account.acct, status.id, status.reblogged, status.favourited, status.bookmarked]
-					if (resolvedToot) {
-						// set the redirect to home instance URL in @ format
-						var redirectUrl = 'https://' + settings.fediact_homeinstance + "/@" + resolvedToot[0] + "/" + resolvedToot[1]
-						var fullEntry = [tootData[0], ...resolvedToot, redirectUrl, true]
+				if (homeResolveStrings.length) {
+					homeResolveStrings = homeResolveStrings.filter((element, index) => {
+						return (homeResolveStrings.indexOf(element) == index)
+					})
+					var resolvedToHomeInstance = false
+					for (var homeResolveString of homeResolveStrings) {
+						if (!resolvedToHomeInstance) {
+							// resolve toot on actual home instance
+							var resolvedToot = await resolveTootToHome(homeResolveString) // [status.account.acct, status.id, status.reblogged, status.favourited, status.bookmarked]
+							if (resolvedToot) {
+								resolvedToHomeInstance = true
+								// set the redirect to home instance URL in @ format
+								var redirectUrl = 'https://' + settings.fediact_homeinstance + "/@" + resolvedToot[0] + "/" + resolvedToot[1]
+								fullEntry = [internalIdentifier, ...resolvedToot, redirectUrl, true]
+							}
+						}
+					}
+					if (resolvedToHomeInstance) {
 						addToProcessedToots(fullEntry)
 						// continue with click handling...
 						clickBinder(fullEntry)
 						initStyles(fullEntry)
 					} else {
-						log("Failed to resolve: "+homeResolveString)
-						addToProcessedToots([tootData[0], false])
-						initStyles([tootData[0], false])
+						log("Failed to resolve: "+homeResolveStrings)
+						addToProcessedToots([internalIdentifier, false])
+						initStyles([internalIdentifier, false])
 					}
 				} else {
 					log("Could not identify a post URI for home resolving.")
-					addToProcessedToots([tootData[0], false])
-					initStyles([tootData[0], false])
+					addToProcessedToots([internalIdentifier, false])
+					initStyles([internalIdentifier, false])
 				}
 			} else {
 				var toot = processed[cacheIndex]
@@ -764,7 +805,6 @@ async function processToots() {
 }
 
 // main function to listen for the follow button pressed and open a new tab with the home instance
-// TODO: this is still an old implementation, update in accordance with processToots as far as possible
 async function processFollow() {
 	var fullHandle
 	var action = "follow"
@@ -851,6 +891,7 @@ async function processFollow() {
 	var allFollowPaths = followButtonPaths.join(",")
 	// one domnodeappear to rule them all
 	$(document).DOMNodeAppear(async function(e) {
+		console.log($(e.target))
 		process($(e.target))
 	}, allFollowPaths)
 }
