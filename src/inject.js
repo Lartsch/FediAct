@@ -489,13 +489,19 @@ async function processReply() {
 async function processToots() {
 	// determine action when a button is clicked (except reply, which will always redirect)
 	function getTootAction(e) {
+		// set to false initially
 		var action = false
+		// check if the clicked element has a retweet icon
 		if ($(e.currentTarget).children("i.fa-retweet").length) {
+			// if so, check if the retweet icon has the fediactive class (for all other buttons it will be the button element itself)
 			if ($(e.currentTarget).children("i.fa-retweet").hasClass("fediactive")) {
+				// yep, has the class - so this action should be unboost
 				action = "unboost"
 			} else {
+				// nope, so it will be a boost
 				action = "boost"
 			}
+		// repeat for favourite and bookmark
 		} else if ($(e.currentTarget).children("i.fa-star").length) {
 			if ($(e.currentTarget).hasClass("fediactive")) {
 				action = "unfavourite"
@@ -508,6 +514,7 @@ async function processToots() {
 			} else {
 				action = "bookmark"
 			}
+		// should rarely reach this point, but some v3 instances include the action in the href only (v3 public view does NOT have a bookmark button, so skip)
 		} else if ($(e.currentTarget).attr("href")) {
 			if (~$(e.currentTarget).attr("href").indexOf("type=reblog")) {
 				if ($(e.currentTarget).hasClass("fediactive")) {
@@ -527,10 +534,15 @@ async function processToots() {
 	}
 	// some toots contain an href which can be an already resolved external link or an internal reference
 	function tootHrefCheck(temp) {
+		// is it a full url?
 		if (temp.startsWith("http")) {
+			// yes, create a new URL() to access its parts
 			var tempUrl = new URL(temp)
+			// is the hostname of the URL the same as the current instance hostname?
 			if (location.hostname == tempUrl.hostname) {
+				// yes, so its a local toot id
 				temp = temp.split("/")
+				// handle trailing / case
 				var tempLast = temp.pop() || temp.pop()
 				return [false, tempLast]
 			} else {
@@ -538,6 +550,7 @@ async function processToots() {
 				return [true, temp]
 			}
 		} else {
+			// no, so it must be a local toot id as well
 			temp = temp.split("/")
 			var tempLast = temp.pop() || temp.pop()
 			return [false, tempLast]
@@ -545,25 +558,30 @@ async function processToots() {
 	}
 	// get only the toot author handle
 	function getTootAuthor(el) {
+		// find the element containing the display name and return text if found
 		if ($(el).find("span.display-name__account").length) {
 			return $(el).find("span.display-name__account").first().text().trim()
 		}
 	}
 	// check elements that can contain the local toot id and return it if found
 	function getTootInternalId(el) {
+		// detailed status wrapper - get id from current document url
 		if ($(el).is(".detailed-status__wrapper")) {
 			// we will use the last part of the URL path - this should be more universal than always selecting the fifth "/" slice
 			var temp = window.location.href.split("?")[0].split("/")
 			return (temp.pop() || temp.pop())
+		// otherwise check if current element has data-id attribute
 		} else if ($(el).attr("data-id")) {
 			// split by "-" to respect some ids startin with "f-"
 			return $(el).attr("data-id").split("-").slice(-1)[0]
+		// otherwise do the same for any closest article or div with the data-id attribute
 		} else if ($(el).closest("article[data-id], div[data-id]").length) {
 			return $(el).closest("article[data-id], div[data-id]").first().attr("data-id").split("-").slice(-1)[0]
 		}
 	}
 	// check elements that can contain an href (either resolved external link or internal reference)
 	function getTootExtIntHref(el) {
+		// for each element possibly containing an href, check if its and external fully resolved href or an internal reference and return the first found
 		if ($(el).find("a.status__relative-time").length) {
 			return tootHrefCheck($(el).find("a.status__relative-time").first().attr("href").split("?")[0])
 		} else if ($(el).find("a.detailed-status__datetime").length) {
@@ -578,10 +596,14 @@ async function processToots() {
 		if ($(el).is("div.detailed-status")) {
 			el = $(el).closest("div.focusable")
 		}
+		// get toot data
 		var tootAuthor = getTootAuthor($(el))
 		var tootInternalId = getTootInternalId($(el))
 		var [tootHrefIsExt, tootHrefOrId] = getTootExtIntHref($(el))
+		// we will always need an internal reference to the toot, be it an actual internal toot id or the href of a toot already resolved to its home
+		// tootInternalId will be preferred if both are set
 		var internalIdentifier = tootInternalId || tootHrefOrId
+		// do we have one of those?
 		if (internalIdentifier) {
 			var homeResolveStrings = []
 			// check if id is already cached
@@ -591,17 +613,23 @@ async function processToots() {
 			var boostButton = $(el).find("button:has(i.fa-retweet), a.icon-button:has(i.fa-retweet)").first()
 			var bookmarkButton = $(el).find("button:has(i.fa-bookmark)").first()
 			var replyButton = $(el).find("button:has(i.fa-reply), button:has(i.fa-reply-all), a.icon-button:has(i.fa-reply), a.icon-button:has(i.fa-reply-all)").first()
+			// handles process when a button is clicked
 			async function clickAction(id, e) {
+				// determine the action to perform
 				var action = getTootAction(e)
 				if (action) {
 					// resolve url on home instance to get local toot/author identifiers and toot status
 					var actionExecuted = await executeTootAction(id, action)
 					if (actionExecuted) {
+						// if the action was successfully executed, update the element styles
 						if (action == "boost" || action == "unboost") {
+							// toggle inline css styles
 							toggleInlineCss($(e.currentTarget).find("i"),[["color","!remove","rgb(140, 141, 255)"],["transition-duration", "!remove", "0.9s"],["background-position", "!remove", "0px 100%"]], "fediactive")
+							// update element in cache if exists
 							if (cacheIndex) {
 								processed[cacheIndex][3] = !processed[cacheIndex][3]
 							}
+						// same for favourite, bookmarked....
 						} else if (action == "favourite" || action == "unfavourite") {
 							toggleInlineCss($(e.currentTarget),[["color","!remove","rgb(202, 143, 4)"]], "fediactive")
 							if (cacheIndex) {
@@ -612,7 +640,7 @@ async function processToots() {
 							if (cacheIndex) {
 								processed[cacheIndex][5] = !processed[cacheIndex][5]
 							}
-						}			
+						}	
 						return true
 					} else {
 						log("Could not execute action on home instance.")
@@ -623,19 +651,25 @@ async function processToots() {
 					return false
 				}
 			}
+			// handles initialization of element styles
 			function initStyles(tootdata) {
+				// always remove any existing "Unresolved" indicator from the element first
 				$(el).find(".feditriggered").remove()
+				// is the toot unresolved?
 				if (!tootdata[1]) {
+					// yes, then add the Unresolved indicator
 					$("<span class='feditriggered' style='color: orange; padding-right: 10px; padding-left: 10px'>Unresolved</span>").insertAfter($(favButton))
 				} else {
-					// enable the bookmark button
+					// otherwise start processing button styles
+					// first enable the bookmark button (is disabled on external instances)
 					$(bookmarkButton).removeClass("disabled").removeAttr("disabled")
-					// set the toot buttons to active, depending on its state
+					// set the toot buttons to active, depending on the state of the resolved toot and if the element already has the active class
 					if (tootdata[4]) {
 						if (!$(favButton).hasClass("fediactive")) {
 							toggleInlineCss($(favButton),[["color","!remove","rgb(202, 143, 4)"]], "fediactive")
 						}
 					}
+					// repeat for other buttons
 					if (tootdata[3]) {
 						if (!$(boostButton).find("i.fediactive").length) {
 							toggleInlineCss($(boostButton).find("i"),[["color","!remove","rgb(140, 141, 255)"],["transition-duration", "!remove", "0.9s"],["background-position", "!remove", "0px 100%"]], "fediactive")
@@ -648,22 +682,30 @@ async function processToots() {
 					}
 				}
 			}
+			// handles binding of clicks events for all buttons of a toot
 			function clickBinder(tootdata) {
+				// reply button is simple, it will always redirect to the homeinstance with the fedireply parameter set
 				$(replyButton).on("click", function(e){
-					// reply button is handle specially (always redirects with reply parameter set)
+					// prevent default and immediate propagation
 					e.preventDefault()
 					e.stopImmediatePropagation()
+					// redirect to the resolved URL + fedireply parameter (so the extension can handle it after redirect)
 					redirectTo(tootdata[6]+"?fedireply")
 				})
+				// for all other buttons...
 				$([favButton, boostButton, bookmarkButton]).each(function() {
-					// all other buttons will behave differently with single / double click
+					// these behave differently with single / double click
+					// we use a custom solution for handling dblclick since the default event does not work here
+					// init function global vars required for single/double click handling
 					var clicks = 0
 					var timer
 					$(this).on("click", async function(e) {
 						// prevent default and immediate propagation
 						e.preventDefault()
 						e.stopImmediatePropagation()
+						// increase click counter
 						clicks++
+						// this will always run, but see below for double click handling
 						if (clicks == 1) {
 							timer = setTimeout(async function() {
 								// execute action on click and get result (fail/success)
@@ -671,17 +713,22 @@ async function processToots() {
 								if (!actionExecuted) {
 									log("Action failed.")
 								}
+								// reset clicks
 								clicks = 0
 							}, 350)
 						} else {
+							// if we get here, the element was clicked twice before the above timeout was over, so this is a double click
+							// reset the above timeout so it wont execute
 							clearTimeout(timer)
 							// same as above, but we redirect if the result is successful
 							var actionExecuted = await clickAction(tootdata[2], e)
 							if (!actionExecuted) {
 								log("Action failed.")
 							} else {
+								// redirect to home instance with the resolved toot url
 								redirectTo(tootdata[6])
 							}
+							// reset clicks
 							clicks = 0
 						}
 					}).on("dblclick", function(e) {
@@ -693,10 +740,11 @@ async function processToots() {
 			}
 			// if element is not in cache, resolve it
 			if (!cacheIndex) {
-				// we can only process internalTootIds if we also have a user handle
+				// always add the already resolved external toot href first, if it was set
 				if (tootHrefIsExt) {
 					homeResolveStrings.push(tootHrefOrId)
 				}
+				// we can only process internalTootIds if we also have a user handle
 				if (tootAuthor) {
 					// get handle/handledomain without @
 					var matches = tootAuthor.match(handleExtractUrlRegex)
