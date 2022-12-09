@@ -800,41 +800,56 @@ async function processToots() {
 						}
 					}
 				}
+				// if we have any resolve strings to resolve on our home instance...
 				if (homeResolveStrings.length) {
+					// filter duplicates
 					homeResolveStrings = homeResolveStrings.filter((element, index) => {
 						return (homeResolveStrings.indexOf(element) == index)
 					})
+					// initialize with false
 					var resolvedToHomeInstance = false
+					// for each resolve string...
 					for (var homeResolveString of homeResolveStrings) {
+						// run only if not already resolved
 						if (!resolvedToHomeInstance) {
 							// resolve toot on actual home instance
 							var resolvedToot = await resolveTootToHome(homeResolveString) // [status.account.acct, status.id, status.reblogged, status.favourited, status.bookmarked]
 							if (resolvedToot) {
+								// if successful, set condition to true (so it will not be resolved twice)
 								resolvedToHomeInstance = true
 								// set the redirect to home instance URL in @ format
 								var redirectUrl = 'https://' + settings.fediact_homeinstance + "/@" + resolvedToot[0] + "/" + resolvedToot[1]
+								// prepare the cache entry / toot data entry
 								fullEntry = [internalIdentifier, ...resolvedToot, redirectUrl, true]
 							}
 						}
 					}
+					// was any resolve successful?
 					if (resolvedToHomeInstance) {
+						// yes, so add to processed toots with the full toot data entry
 						addToProcessedToots(fullEntry)
 						// continue with click handling...
 						clickBinder(fullEntry)
+						// ... and init styles
 						initStyles(fullEntry)
 					} else {
+						// no, but we will still add the toot to cache as unresolved
 						log("Failed to resolve: "+homeResolveStrings)
 						addToProcessedToots([internalIdentifier, false])
 						initStyles([internalIdentifier, false])
 					}
 				} else {
+					// no resolve possible without any resolve strings, but we will still add the toot to cache as unresolved
 					log("Could not identify a post URI for home resolving.")
 					addToProcessedToots([internalIdentifier, false])
 					initStyles([internalIdentifier, false])
 				}
 			} else {
+				// the toot is already in cache, so grab it
 				var toot = processed[cacheIndex]
+				// init stylings
 				initStyles(toot)
+				// if it is NOT unresolved, bind click handlers again
 				if (toot[1]) {
 					clickBinder(toot)
 				}
@@ -857,13 +872,17 @@ async function processFollow() {
 	async function process(el) {
 		// wrapper for follow/unfollow action
 		async function execFollow(id) {
+			// is it a follow action?
 			if (action == "follow") {
+				// execute action and save result
 				var followed = await followHomeInstance(id)
+				// if action was successful, update button text and action value
 				if (followed) {
 					$(el).text("Unfollow")
 					action = "unfollow"
 					return true
 				}
+			// repeat for unfollow action
 			} else {
 				var unfollowed = await unfollowHomeInstance(id)
 				if (unfollowed) {
@@ -885,16 +904,23 @@ async function processFollow() {
 				}
 			}
 		}
+		// do we have a full handle?
 		if (fullHandle) {
+			// yes, so resolve it to a user id on our homeinstance
 			var resolvedHandle = await resolveHandleToHome(fullHandle)
 			if (resolvedHandle) {
+				// successfully resolved
+				// if showfollows is enabled...
 				if (settings.fediact_showfollows) {
+					// ... then check if user is already following
 					var isFollowing = await isFollowingHomeInstance([resolvedHandle[0]])
+					// update button text and action if already following
 					if (isFollowing[0]) {
 						$(el).text("Unfollow")
 						action = "unfollow"
 					}
 				}
+				// single and double click handling (see toot processing for explanation, is the same basically)
 				var clicks = 0
 				var timer
 				$(el).on("click", async function(e) {
