@@ -55,19 +55,19 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 v0.8.0
 <details>
   <summary>Extension popup / settings</summary>
-  <img src="https://github.com/lartsch/FediFollow-Chrome/blob/main/img/settings.png?raw=true">
+  <img src="https://github.com/lartsch/FediAct/blob/main/img/settings.png?raw=true">
 </details>
 <details>
   <summary>Showcase</summary>
-  <img src="https://github.com/lartsch/FediFollow-Chrome/blob/main/img/showcase.gif?raw=true">
+  <img src="https://github.com/lartsch/FediAct/blob/main/img/showcase.gif?raw=true">
 </details>
 
 ## Manual installation
-1. Download the [latest Github release](https://github.com/Lartsch/FediFollow-Chrome/releases/latest) for your browser (chrome or firefox)
+1. Download the [latest Github release](https://github.com/Lartsch/FediAct/releases/latest) for your browser (chrome or firefox)
 ### Chrome
 2. Unzip the downloaded file somewhere
 3. Go to your Chrome extension page (URL: chrome://extensions) and enable developer mode
-4. Click the "Load unpacked" button and then select the unzipped folder (should be "fedifollow-X.X.X-chrome")
+4. Click the "Load unpacked" button and then select the unzipped folder (should be "fediact-X.X.X-chrome")
 
 Note: Some Chromium browsers allow to directly load a .zip file - you can use it if available for you
 
@@ -88,9 +88,9 @@ Since a while, Firefox on Android only allows a [curated list](https://addons.mo
 3. Go back to Settings > Custom Add-on Collection
 4. Enter the following data:
     - ID: 17665294
-    - Name: FediFollow
+    - Name: FediAct
 5. Click OK, Firefox will close - reopen it
-6. FediFollow will now be available in the Add-ons menu of Firefox Nightly
+6. FediAct will now be available in the Add-ons menu of Firefox Nightly
 
 To update the addon instantly, simply remove and re-install it. Not sure when/if auto-update triggers in Firefox.
   
