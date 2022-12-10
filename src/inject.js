@@ -39,6 +39,7 @@ var browser, chrome, lasthomerequest, fedireply
 // this will store already processed elements to compare prior to processing and will reset as soon as the site context changes
 var processed = []
 
+
 // =-=-=-=-==-=-=-=-==-=-=-=-=-
 // =-=-=-=-=-= UTILS =-==-=-=-=
 // =-=-=-=-==-=-=-=-==-=-=-=-=-
@@ -331,6 +332,7 @@ function resolveTootToExternalHome(tooturl) {
 		return false
 	}
 }
+
 
 // =-=-=-=-==-=-=-=-==-=-=-=-==-=-=-=
 // =-=-=-=-= SITE PROCESSING =-==-=-=
@@ -887,6 +889,7 @@ async function processFollow() {
 		process($(e.target))
 	}, allFollowPaths)
 }
+
 
 // =-=-=-=-==-=-=-=-==-=-=-=-==-=-=-=
 // =-=-=-=-=-= SETUP / RUN =-==-=-=-=
