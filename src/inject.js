@@ -55,14 +55,15 @@ function log(text) {
 // Is more reliable/practicable in certain situations than mutationobserver, who will ignore any node that was inserted with its parent node at once
 (function($) {
     $.fn.DOMNodeAppear = function(callback, selector) {
-      var $this = $(this)
-      selector = selector || (typeof $this.selector === 'function' && $this.selector)
       if (!selector) {
         return false
       }
+	  // catch all animationstart events
       $(document).on('animationstart webkitAnimationStart oanimationstart MSAnimationStart', function(e){
+		// check if the animatonname equals our animation and if the element is one of our selectors
         if (e.originalEvent.animationName == 'nodeInserted' && $(e.target).is(selector)) {
           if (typeof callback == 'function') {
+			// return the complete object in the callback
             callback(e)
           }
         }
@@ -88,38 +89,52 @@ var getUrlParameter = function getUrlParameter(sParam) {
 async function makeRequest(method, url, extraheaders) {
 	// try to prevent error 429 too many request by delaying home instance requests
 	if (~url.indexOf(settings.fediact_homeinstance) && settings.fediact_enabledelay) {
-		// get current date
+		// get current time
 		var currenttime = Date.now()
+		// get difference of current time and time of last request
 		var difference = currenttime - lasthomerequest
+		// if difference is smaller than our set api delay value...
 		if (difference < apiDelay) {
+			// ... then wait the time required to reach the api delay value...
 			await new Promise(resolve => {
 				setTimeout(function() {
 					resolve()
 				}, apiDelay-difference)
 			})
 		}
+		// TODO: move this to the top? or get new Date.now() here?
 		lasthomerequest = currenttime
-	} 
+	}
+	// return a new promise...
     return new Promise(function (resolve) {
+		// create xhr
         let xhr = new XMLHttpRequest()
+		// open it with the method and url specified
         xhr.open(method, url)
+		// set timeout
         xhr.timeout = 3000
+		// set extra headers if any were given
 		if (extraheaders) {
 			for (var key in extraheaders) {
 				xhr.setRequestHeader(key, extraheaders[key])
 			}
 		}
+		// on load, check if status is OK...
         xhr.onload = function () {
             if (this.status >= 200 && this.status < 300) {
+				// is ok, resolve promise with response
                 resolve(xhr.responseText)
             } else {
+				// nope, resolve false
                 resolve(false)
             }
         }
+		// on any error, resolve false
 		xhr.onerror = function() {
 			log("Request to " + url + " failed.")
 			resolve(false)
 		}
+		// send the request
 		xhr.send()
     })
 }
@@ -136,7 +151,9 @@ function replaceAll(str, find, replace) {
 
 // handles redirects to home instance
 function redirectTo(url) {
+	// check if redirects are enabled at all
 	if (settings.fediact_redirects) {
+		// check if alert before redirect is enabled and alert if so
 		if (settings.fediact_alert) {
 			alert("Redirecting...")
 		}
@@ -160,189 +177,86 @@ function redirectTo(url) {
 // =-=-=-=-= INTERACTIONS =-=-=-=-=
 // =-=-=-=-==-=-=-=-==-=-=-=-==-=-=
 
-async function followHomeInstance(id) {
-	// if auto actions are enbaled...
+async function executeAction(id, action) {
 	if (settings.fediact_autoaction) {
-		// build follow post request
-		var requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + id + "/follow"
-		var responseFollow = await makeRequest("POST",requestUrl,settings.tokenheader)
-		// check if it worked (it is ignored if the user was already followed)
-		if (responseFollow) {
-			responseFollow = JSON.parse(responseFollow)
-			if (!responseFollow.following && !responseFollow.requested) {
-				log("Follow failed.")
-				return false
+		var requestUrl, condition
+		switch (action) {
+			case 'follow':
+				requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + id + "/follow"
+				condition = function(response) {return response.following || response.requested}
+				break
+			case 'boost':
+				requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/" + id + "/reblog"
+				condition = function(response) {return response.reblogged}
+				break
+			case 'favourite':
+				requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + id + "/favourite"
+				condition = function(response) {return response.favourited}
+				break
+			case 'bookmark':
+				requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + id + "/bookmark"
+				condition = function(response) {return response.bookmarked}
+				break
+			case 'unfollow':
+				requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + id + "/unfollow"
+				condition = function(response) {return !response.following && !response.requested}
+				break
+			case 'unboost':
+				requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/" + id + "/unreblog"
+				condition = function(response) {return !response.reblogged}
+				break
+			case 'unfavourite':
+				requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + id + "/unfavourite"
+				condition = function(response) {return !response.favourited}
+				break
+			case 'unbookmark':
+				requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + id + "/unbookmark"
+				condition = function(response) {return !response.bookmarked}
+				break
+			default:
+			  log("No valid action specified."); break
+		}
+		if (requestUrl) {
+			var response = await makeRequest("POST",requestUrl,settings.tokenheader)
+			if (response) {
+				// convert to json object
+				response = JSON.parse(response)
+				if (condition(response)) {
+					return true
+				} else {
+					log(action + " action failed.")
+				}
 			} else {
-				return true
+				log("API call failed.")
 			}
 		}
 	} else {
-		log("Auto-action disabled.")
+		log("Auto-action is disabled.")
 	}
 }
 
-async function unfollowHomeInstance(id) {
-	// if auto actions are enbaled...
-	if (settings.fediact_autoaction) {
-		// build follow post request
-		var requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + id + "/unfollow"
-		var responseUnfollow = await makeRequest("POST",requestUrl,settings.tokenheader)
-		// check if it worked (it is ignored if the user was already followed)
-		if (responseUnfollow) {
-			responseUnfollow = JSON.parse(responseUnfollow)
-			if (responseUnfollow.following || responseUnfollow.requested) {
-				log("Unfollow failed.")
-				return false
-			} else {
-				return true
-			}
-		}
-	} else {
-		log("Auto-action disabled.")
-	}
-}
-
-async function boostHomeInstance(id) {
-	// if auto actions are enbaled...
-	if (settings.fediact_autoaction) {
-		// build follow post request
-		var requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/" + id + "/reblog"
-		var responseBoost = await makeRequest("POST",requestUrl,settings.tokenheader)
-		// check if it worked (it is ignored if the user was already followed)
-		if (responseBoost) {
-			responseBoost = JSON.parse(responseBoost)
-			if (!responseBoost.reblogged) {
-				log("Boost failed.")
-				return false
-			} else {
-				return true
-			}
-		}
-	} else {
-		log("Auto-action disabled.")
-	}
-}
-
-async function unboostHomeInstance(id) {
-	// if auto actions are enbaled...
-	if (settings.fediact_autoaction) {
-		// build follow post request
-		var requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + id + "/unreblog"
-		var responseUnboost = await makeRequest("POST",requestUrl,settings.tokenheader)
-		// check if it worked (it is ignored if the user was already followed)
-		if (responseUnboost) {
-			responseUnboost = JSON.parse(responseUnboost)
-			if (responseUnboost.reblogged) {
-				log("Unboost failed.")
-				return false
-			} else {
-				return true
-			}
-		}
-	} else {
-		log("Auto-action disabled.")
-	}
-}
-
-async function favouriteHomeInstance(id) {
-	// if auto actions are enbaled...
-	if (settings.fediact_autoaction) {
-		// build follow post request
-		var requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + id + "/favourite"
-		var responseFav = await makeRequest("POST",requestUrl,settings.tokenheader)
-		// check if it worked (it is ignored if the user was already followed)
-		if (responseFav) {
-			responseFav = JSON.parse(responseFav)
-			if (!responseFav.favourited) {
-				log("Favourite failed.")
-				return false
-			} else {
-				return true
-			}
-		}
-	} else {
-		log("Auto-action disabled.")
-	}
-}
-
-async function unfavouriteHomeInstance(id) {
-	// if auto actions are enbaled...
-	if (settings.fediact_autoaction) {
-		// build follow post request
-		var requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/" + id + "/unfavourite"
-		var responseUnFav = await makeRequest("POST",requestUrl,settings.tokenheader)
-		// check if it worked (it is ignored if the user was already followed)
-		if (responseUnFav) {
-			responseUnFav = JSON.parse(responseUnFav)
-			if (responseUnFav.favourited) {
-				log("Unfavourite failed.")
-				return false
-			} else {
-				return true
-			}
-		}
-	} else {
-		log("Auto-action disabled.")
-	}
-}
-
-async function bookmarkHomeInstance(id) {
-	// if auto actions are enbaled...
-	if (settings.fediact_autoaction) {
-		// build follow post request
-		var requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + id + "/bookmark"
-		var responseBookmark = await makeRequest("POST",requestUrl,settings.tokenheader)
-		// check if it worked (it is ignored if the user was already followed)
-		if (responseBookmark) {
-			responseBookmark = JSON.parse(responseBookmark)
-			if (!responseBookmark.bookmarked) {
-				log("Bookmark failed.")
-				return false
-			} else {
-				return true
-			}
-		}
-	} else {
-		log("Auto-action disabled.")
-	}
-}
-
-async function unbookmarkHomeInstance(id) {
-	// if auto actions are enbaled...
-	if (settings.fediact_autoaction) {
-		// build follow post request
-		var requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/" + id + "/unbookmark"
-		var responseUnbookmark = await makeRequest("POST",requestUrl,settings.tokenheader)
-		// check if it worked (it is ignored if the user was already followed)
-		if (responseUnbookmark) {
-			responseUnbookmark = JSON.parse(responseUnbookmark)
-			if (responseUnbookmark.bookmarked) {
-				log("Unbookmark failed.")
-				return false
-			} else {
-				return true
-			}
-		}
-	} else {
-		log("Auto-action disabled.")
-	}
-}
-
+// allows to check if user is following one or multiple user IDs on the home instance
 async function isFollowingHomeInstance(ids) {
 	var requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/relationships?"
+	// build the request url with one or multiple IDs
 	for (const id of ids) {
 		// trailing & is no issue
 		requestUrl += "id[]=" + id.toString() + "&"
 	}
+	// make the request
 	var responseFollowing = await makeRequest("GET",requestUrl,settings.tokenheader)
+	// fill response array according to id amount with false
 	const follows = Array(ids.length).fill(false)
-	// check if it worked (it is ignored if the user was already followed)
+	// parse the response
 	if (responseFollowing) {
 		responseFollowing = JSON.parse(responseFollowing)
+		// iterate over ids and accounts in response
 		for (var i = 0; i < ids.length; i++) {
 			for (account of responseFollowing) {
+				// check if the current account matches the id at the current index
 				if (account.id == ids[i]) {
 					if (account.following) {
+						// update the response array at the given index with true if the account is already followed
 						follows[i] = true
 					}
 				}
@@ -352,46 +266,35 @@ async function isFollowingHomeInstance(ids) {
 	return follows
 }
 
-async function executeTootAction(id, action) {
-	var actionExecuted
-	switch (action) {
-		case 'boost': actionExecuted = await boostHomeInstance(id); break
-		case 'favourite': actionExecuted = await favouriteHomeInstance(id); break
-		case 'bookmark': actionExecuted = await bookmarkHomeInstance(id); break
-		case 'unboost': actionExecuted = await unboostHomeInstance(id); break
-		case 'unfavourite': actionExecuted = await unfavouriteHomeInstance(id); break
-		case 'unbookmark': actionExecuted = await unbookmarkHomeInstance(id); break
-		default:
-		  log("No valid action specified.")
-	}
-	return actionExecuted
-}
-
 
 // =-=-=-=-==-=-=-=-==-=-=-=-==-=-=
 // =-=-=-=-=-= RESOLVING =-=-==-=-=
 // =-=-=-=-==-=-=-=-==-=-=-=-==-=-=
 
-// Return the user id on the home instance
+// Return the user id on the users home instance
 async function resolveHandleToHome(handle) {
 	var requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/search?q=" + handle + "&resolve=true&limit=1"
 	var searchResponse = await makeRequest("GET",requestUrl,settings.tokenheader)
 	if (searchResponse) {
 		searchResponse = JSON.parse(searchResponse)
 		if (searchResponse[0].id) {
+			// return the first account result
 			return [searchResponse[0].id, searchResponse[0].acct]
 		}
 	}
 	return false
 }
 
+// resolve a toot to the users home instance
 async function resolveTootToHome(searchstring) {
 	var requestUrl = 'https://' + settings.fediact_homeinstance + searchApi + "/?q=" + searchstring + "&resolve=true&limit=1"
 	var response = await makeRequest("GET", requestUrl, settings.tokenheader)
 	if (response) {
 		response = JSON.parse(response)
+		// do we have a status as result?
 		if (!response.accounts.length && response.statuses.length) {
 			var status = response.statuses[0]
+			// return the required status data
 			return [status.account.acct, status.id, status.reblogged, status.favourited, status.bookmarked]
 		} else {
 			return false
@@ -418,8 +321,9 @@ function resolveTootToExternalHome(tooturl) {
 					}
 				})
 			} catch (e) {
+				// if we encounter an error here, it is likely since the extension context got invalidated, so reload the page
 				log(e)
-				log("Reloading page, extension likely got updated.")
+				log("Reloading page, extension likely got updated or reloaded.")
 				location.reload()
 			}
 		})
@@ -432,17 +336,24 @@ function resolveTootToExternalHome(tooturl) {
 // =-=-=-=-= SITE PROCESSING =-==-=-=
 // =-=-=-=-==-=-=-=-==-=-=-=-==-=-=-=
 
-// custom implementation for allowing to toggle inline css - .css() etc. are not working for some mastodon instances
+// custom implementation for allowing to toggle inline css
 function toggleInlineCss(el, styles, toggleclass) {
+	// toggle the active class (specified) on the element (specified), then check the current state
 	var active = $(el).toggleClass(toggleclass).hasClass(toggleclass)
+	// we can have multiple styles as input, so loop through them
 	for (var style of styles) {
+		// if the element now has the active class...
 		if (active) {
+			// set the third value as style (first value / 0 is style itself)
 			$(el).css(style[0], style[2])
 		} else {
+			// otherwise, if the second value is "!remove"...
 			if (style[1] == "!remove") {
+				// remove the inline css by regex replacing
 				var newinline = replaceAll($(el).attr('style'), style[0]+": "+style[2]+";", "")
 				$(el).attr('style', newinline)
 			} else {
+				// otherwise set the second value as style
 				$(el).css(style[0], style[1])
 			}
 		}
@@ -455,32 +366,45 @@ function extractHandle(selectors) {
 	for (const selector of selectors) {
 		// if found
 		if ($(selector).length) {
+			// return trimmed since there can be whitespace
 			return $(selector).text().trim()
 		}
 	}
 	return false
 }
 
+// check if an toot identifier is already in the "processed" array
 function isInProcessedToots(id) {
+	// iterate array
 	for (var i = 0; i < processed.length; i++) {
+		// if the the first value of the nested array at the current index matches the id we look for...
 		if (processed[i][0] == id) {
+			// return the index
 			return i
 		}
 	}
+	// if none was found...
 	return false
 }
 
+// add a toot to the "processed" array
 function addToProcessedToots(toot) {
+	// push the array first
 	processed.push(toot)
+	// check the difference of the max elements to cache and the current length of the processed array
 	var diff = processed.length - maxTootCache
+	// if diff is greater than 0...
 	if (diff > 0) {
+		// remove the first diff items from it
 		processed = processed.splice(0,diff)
 	}
 }
 
 // trigger the reply button click - will only run when we are on a home instance url with fedireply parameter
 async function processReply() {
+	// wait for the detailed status action bar to appear
 	$(document).DOMNodeAppear(function(e) {
+		// find the reply button and click it
 		$(e.target).find("button:has(i.fa-reply), button:has(i.fa-reply-all)").click()
 	}, "div.detailed-status__action-bar")
 }
@@ -514,14 +438,18 @@ async function processToots() {
 			} else {
 				action = "bookmark"
 			}
-		// should rarely reach this point, but some v3 instances include the action in the href only (v3 public view does NOT have a bookmark button, so skip)
+		// should rarely reach this point, but some v3 instances include the action in the href only, so we have this as a fallback
+		// (v3 public view does NOT have a bookmark button)
 		} else if ($(e.currentTarget).attr("href")) {
+			// does the href include "type=reblog"?
 			if (~$(e.currentTarget).attr("href").indexOf("type=reblog")) {
+				// if so, do as above...
 				if ($(e.currentTarget).hasClass("fediactive")) {
 					action = "unboost"
 				} else {
 					action = "boost"
 				}
+			// repeat for favourite
 			} else if (~$(e.currentTarget).attr("href").indexOf("type=favourite")) {
 				if ($(e.currentTarget).hasClass("fediactive")) {
 					action = "unfavourite"
@@ -619,7 +547,7 @@ async function processToots() {
 				var action = getTootAction(e)
 				if (action) {
 					// resolve url on home instance to get local toot/author identifiers and toot status
-					var actionExecuted = await executeTootAction(id, action)
+					var actionExecuted = await executeAction(id, action)
 					if (actionExecuted) {
 						// if the action was successfully executed, update the element styles
 						if (action == "boost" || action == "unboost") {
@@ -872,24 +800,18 @@ async function processFollow() {
 	async function process(el) {
 		// wrapper for follow/unfollow action
 		async function execFollow(id) {
-			// is it a follow action?
-			if (action == "follow") {
-				// execute action and save result
-				var followed = await followHomeInstance(id)
-				// if action was successful, update button text and action value
-				if (followed) {
-					$(el).text("Unfollow")
-					action = "unfollow"
-					return true
-				}
+			// execute action and save result
+			var response = await executeAction(id, action)
+			// if action was successful, update button text and action value according to performed action
+			if (action == "follow" && response) {
+				$(el).text("Unfollow")
+				action = "unfollow"
+				return true
 			// repeat for unfollow action
-			} else {
-				var unfollowed = await unfollowHomeInstance(id)
-				if (unfollowed) {
-					$(el).text("Follow")
-					action = "follow"
-					return true
-				}
+			} else if (action == "unfollow" && response) {
+				$(el).text("Follow")
+				action = "follow"
+				return true
 			}
 		}
 		// for mastodon v3 explore page
@@ -1070,6 +992,7 @@ async function backgroundProcessor() {
 			// reset already processed elements
 			processed = []
 		}
+		// if the settings were update, we do a page reload
 		if (request.updatedfedisettings) {
 			location.reload()
 		}
