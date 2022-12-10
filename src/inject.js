@@ -224,13 +224,10 @@ async function executeAction(id, action) {
 				response = JSON.parse(response)
 				if (condition(response)) {
 					return true
-				} else {
-					log(action + " action failed.")
 				}
-			} else {
-				log("API call failed.")
 			}
 		}
+		log(action + " action failed.")
 	} else {
 		log("Auto-action is disabled.")
 	}
