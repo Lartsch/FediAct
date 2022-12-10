@@ -15,6 +15,8 @@ const statusApi = "/api/v1/statuses"
 const searchApi = "/api/v2/search"
 const accountsApi = "/api/v1/accounts"
 const mutesApi = "/api/v1/mutes"
+const blocksApi = "/api/v1/blocks"
+const domainBlocksApi = "/api/v1/domain_blocks"
 const apiDelay = 500
 const maxTootCache = 200
 
@@ -33,7 +35,8 @@ const settingsDefaults = {
 	fediact_redirects: true,
 	fediact_enabledelay: true,
 	fediact_hidemuted: false,
-	fediact_mutes: []
+	fediact_mutesblocks: [],
+	fediact_domainblocks: []
 }
 
 // fix for cross-browser storage api compatibility and other global vars
@@ -264,14 +267,34 @@ async function isFollowingHomeInstance(ids) {
 }
 
 // grab all accounts that are muted by the user
-async function getMutes() {
+async function getMutesAndBlocks() {
 	if (settings.fediact_hidemuted) {
 		var requesturl = "https://" + settings.fediact_homeinstance + mutesApi
-		var responseMutes = await makeRequest("GET", requesturl, settings.tokenheader)
-		if (responseMutes) {
-			responseMutes = JSON.parse(responseMutes)
-			if (responseMutes.length) {
-				settings.fediact_mutes = responseMutes.map(acc => acc.acct)
+		var response = await makeRequest("GET", requesturl, settings.tokenheader)
+		if (response) {
+			response = JSON.parse(response)
+			if (response.length) {
+				settings.fediact_mutesblocks.push(...response.map(acc => acc.acct))
+			}
+		}
+		requesturl = "https://" + settings.fediact_homeinstance + blocksApi
+		response = await makeRequest("GET", requesturl, settings.tokenheader)
+		if (response) {
+			response = JSON.parse(response)
+			if (response.length) {
+				settings.fediact_mutesblocks.push(...response.map(acc => acc.acct))
+			}
+		}
+		// filter duplicates
+		settings.fediact_mutesblocks = settings.fediact_mutesblocks.filter((element, index) => {
+			return (element !== undefined && settings.fediact_mutesblocks.indexOf(element) == index)
+		})
+		requesturl = "https://" + settings.fediact_homeinstance + domainBlocksApi
+		response = await makeRequest("GET", requesturl, settings.tokenheader)
+		if (response) {
+			response = JSON.parse(response)
+			if (response.length) {
+				settings.fediact_domainblocks = response
 			}
 		}
 	}
@@ -285,7 +308,7 @@ function isMuted(handle) {
 	if (handle.split("@").length-1 == 0) {
 		handle = handle + "@" + settings.fediact_exturi
 	}
-	if (settings.fediact_mutes.includes(handle)) {
+	if (settings.fediact_mutesblocks.includes(handle) || settings.fediact_domainblocks.includes(handle.split("@")[1])) {
 		return true
 	}
 }
@@ -573,7 +596,7 @@ async function processToots() {
 					processedHrefs.push(lastpart + "@" + settings.fediact_exturi)
 				}
 			}
-			if (processedHrefs.some(r=> settings.fediact_mutes.includes(r)) || isMuted(tootAuthor)) {
+			if (processedHrefs.some(r=> settings.fediact_mutesblocks.includes(r)) || isMuted(tootAuthor) || processedHrefs.some(r=> settings.fediact_domainblocks.includes(r.split("@")[1]))) {
 				$(el).hide()
 				if (prepended) {
 					$(prepended).hide()
@@ -1103,7 +1126,7 @@ async function run() {
 					processReply()
 				} else {
 					if (backgroundProcessor()) {
-						getMutes()
+						getMutesAndBlocks()
 						processFollow()
 						processToots()
 					} else {
