@@ -10,7 +10,8 @@ const settingsDefaults = {
 	fediact_autoaction: true,
 	fediact_showfollows: true,
 	fediact_redirects: true,
-	fediact_enabledelay: true
+	fediact_enabledelay: true,
+	fediact_hidemuted: false
 }
 
 // fix for cross-browser storage api compatibility
@@ -47,6 +48,7 @@ function popupTasks() {
 		settings.fediact_showfollows = $("input#showfollows").is(':checked')
 		settings.fediact_redirects = $("input#redirects").is(':checked')
 		settings.fediact_enabledelay = $("input#delay").is(':checked')
+		settings.fediact_hidemuted = $("input#hidemuted").is(':checked')
 		// write to storage
 		try {
 			await (browser || chrome).storage.local.set(settings)
@@ -70,6 +72,7 @@ function popupTasks() {
 		$("input#showfollows").prop('checked', settings.fediact_showfollows)
 		$("input#redirects").prop('checked', settings.fediact_redirects)
 		$("input#delay").prop('checked', settings.fediact_enabledelay)
+		$("input#hidemuted").prop('checked', settings.fediact_hidemuted)
 		// both containers are hidden by default
 		if ($("select#mode").val() == "whitelist") {
 			$("div#whitelist_input").show()

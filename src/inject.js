@@ -14,6 +14,7 @@ const instanceApi = "/api/v1/instance"
 const statusApi = "/api/v1/statuses"
 const searchApi = "/api/v2/search"
 const accountsApi = "/api/v1/accounts"
+const mutesApi = "/api/v1/mutes"
 const apiDelay = 500
 const maxTootCache = 200
 
@@ -30,7 +31,9 @@ const settingsDefaults = {
 	fediact_token: null,
 	fediact_showfollows: true,
 	fediact_redirects: true,
-	fediact_enabledelay: true
+	fediact_enabledelay: true,
+	fediact_hidemuted: false,
+	fediact_mutes: []
 }
 
 // fix for cross-browser storage api compatibility and other global vars
@@ -179,58 +182,54 @@ function redirectTo(url) {
 // =-=-=-=-==-=-=-=-==-=-=-=-==-=-=
 
 async function executeAction(id, action) {
-	if (settings.fediact_autoaction) {
-		var requestUrl, condition
-		switch (action) {
-			case 'follow':
-				requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + id + "/follow"
-				condition = function(response) {return response.following || response.requested}
-				break
-			case 'boost':
-				requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/" + id + "/reblog"
-				condition = function(response) {return response.reblogged}
-				break
-			case 'favourite':
-				requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + id + "/favourite"
-				condition = function(response) {return response.favourited}
-				break
-			case 'bookmark':
-				requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + id + "/bookmark"
-				condition = function(response) {return response.bookmarked}
-				break
-			case 'unfollow':
-				requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + id + "/unfollow"
-				condition = function(response) {return !response.following && !response.requested}
-				break
-			case 'unboost':
-				requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/" + id + "/unreblog"
-				condition = function(response) {return !response.reblogged}
-				break
-			case 'unfavourite':
-				requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + id + "/unfavourite"
-				condition = function(response) {return !response.favourited}
-				break
-			case 'unbookmark':
-				requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + id + "/unbookmark"
-				condition = function(response) {return !response.bookmarked}
-				break
-			default:
-			  log("No valid action specified."); break
-		}
-		if (requestUrl) {
-			var response = await makeRequest("POST",requestUrl,settings.tokenheader)
-			if (response) {
-				// convert to json object
-				response = JSON.parse(response)
-				if (condition(response)) {
-					return true
-				}
+	var requestUrl, condition
+	switch (action) {
+		case 'follow':
+			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + id + "/follow"
+			condition = function(response) {return response.following || response.requested}
+			break
+		case 'boost':
+			requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/" + id + "/reblog"
+			condition = function(response) {return response.reblogged}
+			break
+		case 'favourite':
+			requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + id + "/favourite"
+			condition = function(response) {return response.favourited}
+			break
+		case 'bookmark':
+			requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + id + "/bookmark"
+			condition = function(response) {return response.bookmarked}
+			break
+		case 'unfollow':
+			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + id + "/unfollow"
+			condition = function(response) {return !response.following && !response.requested}
+			break
+		case 'unboost':
+			requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/" + id + "/unreblog"
+			condition = function(response) {return !response.reblogged}
+			break
+		case 'unfavourite':
+			requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + id + "/unfavourite"
+			condition = function(response) {return !response.favourited}
+			break
+		case 'unbookmark':
+			requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + id + "/unbookmark"
+			condition = function(response) {return !response.bookmarked}
+			break
+		default:
+			log("No valid action specified."); break
+	}
+	if (requestUrl) {
+		var response = await makeRequest("POST",requestUrl,settings.tokenheader)
+		if (response) {
+			// convert to json object
+			response = JSON.parse(response)
+			if (condition(response)) {
+				return true
 			}
 		}
-		log(action + " action failed.")
-	} else {
-		log("Auto-action is disabled.")
 	}
+	log(action + " action failed.")
 }
 
 // allows to check if user is following one or multiple user IDs on the home instance
@@ -262,6 +261,33 @@ async function isFollowingHomeInstance(ids) {
 		}
 	}
 	return follows
+}
+
+// grab all accounts that are muted by the user
+async function getMutes() {
+	if (settings.fediact_hidemuted) {
+		var requesturl = "https://" + settings.fediact_homeinstance + mutesApi
+		var responseMutes = await makeRequest("GET", requesturl, settings.tokenheader)
+		if (responseMutes) {
+			responseMutes = JSON.parse(responseMutes)
+			if (responseMutes.length) {
+				settings.fediact_mutes = responseMutes.map(acc => acc.acct)
+			}
+		}
+	}
+}
+
+// check if handle is muted
+function isMuted(handle) {
+	// remove leading @
+	handle = handle.slice(1)
+	// add local uri if handle has no domain already
+	if (handle.split("@").length-1 == 0) {
+		handle = handle + "@" + settings.fediact_exturi
+	}
+	if (settings.fediact_mutes.includes(handle)) {
+		return true
+	}
 }
 
 
@@ -517,6 +543,45 @@ async function processToots() {
 			return tootHrefCheck($(el).find("a.modal-button").first().attr("href").split("?")[0])
 		}
 	}
+	// check toot author, mentions and toot prepend mentions for applying mutes
+	function processMutes(el, tootAuthor) {
+		if (settings.fediact_hidemuted) {
+			var hrefs = []
+			if ($(el).siblings(".status__prepend").length) {
+				var prepended = $(el).siblings(".status__prepend").first()
+				hrefs.push($(prepended).find("a").attr("href").split("?")[0])
+			}
+			// build array of mentions in @user@domain.com format
+			// NOTE: this will fail if ax external user handle uses another subdomain than hostname, but FediAct was not designed for that - this is best effort
+			$(el).find("span.h-card").each(function() {
+				hrefs.push($(this).find("a").attr("href").split("?")[0])
+			})
+			var processedHrefs = []
+			for (href of hrefs) {
+				var splitted = href.split("/")
+				var lastpart = splitted.pop() || splitted.pop()
+				lastpart = lastpart.slice(1)
+				if (href.startsWith("http")) {
+					var url = new URL(href)
+					if (url.hostname != settings.fediact_exturi && url.hostname != location.hostname) {
+						// external handle
+						processedHrefs.push(lastpart + "@" + url.hostname)
+					} else {
+						processedHrefs.push(lastpart + "@" + settings.fediact_exturi)
+					}
+				} else {
+					processedHrefs.push(lastpart + "@" + settings.fediact_exturi)
+				}
+			}
+			if (processedHrefs.some(r=> settings.fediact_mutes.includes(r)) || isMuted(tootAuthor)) {
+				$(el).hide()
+				if (prepended) {
+					$(prepended).hide()
+				}
+				return true
+			}
+		}
+	}
 	// main function to process each detected toot element
 	async function process(el) {
 		// extra step for detailed status elements to select the correct parent
@@ -525,6 +590,10 @@ async function processToots() {
 		}
 		// get toot data
 		var tootAuthor = getTootAuthor($(el))
+		// check if mutes apply and return if so
+		if (processMutes(el, tootAuthor)) {
+			return
+		}
 		var tootInternalId = getTootInternalId($(el))
 		var [tootHrefIsExt, tootHrefOrId] = getTootExtIntHref($(el))
 		// we will always need an internal reference to the toot, be it an actual internal toot id or the href of a toot already resolved to its home
@@ -542,40 +611,43 @@ async function processToots() {
 			var replyButton = $(el).find("button:has(i.fa-reply), button:has(i.fa-reply-all), a.icon-button:has(i.fa-reply), a.icon-button:has(i.fa-reply-all)").first()
 			// handles process when a button is clicked
 			async function clickAction(id, e) {
-				// determine the action to perform
-				var action = getTootAction(e)
-				if (action) {
-					// resolve url on home instance to get local toot/author identifiers and toot status
-					var actionExecuted = await executeAction(id, action)
-					if (actionExecuted) {
-						// if the action was successfully executed, update the element styles
-						if (action == "boost" || action == "unboost") {
-							// toggle inline css styles
-							toggleInlineCss($(e.currentTarget).find("i"),[["color","!remove","rgb(140, 141, 255)"],["transition-duration", "!remove", "0.9s"],["background-position", "!remove", "0px 100%"]], "fediactive")
-							// update element in cache if exists
-							if (cacheIndex) {
-								processed[cacheIndex][3] = !processed[cacheIndex][3]
-							}
-						// same for favourite, bookmarked....
-						} else if (action == "favourite" || action == "unfavourite") {
-							toggleInlineCss($(e.currentTarget),[["color","!remove","rgb(202, 143, 4)"]], "fediactive")
-							if (cacheIndex) {
-								processed[cacheIndex][4] = !processed[cacheIndex][4]
-							}
+				if (settings.fediact_autoaction) {
+					// determine the action to perform
+					var action = getTootAction(e)
+					if (action) {
+						// resolve url on home instance to get local toot/author identifiers and toot status
+						var actionExecuted = await executeAction(id, action)
+						if (actionExecuted) {
+							// if the action was successfully executed, update the element styles
+							if (action == "boost" || action == "unboost") {
+								// toggle inline css styles
+								toggleInlineCss($(e.currentTarget).find("i"),[["color","!remove","rgb(140, 141, 255)"],["transition-duration", "!remove", "0.9s"],["background-position", "!remove", "0px 100%"]], "fediactive")
+								// update element in cache if exists
+								if (cacheIndex) {
+									processed[cacheIndex][3] = !processed[cacheIndex][3]
+								}
+							// same for favourite, bookmarked....
+							} else if (action == "favourite" || action == "unfavourite") {
+								toggleInlineCss($(e.currentTarget),[["color","!remove","rgb(202, 143, 4)"]], "fediactive")
+								if (cacheIndex) {
+									processed[cacheIndex][4] = !processed[cacheIndex][4]
+								}
+							} else {
+								toggleInlineCss($(e.currentTarget),[["color","!remove","rgb(255, 80, 80)"]], "fediactive")
+								if (cacheIndex) {
+									processed[cacheIndex][5] = !processed[cacheIndex][5]
+								}
+							}	
+							return true
 						} else {
-							toggleInlineCss($(e.currentTarget),[["color","!remove","rgb(255, 80, 80)"]], "fediactive")
-							if (cacheIndex) {
-								processed[cacheIndex][5] = !processed[cacheIndex][5]
-							}
-						}	
-						return true
+							log("Could not execute action on home instance.")
+						}
 					} else {
-						log("Could not execute action on home instance.")
-						return false
+						log("Could not determine action.")
 					}
 				} else {
-					log("Could not determine action.")
-					return false
+					log("Auto-action disabled.")
+					return true
 				}
 			}
 			// handles initialization of element styles
@@ -799,17 +871,22 @@ async function processFollow() {
 	async function process(el) {
 		// wrapper for follow/unfollow action
 		async function execFollow(id) {
-			// execute action and save result
-			var response = await executeAction(id, action)
-			// if action was successful, update button text and action value according to performed action
-			if (action == "follow" && response) {
-				$(el).text("Unfollow")
-				action = "unfollow"
-				return true
-			// repeat for unfollow action
-			} else if (action == "unfollow" && response) {
-				$(el).text("Follow")
-				action = "follow"
+			if (settings.fediact_autoaction) {
+				// execute action and save result
+				var response = await executeAction(id, action)
+				// if action was successful, update button text and action value according to performed action
+				if (action == "follow" && response) {
+					$(el).text("Unfollow")
+					action = "unfollow"
+					return true
+				// repeat for unfollow action
+				} else if (action == "unfollow" && response) {
+					$(el).text("Follow")
+					action = "follow"
+					return true
+				}
+			} else {
+				log("Auto-action disabled.")
 				return true
 			}
 		}
@@ -978,6 +1055,7 @@ async function checkSite() {
 		var uri = JSON.parse(response).uri
 		if (uri) {
 			// run external mode
+			settings.fediact_exturi = uri
 			return true
 		}
 	}
@@ -1025,6 +1103,7 @@ async function run() {
 					processReply()
 				} else {
 					if (backgroundProcessor()) {
+						getMutes()
 						processFollow()
 						processToots()
 					} else {
