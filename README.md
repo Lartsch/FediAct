@@ -1,4 +1,4 @@
-# FediAct (v0.9.3)
+# FediAct (v0.9.4)
 A Chrome/Firefox extension that simplifies following and post interactions on other Mastodon instances than your own.
 
 **Features**:
@@ -7,6 +7,7 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 - Show following status and toot status (boosted, faved, bookmarked) on external instances
 - Single click to execute action only, double click to redirect to content on home instance
 - Reply button on external instances always redirects to home instance and enters reply-mode
+- Hide muted content on external instances if set
 - Customizable
 
 **Supported browsers**:
