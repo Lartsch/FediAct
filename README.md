@@ -67,7 +67,7 @@ v0.8.0
 ### Chrome
 2. Unzip the downloaded file somewhere
 3. Go to your Chrome extension page (URL: chrome://extensions) and enable developer mode
-4. Click the "Load unpacked" button and then select the unzipped folder (should be "fediact-X.X.X-chrome")
+4. Click the "Load unpacked" button and then select the unzipped folder
 
 Note: Some Chromium browsers allow to directly load a .zip file - you can use it if available for you
 
