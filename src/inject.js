@@ -265,7 +265,9 @@ async function isFollowingHomeInstance(ids) {
 // check if handle is muted
 function isMuted(handle) {
 	// remove leading @
-	handle = handle.slice(1)
+	if (handle.startsWith("@")) {
+		handle = handle.slice(1)
+	}
 	// add local uri if handle has no domain already
 	if (handle.split("@").length-1 == 0) {
 		handle = handle + "@" + settings.fediact_exturi
