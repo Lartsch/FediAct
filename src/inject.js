@@ -252,7 +252,7 @@ async function isFollowingHomeInstance(ids) {
 			for (account of responseFollowing) {
 				// check if the current account matches the id at the current index
 				if (account.id == ids[i]) {
-					if (account.following) {
+					if (account.following || account.requested) {
 						// update the response array at the given index with true if the account is already followed
 						follows[i] = true
 					}
@@ -853,10 +853,10 @@ async function processToots() {
 
 // main function to listen for the follow button pressed and open a new tab with the home instance
 async function processFollow() {
-	var fullHandle
-	var action = "follow"
 	// for mastodon v3 - v4 does not show follow buttons / account cards on /explore
 	async function process(el) {
+		var fullHandle
+		var action = "follow"
 		// wrapper for follow/unfollow action
 		async function execFollow(id) {
 			if (settings.fediact_autoaction) {
