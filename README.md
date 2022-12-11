@@ -117,6 +117,7 @@ I included all of the default add-ons in the custom collection, so you will not 
 5. There can be short delays since external API calls have to be made
 6. If you only want redirects, simply turn off auto-action and leave redirect on - double click will then only redirect, not execute the action (alternatively, you can simply use the reply button, as it will always redirect to your home instance if redirects are enabled)
 7. If the extension fails to resolve content, the affected buttons will behave like usually
+8. If you have enabled "Hide muted", your muted and blocked accounts/instances will be fetched every 60 seconds in the background or when the settings are updated
 
 ## Todos / Planned features 
 - Fix last remaining resolve fails as far as **possible**
