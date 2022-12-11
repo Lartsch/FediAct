@@ -832,7 +832,6 @@ async function processToots() {
 					initStyles([internalIdentifier, false])
 				}
 			} else {
-				log("ALREADY PROCESSED")
 				// the toot is already in cache, so grab it
 				var toot = processed[cacheIndex]
 				// init stylings
