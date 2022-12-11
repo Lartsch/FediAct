@@ -40,7 +40,7 @@ const settingsDefaults = {
 var browser, chrome, lasthomerequest, fedireply
 // currently, the only reliable way to detect all toots etc. has the drawback that the same element could be processed multiple times
 // this will store already processed elements to compare prior to processing and will reset as soon as the site context changes
-var processed = []
+var [processed, processedFollow, isProcessing] = [[],[],[]]
 
 
 // =-=-=-=-==-=-=-=-==-=-=-=-=-
@@ -832,6 +832,7 @@ async function processToots() {
 					initStyles([internalIdentifier, false])
 				}
 			} else {
+				log("ALREADY PROCESSED")
 				// the toot is already in cache, so grab it
 				var toot = processed[cacheIndex]
 				// init stylings
@@ -847,8 +848,18 @@ async function processToots() {
 	}
 	// One DOMNodeAppear to rule them all
 	$(document).DOMNodeAppear(async function(e) {
-		process($(e.target))
+		if (!isProcessing.includes($(e.target).get(0))) {
+			isProcessing.push($(e.target).get(0))
+			process($(e.target))
+		}
 	}, "div.status, div.detailed-status")
+	// try to find all existing elements (fixes some elements not being detected by DOMNodeAppear in rare cases, esp. v3)
+	$(document).find("div.status, div.detailed-status").each(function(){
+		if (!isProcessing.includes($(this).get(0))) {
+			isProcessing.push($(this).get(0))
+			process($(this))
+		}
+	})
 }
 
 // main function to listen for the follow button pressed and open a new tab with the home instance
@@ -892,55 +903,58 @@ async function processFollow() {
 		}
 		// do we have a full handle?
 		if (fullHandle) {
-			// yes, so resolve it to a user id on our homeinstance
-			var resolvedHandle = await resolveHandleToHome(fullHandle)
-			if (resolvedHandle) {
-				// successfully resolved
-				// if showfollows is enabled...
-				if (settings.fediact_showfollows) {
-					// ... then check if user is already following
-					var isFollowing = await isFollowingHomeInstance([resolvedHandle[0]])
-					// update button text and action if already following
-					if (isFollowing[0]) {
-						$(el).text("Unfollow")
-						action = "unfollow"
-					}
-				}
-				// single and double click handling (see toot processing for explanation, is the same basically)
-				var clicks = 0
-				var timer
-				$(el).on("click", async function(e) {
-					// prevent default and immediate propagation
-					e.preventDefault()
-					e.stopImmediatePropagation()
-					clicks++
-					if (clicks == 1) {
-						timer = setTimeout(async function() {
-							execFollow(resolvedHandle[0])
-							clicks = 0
-						}, 350)
-					} else {
-						clearTimeout(timer)
-						var done = await execFollow(resolvedHandle[0])
-						if (done) {
-							var saveText = $(el).text()
-							var redirectUrl = 'https://' + settings.fediact_homeinstance + '/@' + resolvedHandle[1]
-							$(el).text("Redirecting...")
-							setTimeout(function() {
-								redirectTo(redirectUrl)
-								$(el).text(saveText)
-							}, 1000)
-						} else {
-							log("Action failed.")
+			if (!processedFollow.includes(fullHandle)) {
+				// yes, so resolve it to a user id on our homeinstance
+				var resolvedHandle = await resolveHandleToHome(fullHandle)
+				if (resolvedHandle) {
+					processedFollow.push(fullHandle)
+					// successfully resolved
+					// if showfollows is enabled...
+					if (settings.fediact_showfollows) {
+						// ... then check if user is already following
+						var isFollowing = await isFollowingHomeInstance([resolvedHandle[0]])
+						// update button text and action if already following
+						if (isFollowing[0]) {
+							$(el).text("Unfollow")
+							action = "unfollow"
 						}
-						clicks = 0
 					}
-				}).on("dblclick", function(e) {
-					e.preventDefault()
-					e.stopImmediatePropagation()
-				})
-			} else {
-				log("Could not resolve user home ID.")
+					// single and double click handling (see toot processing for explanation, is the same basically)
+					var clicks = 0
+					var timer
+					$(el).on("click", async function(e) {
+						// prevent default and immediate propagation
+						e.preventDefault()
+						e.stopImmediatePropagation()
+						clicks++
+						if (clicks == 1) {
+							timer = setTimeout(async function() {
+								execFollow(resolvedHandle[0])
+								clicks = 0
+							}, 350)
+						} else {
+							clearTimeout(timer)
+							var done = await execFollow(resolvedHandle[0])
+							if (done) {
+								var saveText = $(el).text()
+								var redirectUrl = 'https://' + settings.fediact_homeinstance + '/@' + resolvedHandle[1]
+								$(el).text("Redirecting...")
+								setTimeout(function() {
+									redirectTo(redirectUrl)
+									$(el).text(saveText)
+								}, 1000)
+							} else {
+								log("Action failed.")
+							}
+							clicks = 0
+						}
+					}).on("dblclick", function(e) {
+						e.preventDefault()
+						e.stopImmediatePropagation()
+					})
+				} else {
+					log("Could not resolve user home ID.")
+				}
 			}
 		}
 	}
@@ -948,8 +962,18 @@ async function processFollow() {
 	var allFollowPaths = followButtonPaths.join(",")
 	// one domnodeappear to rule them all
 	$(document).DOMNodeAppear(async function(e) {
-		process($(e.target))
+		if (!isProcessing.includes($(e.target).get(0))) {
+			isProcessing.push($(e.target).get(0))
+			process($(e.target))
+		}
 	}, allFollowPaths)
+	// try to find all existing elements (fixes some elements not being detected by DOMNodeAppear in rare cases, esp. v3)
+	$(document).find(allFollowPaths).each(function(){
+		if (!isProcessing.includes($(this).get(0))) {
+			isProcessing.push($(this).get(0))
+			process($(this))
+		}
+	})
 }
 
 
@@ -1057,6 +1081,8 @@ async function backgroundProcessor() {
 		if (request.urlchanged) {
 			// reset already processed elements
 			processed = []
+			processedFollow = []
+			isProcessing = []
 			// rerun getSettings to keep mutes/blocks up to date while not reloading the page
 			if (!await getSettings()) {
 				// but reload if settings are invalid
