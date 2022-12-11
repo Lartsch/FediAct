@@ -28,7 +28,7 @@ async function resolveToot(url) {
         try {
             var res = await fetch(url, {method: 'HEAD'})
             if (res.redirected) {
-             resolve(res.url)
+                resolve(res.url)
             } else {
                 resolve(false)
             }
@@ -41,93 +41,110 @@ async function resolveToot(url) {
 
 // fetch API token here (will use logged in session automatically)
 async function fetchBearerToken() {
-    var url = "https://" + settings.fediact_homeinstance
-    try {
-        var res = await fetch(url)
-        var text = await res.text()
-    } catch(e) {
-        log(e)
-        return false
-    }
-    if (text) {
-        // dom parser is not available in background workers, so we use regex to parse the html....
-        // for some reason, regex groups do also not seem to work in chrome background workers... the following is ugly but should work fine
-        var content = text.match(tokenRegex)
-        if (content) {
-            var indexOne = content[0].search(/"access_token":"/)
-            var indexTwo = content[0].search(/",/)
-            if (indexOne > -1 && indexTwo > -1) {
-                indexOne = indexOne + 16
-                var token = content[0].substring(indexOne, indexTwo)
-                if (token.length > 16) {
-                    settings.fediact_token = token
-                    return true
+    return new Promise(async function(resolve) {
+        var url = "https://" + settings.fediact_homeinstance
+        try {
+            var res = await fetch(url)
+            var text = await res.text()
+        } catch(e) {
+            log(e)
+            resolve(false)
+            return
+        }
+        if (text) {
+            // dom parser is not available in background workers, so we use regex to parse the html....
+            // for some reason, regex groups do also not seem to work in chrome background workers... the following is ugly but should work fine
+            var content = text.match(tokenRegex)
+            if (content) {
+                var indexOne = content[0].search(/"access_token":"/)
+                var indexTwo = content[0].search(/",/)
+                if (indexOne > -1 && indexTwo > -1) {
+                    indexOne = indexOne + 16
+                    var token = content[0].substring(indexOne, indexTwo)
+                    if (token.length > 16) {
+                        settings.fediact_token = token
+                        resolve(true)
+                        return
+                    }
                 }
             }
         }
-    }
-    // reset token for inject.js to know
-    settings.fediact_token = null
-    log("Token could not be found.")
+        // reset token for inject.js to know
+        settings.fediact_token = null
+        log("Token could not be found.")
+        resolve(false)
+    })
 }
 
 // grab all accounts that are muted by the user
 async function fetchMutesAndBlocks() {
-    if (settings.fediact_hidemuted) {
-        // set empty initially
-        [settings.fediact_mutesblocks, settings.fediact_domainblocks] = [[],[]]
-        var [mutes, blocks, domainblocks] = await Promise.all([
-            fetch("https://" + settings.fediact_homeinstance + mutesApi, {headers: {"Authorization": "Bearer "+settings.fediact_token}}).then((response) => response.json()),
-            fetch("https://" + settings.fediact_homeinstance + blocksApi, {headers: {"Authorization": "Bearer "+settings.fediact_token}}).then((response) => response.json()),
-            fetch("https://" + settings.fediact_homeinstance + domainBlocksApi, {headers: {"Authorization": "Bearer "+settings.fediact_token}}).then((response) => response.json())
-        ])
-        if (mutes.length) {
-            settings.fediact_mutesblocks.push(...mutes.map(acc => acc.acct))
+    return new Promise(async function(resolve) {
+        if (settings.fediact_hidemuted) {
+            // set empty initially
+            [settings.fediact_mutesblocks, settings.fediact_domainblocks] = [[],[]]
+            var [mutes, blocks, domainblocks] = await Promise.all([
+                fetch("https://" + settings.fediact_homeinstance + mutesApi, {headers: {"Authorization": "Bearer "+settings.fediact_token}}).then((response) => response.json()),
+                fetch("https://" + settings.fediact_homeinstance + blocksApi, {headers: {"Authorization": "Bearer "+settings.fediact_token}}).then((response) => response.json()),
+                fetch("https://" + settings.fediact_homeinstance + domainBlocksApi, {headers: {"Authorization": "Bearer "+settings.fediact_token}}).then((response) => response.json())
+            ])
+            if (mutes.length) {
+                settings.fediact_mutesblocks.push(...mutes.map(acc => acc.acct))
+            }
+            if (blocks.length) {
+                settings.fediact_mutesblocks.push(...blocks.map(acc => acc.acct))
+            }
+            // filter duplicates
+            settings.fediact_mutesblocks = settings.fediact_mutesblocks.filter((element, index) => {
+                return (settings.fediact_mutesblocks.indexOf(element) == index)
+            })
+            if (domainblocks.length) {
+                settings.fediact_domainblocks = domainblocks
+            }
+            resolve(true)
+        } else {
+            resolve(true)
         }
-        if (blocks.length) {
-            settings.fediact_mutesblocks.push(...blocks.map(acc => acc.acct))
-        }
-        // filter duplicates
-        settings.fediact_mutesblocks = settings.fediact_mutesblocks.filter((element, index) => {
-            return (settings.fediact_mutesblocks.indexOf(element) == index)
-        })
-        if (domainblocks.length) {
-            settings.fediact_domainblocks = domainblocks
-        }
-    }
+    })
 }
 
 async function fetchData() {
-    try {
-        settings = await (browser || chrome).storage.local.get(settingsDefaults)
-    } catch(e) {
-        log(e)
-        return false
-    }
-    if (settings.fediact_homeinstance) {
-        await fetchBearerToken()
-        await fetchMutesAndBlocks()
-    } else {
-        log("Home instance not set")
-    }
-    try {
-        await (browser || chrome).storage.local.set(settings)
-    } catch {
-        log(e)
-    }
+    return new Promise(async function(resolve) {
+        try {
+            settings = await (browser || chrome).storage.local.get(settingsDefaults)
+        } catch(e) {
+            log(e)
+            resolve(false)
+            return
+        }
+        if (settings.fediact_homeinstance) {
+            await fetchBearerToken()
+            await fetchMutesAndBlocks()
+        } else {
+            log("Home instance not set")
+            resolve(false)
+            return
+        }
+        try {
+            await (browser || chrome).storage.local.set(settings)
+            resolve(true)
+        } catch {
+            log(e)
+        }
+    })
 }
 
 async function reloadListeningScripts() {
-    chrome.tabs.query({}, async function(tabs) {
+    var tabs = await chrome.tabs.query({})
+    if (tabs.length) {
         for (var i=0; i<tabs.length; ++i) {
             try {
-                await chrome.tabs.sendMessage(tabs[i].id, {updatedfedisettings: true})
+                chrome.tabs.sendMessage(tabs[i].id, {updatedfedisettings: true})
             } catch(e) {
                 // all non-listening tabs will throw an error, we can ignore it
                 continue
             }
-       }
-    })
+        }
+    }
 }
 
 // fetch api token right after install (mostly for debugging, when the ext. is reloaded)
@@ -145,8 +162,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
     // immediately fetch api token after settings are updated
     if (request.updatedsettings) {
-        fetchData()
-        reloadListeningScripts()
+        fetchData().then(reloadListeningScripts)
+        return true
     }
     // when the content script starts to process on a site, listen for tab changes (url)
     if (request.running) {
