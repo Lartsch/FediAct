@@ -37,6 +37,8 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 
 [<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fediact.svg?label=%20%20">][link-firefox] including Firefox for Android
 
+I recommend using version 0.9.5.3 as I think it's the most stable release yet, including all features.
+
 > **Note**
 > 
 > - **If webstore release is outdated, use the [manual installation method](#manual-installation) to install the latest version**  
