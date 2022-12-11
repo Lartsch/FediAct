@@ -1110,7 +1110,6 @@ async function run() {
 				processReply()
 			} else {
 				if (backgroundProcessor()) {
-					console.log(settings.fediact_domainblocks, settings.fediact_mutesblocks)
 					processFollow()
 					processToots()
 				} else {
