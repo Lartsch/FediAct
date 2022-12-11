@@ -134,8 +134,7 @@ async function fetchData() {
 }
 
 async function reloadListeningScripts() {
-    var tabs = await chrome.tabs.query({})
-    if (tabs.length) {
+    chrome.tabs.query({}, async function(tabs) {
         for (var i=0; i<tabs.length; ++i) {
             try {
                 chrome.tabs.sendMessage(tabs[i].id, {updatedfedisettings: true})
@@ -144,7 +143,7 @@ async function reloadListeningScripts() {
                 continue
             }
         }
-    }
+    })
 }
 
 // fetch api token right after install (mostly for debugging, when the ext. is reloaded)
