@@ -9,7 +9,6 @@ const handleExtractUrlRegex = /^(?<domain>https?:\/\/(?:\.?[a-z0-9-]+)+(?:\.[a-z
 const handleExtractUriRegex = /^(?<domain>https?:\/\/(?:\.?[a-z0-9-]+)+(?:\.[a-z]+){1})(?:\/users\/)(?<handle>\w+)(?:(?:\/statuses\/)(?<tootid>\d+))?\/?$/
 const enableConsoleLog = true
 const logPrepend = "[FediAct]"
-const maxElementWaitFactor = 200 // x 100ms for total time
 const instanceApi = "/api/v1/instance"
 const statusApi = "/api/v1/statuses"
 const searchApi = "/api/v2/search"
