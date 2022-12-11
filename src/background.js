@@ -1,14 +1,18 @@
 var browser, chrome, settings
 const enableConsoleLog = true
 const logPrepend = "[FediAct]"
-const tokenInterval = 3 // minutes
+const tokenInterval = 1 // minutes
+const mutesApi = "/api/v1/mutes"
+const blocksApi = "/api/v1/blocks"
+const domainBlocksApi = "/api/v1/domain_blocks"
 
 const tokenRegex = /"access_token":".*?",/gm
 
 // required settings keys with defauls
 const settingsDefaults = {
 	fediact_homeinstance: null,
-    fediact_showfollows: true
+    fediact_showfollows: true,
+    fediact_hidemuted: false,
 }
 
 // wrapper to prepend to log messages
@@ -67,6 +71,32 @@ async function fetchBearerToken() {
     log("Token could not be found.")
 }
 
+// grab all accounts that are muted by the user
+async function fetchMutesAndBlocks() {
+    if (settings.fediact_hidemuted) {
+        // set empty initially
+        [settings.fediact_mutesblocks, settings.fediact_domainblocks] = [[],[]]
+        var [mutes, blocks, domainblocks] = await Promise.all([
+            fetch("https://" + settings.fediact_homeinstance + mutesApi, {headers: {"Authorization": "Bearer "+settings.fediact_token}}).then((response) => response.json()),
+            fetch("https://" + settings.fediact_homeinstance + blocksApi, {headers: {"Authorization": "Bearer "+settings.fediact_token}}).then((response) => response.json()),
+            fetch("https://" + settings.fediact_homeinstance + domainBlocksApi, {headers: {"Authorization": "Bearer "+settings.fediact_token}}).then((response) => response.json())
+        ])
+        if (mutes.length) {
+            settings.fediact_mutesblocks.push(...mutes.map(acc => acc.acct))
+        }
+        if (blocks.length) {
+            settings.fediact_mutesblocks.push(...blocks.map(acc => acc.acct))
+        }
+        // filter duplicates
+        settings.fediact_mutesblocks = settings.fediact_mutesblocks.filter((element, index) => {
+            return (settings.fediact_mutesblocks.indexOf(element) == index)
+        })
+        if (domainblocks.length) {
+            settings.fediact_domainblocks = domainblocks
+        }
+    }
+}
+
 async function fetchData() {
     try {
         settings = await (browser || chrome).storage.local.get(settingsDefaults)
@@ -76,6 +106,7 @@ async function fetchData() {
     }
     if (settings.fediact_homeinstance) {
         await fetchBearerToken()
+        await fetchMutesAndBlocks()
     } else {
         log("Home instance not set")
     }

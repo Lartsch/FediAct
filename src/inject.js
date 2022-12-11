@@ -14,9 +14,6 @@ const instanceApi = "/api/v1/instance"
 const statusApi = "/api/v1/statuses"
 const searchApi = "/api/v2/search"
 const accountsApi = "/api/v1/accounts"
-const mutesApi = "/api/v1/mutes"
-const blocksApi = "/api/v1/blocks"
-const domainBlocksApi = "/api/v1/domain_blocks"
 const apiDelay = 500
 const maxTootCache = 200
 
@@ -244,7 +241,7 @@ async function isFollowingHomeInstance(ids) {
 		requestUrl += "id[]=" + id.toString() + "&"
 	}
 	// make the request
-	var responseFollowing = await makeRequest("GET",requestUrl,settings.tokenheader)
+	var responseFollowing = await makeRequest("GET", requestUrl, settings.tokenheader)
 	// fill response array according to id amount with false
 	const follows = Array(ids.length).fill(false)
 	// parse the response
@@ -264,40 +261,6 @@ async function isFollowingHomeInstance(ids) {
 		}
 	}
 	return follows
-}
-
-// grab all accounts that are muted by the user
-async function getMutesAndBlocks() {
-	if (settings.fediact_hidemuted) {
-		var requesturl = "https://" + settings.fediact_homeinstance + mutesApi
-		var response = await makeRequest("GET", requesturl, settings.tokenheader)
-		if (response) {
-			response = JSON.parse(response)
-			if (response.length) {
-				settings.fediact_mutesblocks.push(...response.map(acc => acc.acct))
-			}
-		}
-		requesturl = "https://" + settings.fediact_homeinstance + blocksApi
-		response = await makeRequest("GET", requesturl, settings.tokenheader)
-		if (response) {
-			response = JSON.parse(response)
-			if (response.length) {
-				settings.fediact_mutesblocks.push(...response.map(acc => acc.acct))
-			}
-		}
-		// filter duplicates
-		settings.fediact_mutesblocks = settings.fediact_mutesblocks.filter((element, index) => {
-			return (element !== undefined && settings.fediact_mutesblocks.indexOf(element) == index)
-		})
-		requesturl = "https://" + settings.fediact_homeinstance + domainBlocksApi
-		response = await makeRequest("GET", requesturl, settings.tokenheader)
-		if (response) {
-			response = JSON.parse(response)
-			if (response.length) {
-				settings.fediact_domainblocks = response
-			}
-		}
-	}
 }
 
 // check if handle is muted
@@ -572,7 +535,9 @@ async function processToots() {
 			var hrefs = []
 			if ($(el).siblings(".status__prepend").length) {
 				var prepended = $(el).siblings(".status__prepend").first()
-				hrefs.push($(prepended).find("a").attr("href").split("?")[0])
+				if ($(prepended).find("a").attr("href")) {
+					hrefs.push($(prepended).find("a").attr("href").split("?")[0])
+				}
 			}
 			// build array of mentions in @user@domain.com format
 			// NOTE: this will fail if ax external user handle uses another subdomain than hostname, but FediAct was not designed for that - this is best effort
@@ -1088,12 +1053,17 @@ async function checkSite() {
 
 async function backgroundProcessor() {
 	// wait for any url change messages from background script
-	chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+	chrome.runtime.onMessage.addListener(async function(request, sender, sendResponse) {
 		if (request.urlchanged) {
 			// reset already processed elements
 			processed = []
+			// rerun getSettings to keep mutes/blocks up to date while not reloading the page
+			if (!await getSettings()) {
+				// but reload if settings are invalid
+				location.reload()
+			}
 		}
-		// if the settings were update, we do a page reload
+		// if the settings were updated, we do a page reload
 		if (request.updatedfedisettings) {
 			location.reload()
 		}
@@ -1108,34 +1078,47 @@ async function backgroundProcessor() {
 	return false
 }
 
+function getSettings() {
+	// get setting
+	return new Promise(async function(resolve) {
+		try {
+			settings = await (browser || chrome).storage.local.get(settingsDefaults)
+		} catch(e) {
+			log(e)
+			resolve(false)
+		}
+		if (settings) {
+			// validate settings
+			if (checkSettings()) {
+				resolve(true)
+			} else {
+				resolve(false)
+			}
+		} else {
+			resolve(false)
+		}
+	})
+}
+
 // run wrapper
 async function run() {
-	// get setting
-	try {
-		settings = await (browser || chrome).storage.local.get(settingsDefaults)
-	} catch(e) {
-		log(e)
-		return false
-	}
-	if (settings) {
-		// validate settings
-		if (checkSettings()) {
-			// check site (if and which scripts should run)
-			if (await checkSite()) {
-				if (fedireply) {
-					processReply()
-				} else {
-					if (backgroundProcessor()) {
-						getMutesAndBlocks()
-						processFollow()
-						processToots()
-					} else {
-						log("Failed to initialize background script.")
-					}
-				}
+	// validate settings
+	if (await getSettings()) {
+		// check site (if and which scripts should run)
+		if (await checkSite()) {
+			if (fedireply) {
+				processReply()
 			} else {
-				log("Will not process this site.")
+				if (backgroundProcessor()) {
+					console.log(settings.fediact_domainblocks, settings.fediact_mutesblocks)
+					processFollow()
+					processToots()
+				} else {
+					log("Failed to initialize background script.")
+				}
 			}
+		} else {
+			log("Will not process this site.")
 		}
 	} else {
 		log("Could not load settings.")
