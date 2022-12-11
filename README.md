@@ -1,4 +1,4 @@
-# FediAct (v0.9.4)
+# FediAct (v0.9.5)
 A Chrome/Firefox extension that simplifies following and post interactions on other Mastodon instances than your own.
 
 **Features**:
