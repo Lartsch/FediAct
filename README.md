@@ -102,7 +102,7 @@ To update the addon instantly, simply remove and re-install it. Not sure when/if
 I included all of the default add-ons in the custom collection, so you will not miss out on any of those. Of course, you can create [your own collection](https://support.mozilla.org/en-US/kb/how-use-collections-addonsmozillaorg) as well.
 
 ## Additional notes
-1. Currently supports external Mastodon instances v3 + v4, support for other Fedi software is planned
+1. Support for other Fedi software is planned
 2. The whitelist mode can be useful if you do not want the extension to run basic checks on every site (since it needs to determine if its a Mastodon site). Not sure if blacklist is good for anything but I still included it.
 3. It can have several reasons why resolving/executing actions/redirection might not work:
     - Not logged in to your home instance
