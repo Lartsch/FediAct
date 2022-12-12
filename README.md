@@ -104,15 +104,14 @@ I included all of the default add-ons in the custom collection, so you will not 
     - Support for other Fedi software is still planned
 2. The whitelist mode can be useful if you do not want the extension to run basic checks on every site (since it needs to determine if its a Mastodon site). Not sure if blacklist is good for anything but I still included it.
 3. It can have several reasons why resolving/executing actions/redirection might not work:
-    - You're not logged in to your home instance (can't fix, log in lol)
-    - You're scrolling fast and posts are not resolved instantly (a delay is implemented to prevent 429 API errors - wait shortly and check again)
-    - Element identifiers have changed / instance uses a custom layout/flavour (identifiers need to be added / updated)
-    - The external instance you are browsing is not Mastodon (not supported yet)
-    - **Your home instance has strong rate limiting and blocks the API requests** (looking for a way to improve 429 prevention)
-    - The toot that was tried to resolve is from an original instance that is not Mastodon(-like) (not supported yet, at leat a fallback will be added)
-    - Your home instance or the original instance of a toot have defederated / are moderated in a way that affects the API search endpoint (can't fix)
-    - The instance you are browsing does not use 302 redirects for external toots (fallback will be added)
-    - Maybe it also plays a role if the toot is set to unlisted on its original instance (not sure yet)
+    - Not logged in to your home instance
+    - If you scroll fast, there can be a noticeable delay in toot resolving to prevent error 429 (too many requests)
+    - Element identifiers have changed / instance uses a custom layout/flavour
+    - The external instance you are browsing or the originating instance of a toot is not Mastodon
+    - Your home instance has strong rate limiting
+    - Your home instance / the external instance / the original instance of a toot have defederated / are moderated
+    - The instance you are browsing does not use 302 redirects for external toots
+    - Maybe it also plays a role if the toot is set to unlisted on its original instance
 5. There can be short delays since external API calls have to be made
 6. If you only want redirects, simply turn off auto-action and leave redirect on - double click will then only redirect, not execute the action (alternatively, you can simply use the reply button, as it will always redirect to your home instance if redirects are enabled)
 7. If the extension fails to resolve content, the affected buttons will behave like usually
