@@ -114,10 +114,9 @@ I included all of the default add-ons in the custom collection, so you will not 
     - The toot has not yet federated to your home instace (follow the account and toots should start federating)
     - The instance you are browsing does not use 302 redirects for external toots
     - Maybe it also plays a role if the toot is set to unlisted on its original instance
-5. There can be short delays since external API calls have to be made
-6. If you only want redirects, simply turn off auto-action and leave redirect on - double click will then only redirect, not execute the action (alternatively, you can simply use the reply button, as it will always redirect to your home instance if redirects are enabled)
-7. If the extension fails to resolve content, the affected buttons will behave like usually
-8. If you have enabled "Hide muted", your muted and blocked accounts/instances will be fetched every 60 seconds in the background or when the settings are updated
+4. There can be short delays since external API calls have to be made
+5. If you only want redirects, simply turn off auto-action and leave redirect on - double click will then only redirect, not execute the action (alternatively, you can simply use the reply button, as it will always redirect to your home instance if redirects are enabled)
+6. If the extension fails to resolve content, the affected buttons will behave like usually
 
 ## Todos / Planned features 
 - General performance and code improvements
