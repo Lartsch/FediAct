@@ -1003,7 +1003,7 @@ function processDomainList(newLineList) {
 		}
 	}
 	// return newly created set (remvoes duplicates)
-	return [...new Set(cleanedArray)];
+	return [...new Set(cleanedArray)]
 }
 
 function checkSettings() {
