@@ -108,10 +108,11 @@ I included all of the default add-ons in the custom collection, so you will not 
 3. It can have several reasons why resolving/executing actions/redirection might not work:
     - Not logged in to your home instance
     - If you scroll fast, there can be a noticeable delay in toot resolving to prevent error 429 (too many requests)
-    - Element identifiers have changed / instance uses a custom layout/flavour
+    - Element identifiers have changed / instance uses an unsupported flavour
     - The external instance you are browsing or the originating instance of a toot is not Mastodon
     - Your home instance has strong rate limiting
     - Your home instance / the external instance / the original instance of a toot have defederated / are moderated
+    - The toot has not yet federated to your home instace (follow the account and toots should start federating)
     - The instance you are browsing does not use 302 redirects for external toots
     - Maybe it also plays a role if the toot is set to unlisted on its original instance
 5. There can be short delays since external API calls have to be made
