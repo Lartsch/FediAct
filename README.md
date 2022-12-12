@@ -51,6 +51,8 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 4. Check the other settings (optional)
 5. Click the "Submit" button to save
 
+If you only want redirects, simply turn off auto-action and leave redirect on - double click will then only redirect, not execute the action.
+
 **Note for "Hide muted" feature**  
 If enabled, your muted/blocked users/instances are synced every minute, so changes may not be reflected instantly. Blocked/muted are treated the same: All boosts, toots and toots with mentions of them will be hidden. There can be edge cases where hiding might fail and also, this feature can decrease performance, so it is disabled by default.
 
@@ -114,9 +116,8 @@ I included all of the default add-ons in the custom collection, so you will not 
     - The toot has not yet federated to your home instace (follow the account and toots should start federating)
     - The instance you are browsing does not use 302 redirects for external toots
     - Maybe it also plays a role if the toot is set to unlisted on its original instance
-4. There can be short delays since external API calls have to be made
-5. If you only want redirects, simply turn off auto-action and leave redirect on - double click will then only redirect, not execute the action (alternatively, you can simply use the reply button, as it will always redirect to your home instance if redirects are enabled)
-6. If the extension fails to resolve content, the affected buttons will behave like usually
+4. There can be short delays since API calls have to be made
+5. If the extension fails to resolve content, the affected buttons will behave like usually (popup modal)
 
 ## Todos / Planned features 
 - General performance and code improvements
