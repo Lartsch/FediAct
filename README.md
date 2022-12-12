@@ -121,14 +121,11 @@ I included all of the default add-ons in the custom collection, so you will not 
 8. If you have enabled "Hide muted", your muted and blocked accounts/instances will be fetched every 60 seconds in the background or when the settings are updated
 
 ## Todos / Planned features 
-- Fix last remaining resolve fails as far as **possible**
 - General performance and code improvements
-- Update settings in content script instantly (so no page reload is needed)
 - Improve 429 prevention and add resolving fallbacks
 - Add support for other implementations (Plemora, GNU Social, ...)
 - Find additional layouts/flavours to add identifiers for
-- Support for profiles views with follow button disabled
-- Implement caching where applicable to decrease required requests
+- Support for profiles / card views with no follow button
 - If I find myself to be bored, probably more
 
 ## Thanks to...
