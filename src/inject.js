@@ -372,19 +372,6 @@ function toggleInlineCss(el, styles, toggleclass) {
 	}
 }
 
-// extract handle from elements
-function extractHandle(selectors) {
-	// check all of the selectors
-	for (const selector of selectors) {
-		// if found
-		if ($(selector).length) {
-			// return trimmed since there can be whitespace
-			return $(selector).text().trim()
-		}
-	}
-	return false
-}
-
 // check if an toot identifier is already in the "processed" array
 function isInProcessedToots(id) {
 	// iterate array
