@@ -41,6 +41,7 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 > 
 > - **If webstore release is outdated, use the [manual installation method](#manual-installation) to install the latest version**  
 > - **Special installation steps for [Firefox on Android](#install-in-firefox-for-android)**
+> - If you like this addon, please consider donating: [paypal.me/lartsch](https://paypal.me/lartsch)
 
 ## Setup
 
@@ -50,9 +51,10 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 4. Check the other settings (optional)
 5. Click the "Submit" button to save
 
-**Please read the [additional notes](#additional-notes).**
+**Note for "Hide muted" feature**  
+If enabled, your muted/blocked users/instances are synced every minute, so changes may not be reflected instantly. Blocked/muted are treated the same: All boosts, toots and toots with mentions of them will be hidden. There can be edge cases where hiding might fail and also, this feature can decrease performance, so it is disabled by default.
 
-If you like this addon, please consider donating: [paypal.me/lartsch](https://paypal.me/lartsch)
+**Please read the [additional notes](#additional-notes).**
 
 ## Screenshots / GIFs
 v0.8.0
