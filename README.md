@@ -41,7 +41,8 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 > 
 > - **If webstore release is outdated, use the [manual installation method](#manual-installation) to install the latest version**  
 > - **Special installation steps for [Firefox on Android](#install-in-firefox-for-android)**
-> - If you like this addon, please consider donating: [paypal.me/lartsch](https://paypal.me/lartsch)
+
+If you like this addon, please consider donating: [paypal.me/lartsch](https://paypal.me/lartsch)
 
 ## Setup
 
