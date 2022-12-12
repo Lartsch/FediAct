@@ -101,7 +101,6 @@ I included all of the default add-ons in the custom collection, so you will not 
 
 ## Additional notes
 1. Currently supports external Mastodon instances v3 + v4
-    - **I have not tested if Mastodon v3 works as home instance! v4 support is the main objective**
     - Support for other Fedi software is still planned
 2. The whitelist mode can be useful if you do not want the extension to run basic checks on every site (since it needs to determine if its a Mastodon site). Not sure if blacklist is good for anything but I still included it.
 3. It can have several reasons why resolving/executing actions/redirection might not work:
@@ -117,6 +116,7 @@ I included all of the default add-ons in the custom collection, so you will not 
 5. There can be short delays since external API calls have to be made
 6. If you only want redirects, simply turn off auto-action and leave redirect on - double click will then only redirect, not execute the action (alternatively, you can simply use the reply button, as it will always redirect to your home instance if redirects are enabled)
 7. If the extension fails to resolve content, the affected buttons will behave like usually
+8. If you have enabled "Hide muted", your muted and blocked accounts/instances will be fetched every 60 seconds in the background or when the settings are updated
 
 ## Todos / Planned features 
 - Fix last remaining resolve fails as far as **possible**
