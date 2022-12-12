@@ -54,6 +54,8 @@ I recommend using version 0.9.5.3 as I think it's the most stable release yet, i
 
 **Please read the [additional notes](#additional-notes).**
 
+If you like this addon, please consider donating: [paypal.me/lartsch](https://paypal.me/lartsch)
+
 ## Screenshots / GIFs
 v0.8.0
 <details>
