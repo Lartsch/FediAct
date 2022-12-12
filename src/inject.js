@@ -610,7 +610,8 @@ async function processToots() {
 							// if the action was successfully executed, update the element styles
 							if (action == "boost" || action == "unboost") {
 								// toggle inline css styles
-								toggleInlineCss($(e.currentTarget).find("i"),[["color","!remove","rgb(140, 141, 255)"],["transition-duration", "!remove", "0.9s"],["background-position", "!remove", "0px 100%"]], "fediactive")
+								toggleInlineCss($(e.currentTarget),[["color","!remove","rgb(140, 141, 255)"]], "fediactive")
+								toggleInlineCss($(e.currentTarget).find("i"),[["transition-duration", "!remove", "0.9s"],["background-position", "!remove", "0px 100%"]], "fediactive")
 								// update element in cache if exists
 								if (cacheIndex) {
 									processed[cacheIndex][3] = !processed[cacheIndex][3]
@@ -618,6 +619,7 @@ async function processToots() {
 							// same for favourite, bookmarked....
 							} else if (action == "favourite" || action == "unfavourite") {
 								toggleInlineCss($(e.currentTarget),[["color","!remove","rgb(202, 143, 4)"]], "fediactive")
+								toggleInlineCss($(e.currentTarget).find("i"),[["animation","spring-rotate-out 1s linear","spring-rotate-in 1s linear"]], "fediactive")
 								if (cacheIndex) {
 									processed[cacheIndex][4] = !processed[cacheIndex][4]
 								}
@@ -655,12 +657,14 @@ async function processToots() {
 					if (tootdata[4]) {
 						if (!$(favButton).hasClass("fediactive")) {
 							toggleInlineCss($(favButton),[["color","!remove","rgb(202, 143, 4)"]], "fediactive")
+							toggleInlineCss($(favButton).find("i"),[["animation","spring-rotate-out 1s linear","spring-rotate-in 1s linear"]], "fediactive")
 						}
 					}
 					// repeat for other buttons
 					if (tootdata[3]) {
 						if (!$(boostButton).find("i.fediactive").length) {
-							toggleInlineCss($(boostButton).find("i"),[["color","!remove","rgb(140, 141, 255)"],["transition-duration", "!remove", "0.9s"],["background-position", "!remove", "0px 100%"]], "fediactive")
+							toggleInlineCss($(boostButton),[["color","!remove","rgb(140, 141, 255)"]], "fediactive")
+							toggleInlineCss($(boostButton).find("i"),[["transition-duration", "!remove", "0.9s"],["background-position", "!remove", "0px 100%"]], "fediactive")
 						}
 					}
 					if (tootdata[5]) {
