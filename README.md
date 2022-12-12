@@ -104,7 +104,7 @@ I included all of the default add-ons in the custom collection, so you will not 
 ## Additional notes
 1. Support for other Fedi software is planned
 2. The whitelist mode can be useful if you do not want the extension to run basic checks on every site (since it needs to determine if its a Mastodon site). Not sure if blacklist is good for anything but I still included it.
-3. It can have several reasons why resolving/executing actions/redirection might not work:
+3. It can have several reasons why resolving might not work:
     - Not logged in to your home instance
     - If you scroll fast, there can be a noticeable delay in toot resolving to prevent error 429 (too many requests)
     - Element identifiers have changed / instance uses an unsupported flavour
