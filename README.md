@@ -1,4 +1,4 @@
-# FediAct (v0.9.5)
+# FediAct (v0.9.6)
 A Chrome/Firefox extension that simplifies following and post interactions on other Mastodon instances than your own.
 
 **Features**:
@@ -27,22 +27,23 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
       * [Install in Firefox for Android](#install-in-firefox-for-android)
   * [Additional notes](#additional-notes)
   * [Todos / Planned features](#todos--planned-features)
+  * [Contributing](#contributing)
 
 ## Installation
 
 [link-chrome]: https://chrome.google.com/webstore/detail/fediact/lmpcajpkjcclkjbliapfjfolocffednm 'Version published on Chrome Web Store'
 [link-firefox]: https://addons.mozilla.org/en-US/firefox/addon/fediact/ 'Version published on Mozilla Add-ons'
 
-[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/chrome/chrome.svg" width="48" alt="Chrome" valign="middle">][link-chrome] [<img valign="middle" src="https://img.shields.io/chrome-web-store/v/lmpcajpkjcclkjbliapfjfolocffednm.svg?label=%20%20">][link-chrome] and other Chromium browsers (**currently in review** by Google)
+[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/chrome/chrome.svg" width="48" alt="Chrome" valign="middle">][link-chrome] [<img valign="middle" src="https://img.shields.io/chrome-web-store/v/lmpcajpkjcclkjbliapfjfolocffednm.svg?label=%20">][link-chrome] + other Chromium browsers
 
 [<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fediact.svg?label=%20%20">][link-firefox] including Firefox for Android
-
-I recommend using version 0.9.5.3 as I think it's the most stable release yet, including all features.
 
 > **Note**
 > 
 > - **If webstore release is outdated, use the [manual installation method](#manual-installation) to install the latest version**  
 > - **Special installation steps for [Firefox on Android](#install-in-firefox-for-android)**
+
+If you like this addon, please consider donating: [paypal.me/lartsch](https://paypal.me/lartsch)
 
 ## Setup
 
@@ -52,9 +53,13 @@ I recommend using version 0.9.5.3 as I think it's the most stable release yet, i
 4. Check the other settings (optional)
 5. Click the "Submit" button to save
 
-**Please read the [additional notes](#additional-notes).**
+**Only redirect?**  
+If you only want redirects, simply turn off auto-action and leave redirect on - double click will then only redirect, not execute the action.
 
-If you like this addon, please consider donating: [paypal.me/lartsch](https://paypal.me/lartsch)
+**"Hide muted" feature**  
+If enabled, your muted/blocked users/instances are synced every minute, so changes may not be reflected instantly. Blocked/muted are treated the same: All boosts, toots and toots with mentions of them will be hidden. There can be edge cases where hiding might fail and also, this feature can decrease performance, so it is disabled by default.
+
+**Please read the [additional notes](#additional-notes).**
 
 ## Screenshots / GIFs
 v0.8.0
@@ -102,31 +107,32 @@ To update the addon instantly, simply remove and re-install it. Not sure when/if
 I included all of the default add-ons in the custom collection, so you will not miss out on any of those. Of course, you can create [your own collection](https://support.mozilla.org/en-US/kb/how-use-collections-addonsmozillaorg) as well.
 
 ## Additional notes
-1. Currently supports external Mastodon instances v3 + v4
-    - Support for other Fedi software is still planned
+1. Support for other Fedi software is planned
 2. The whitelist mode can be useful if you do not want the extension to run basic checks on every site (since it needs to determine if its a Mastodon site). Not sure if blacklist is good for anything but I still included it.
-3. It can have several reasons why resolving/executing actions/redirection might not work:
-    - You're not logged in to your home instance (can't fix, log in lol)
-    - You're scrolling fast and posts are not resolved instantly (a delay is implemented to prevent 429 API errors - wait shortly and check again)
-    - Element identifiers have changed / instance uses a custom layout/flavour (identifiers need to be added / updated)
-    - The external instance you are browsing is not Mastodon (not supported yet)
-    - **Your home instance has strong rate limiting and blocks the API requests** (looking for a way to improve 429 prevention)
-    - The toot that was tried to resolve is from an original instance that is not Mastodon(-like) (not supported yet, at leat a fallback will be added)
-    - Your home instance or the original instance of a toot have defederated / are moderated in a way that affects the API search endpoint (can't fix)
-    - The instance you are browsing does not use 302 redirects for external toots (fallback will be added)
-    - Maybe it also plays a role if the toot is set to unlisted on its original instance (not sure yet)
-5. There can be short delays since external API calls have to be made
-6. If you only want redirects, simply turn off auto-action and leave redirect on - double click will then only redirect, not execute the action (alternatively, you can simply use the reply button, as it will always redirect to your home instance if redirects are enabled)
-7. If the extension fails to resolve content, the affected buttons will behave like usually
-8. If you have enabled "Hide muted", your muted and blocked accounts/instances will be fetched every 60 seconds in the background or when the settings are updated
+3. It can have several reasons why resolving might not work:
+    - Not logged in to your home instance
+    - If you scroll fast, there can be a noticeable delay in toot resolving to prevent error 429 (too many requests)
+    - Element identifiers have changed / instance uses an unsupported flavour
+    - The external instance you are browsing or the originating instance of a toot is not Mastodon
+    - Your home instance has strong rate limiting
+    - Your home instance / the external instance / the original instance of a toot have defederated / are moderated
+    - The toot has not yet federated to your home instace (follow the account and toots should start federating)
+    - The instance you are browsing does not use 302 redirects for external toots
+    - Maybe it also plays a role if the toot is set to unlisted on its original instance
+4. There can be short delays since API calls have to be made
+5. If the extension fails to resolve content, the affected buttons will behave like usually (popup modal)
 
 ## Todos / Planned features 
+- Improve handling of irrelevant errors
 - General performance and code improvements
 - Improve 429 prevention and add resolving fallbacks
 - Add support for other implementations (Plemora, GNU Social, ...)
 - Find additional layouts/flavours to add identifiers for
 - Support for profiles / card views with no follow button
 - If I find myself to be bored, probably more
+
+## Contributing
+Feel free to create pull requests for whatever improvements you can make! :)
 
 ## Thanks to...
 @raikasdev because I stole his fix for cross-browser storage API support  
