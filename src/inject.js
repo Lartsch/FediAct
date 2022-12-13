@@ -2,8 +2,8 @@
 // =-=-=-=-=-= CONSTANTS =-==-=-=-=
 // =-=-=-=-==-=-=-=-==-=-=-=-==-=-=
 
-const followButtonPaths = ["div.account__header button.logo-button","div.public-account-header a.logo-button","div.account-card a.logo-button","div.directory-card a.icon-button", "div.detailed-status a.logo-button"]
-const profileNamePaths = ["div.account__header__tabs__name small", "div.public-account-header__tabs__name small", "div.detailed-status span.display-name__account", "div.display-name > span"]
+const followButtonPaths = ["div.account__header button.logo-button","div.public-account-header a.logo-button","div.account-card a.logo-button","div.directory-card a.icon-button", "div.detailed-status a.logo-button", "button.remote-button", "div.account__header button.button--follow"]
+const profileNamePaths = ["div.account__header__tabs__name small", "div.public-account-header__tabs__name small", "div.detailed-status span.display-name__account", "div.display-name > span", "a.user-screen-name", "div.profile-info-panel small"]
 const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/
 const handleExtractUrlRegex = /^(?<domain>https?:\/\/(?:\.?[a-z0-9-]+)+(?:\.[a-z]+){1})?\/?@(?<handle>\w+)(?:@(?<handledomain>(?:[\w-]+\.)+?\w+))?(?:\/(?<tootid>\d+))?\/?$/
 const handleExtractUriRegex = /^(?<domain>https?:\/\/(?:\.?[a-z0-9-]+)+(?:\.[a-z]+){1})(?:\/users\/)(?<handle>\w+)(?:(?:\/statuses\/)(?<tootid>\d+))?\/?$/
@@ -888,6 +888,10 @@ async function processFollow() {
 			for (const selector of profileNamePaths) {
 				if ($(selector).length) {
 					fullHandle = $(selector).text().trim()
+					if (fullHandle.split("@").length-1 == 1) {
+						fullHandle = fullHandle + "@" + settings.fediact_exturi
+					}
+					console.log(fullHandle)
 					break
 				}
 			}
@@ -1057,8 +1061,13 @@ async function checkSite() {
 	if (response) {
 		var uri = JSON.parse(response).uri
 		if (uri) {
-			// run external mode
-			settings.fediact_exturi = uri
+			if (uri.startsWith("http")) {
+				uri = new URL(uri)
+				settings.fediact_exturi = uri.hostname
+			} else {
+				settings.fediact_exturi = uri
+			}
+			console.log(settings.fediact_exturi)
 			return true
 		}
 	}

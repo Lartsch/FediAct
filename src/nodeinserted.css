@@ -43,10 +43,12 @@ div.status,
 div.detailed-status,
 div.detailed-status__action-bar,
 div.account__header button.logo-button,
+div.account__header button.button--follow,
 div.public-account-header a.logo-button,
 div.account-card a.logo-button,
 div.directory-card a.icon-button,
-div.detailed-status a.logo-button { 
+div.detailed-status a.logo-button,
+button.remote-button { 
     -webkit-animation-name: nodeInserted !important;
     -webkit-animation-duration: 0.001s !important;
     -ms-animation-name: nodeInserted !important;
