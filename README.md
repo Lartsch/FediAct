@@ -123,6 +123,8 @@ I included all of the default add-ons in the custom collection, so you will not 
 5. If the extension fails to resolve content, the affected buttons will behave like usually (popup modal)
 
 ## Todos / Planned features 
+- Support for poll votes
+- Update settings in content script without page reload
 - Improve handling of irrelevant errors
 - General performance and code improvements
 - Improve 429 prevention and add resolving fallbacks
