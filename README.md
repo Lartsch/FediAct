@@ -54,7 +54,7 @@ If you like this addon, please consider donating: [paypal.me/lartsch](https://pa
 5. Click the "Submit" button to save
 
 **Only redirect?**  
-If you only want redirects, simply turn off auto-action and leave redirect on - double click will then only redirect, not execute the action.
+Simply turn off auto-action and leave redirect on - double click will then only redirect, not execute the action.
 
 **"Hide muted" feature**  
 If enabled, your muted/blocked users/instances are synced every minute, so changes may not be reflected instantly. Blocked/muted are treated the same: All boosts, toots and toots with mentions of them will be hidden. There can be edge cases where hiding might fail and also, this feature can decrease performance, so it is disabled by default.
