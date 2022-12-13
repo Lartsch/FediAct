@@ -27,6 +27,7 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
       * [Install in Firefox for Android](#install-in-firefox-for-android)
   * [Additional notes](#additional-notes)
   * [Todos / Planned features](#todos--planned-features)
+  * [Contributing](#contributing)
 
 ## Installation
 
@@ -129,6 +130,9 @@ I included all of the default add-ons in the custom collection, so you will not 
 - Find additional layouts/flavours to add identifiers for
 - Support for profiles / card views with no follow button
 - If I find myself to be bored, probably more
+
+## Thanks to...
+Feel free to create pull requests for whatever improvements you can make! :)
 
 ## Thanks to...
 @raikasdev because I stole his fix for cross-browser storage API support  
