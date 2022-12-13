@@ -121,6 +121,7 @@ I included all of the default add-ons in the custom collection, so you will not 
 5. If the extension fails to resolve content, the affected buttons will behave like usually (popup modal)
 
 ## Todos / Planned features 
+- Improve handling of irrelevant errors
 - General performance and code improvements
 - Improve 429 prevention and add resolving fallbacks
 - Add support for other implementations (Plemora, GNU Social, ...)
