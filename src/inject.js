@@ -143,12 +143,14 @@ async function makeRequest(method, url, extraheaders) {
 }
 
 async function determineSoftware() {
+	// TODO: what if response is ok but is an error page?
 	var found = false
 	var host = location.protocol + "//" + location.hostname
 	// return first resolving promise
 	var result = await Promise.any([
 		// use jquery ajax as it always rejects on 404
 		$.ajax(host + '/api/v1/instance'),
+		$.ajax(host + '/api/v1/instance/settings'),
 		$.ajax(host + '/nodeinfo/2.0.json'),
 		$.ajax(host + '/nodeinfo/2.1.json'),
 		$.ajax(host + '/api/nodeinfo/2.0.json'),
@@ -172,7 +174,69 @@ async function determineSoftware() {
 		} else if (/gnusocial/i.test(dataStr)) {
 			settings.fediact_instancetype = "gnusocial"
 			found = true
-		} 
+		} else if (/friendica/i.test(dataStr)) {
+			settings.fediact_instancetype = "friendica"
+			found = true
+		} else if (/diaspora/i.test(dataStr)) {
+			settings.fediact_instancetype = "diaspora"
+			found = true
+		} else if (/hubzilla/i.test(dataStr)) {
+			settings.fediact_instancetype = "hubzilla"
+			found = true
+		} else if (/peertube/i.test(dataStr)) {
+			settings.fediact_instancetype = "peertube"
+			found = true
+		} else if (/pixelfed/i.test(dataStr)) {
+			settings.fediact_instancetype = "pixelfed"
+			found = true
+		} else if (/plume/i.test(dataStr)) {
+			settings.fediact_instancetype = "plume"
+			found = true
+		} else if (/lemmy/i.test(dataStr)) {
+			settings.fediact_instancetype = "lemmy"
+			found = true
+		} else if (/kbin/i.test(dataStr)) {
+			settings.fediact_instancetype = "kbin"
+			found = true
+		} else if (/funkwhale/i.test(dataStr)) {
+			settings.fediact_instancetype = "funkwhale"
+			found = true
+		} else if (/bookwyrm/i.test(dataStr)) {
+			settings.fediact_instancetype = "bookwyrm"
+			found = true
+		} else if (/dolphin/i.test(dataStr)) {
+			settings.fediact_instancetype = "dolphin"
+			found = true
+		} else if (/acropolis/i.test(dataStr)) {
+			settings.fediact_instancetype = "acropolis"
+			found = true
+		} else if (/pubgate/i.test(dataStr)) {
+			settings.fediact_instancetype = "pubgate"
+			found = true
+		} else if (/contentnation/i.test(dataStr)) {
+			settings.fediact_instancetype = "contentnation"
+			found = true
+		} else if (/mitra/i.test(dataStr)) {
+			settings.fediact_instancetype = "mitra"
+			found = true
+		} else if (/gotosocial/i.test(dataStr)) {
+			settings.fediact_instancetype = "gotosocial" 
+			found = true
+		} else if (/smithereen/i.test(dataStr)) {
+			settings.fediact_instancetype = "smithereen" 
+			found = true
+		} else if (/zap/i.test(dataStr)) {
+			settings.fediact_instancetype = "zap"
+			found = true
+		} else if (/red/i.test(dataStr)) {
+			settings.fediact_instancetype = "red"
+			found = true
+		}
+		// TODO: remove software that does not fit. move shortest to bottom
+		// TODO: use json keys if possible
+		// TODO: how to generalize getting the instance URI?
+		// TODO: move forks to the according forked project
+		// TODO: Write.as, Writefreely, Nextcloud social, birdsitelive, owncast, micro.blog, mobilize, matrix/element, castopod, bonfire, ktistec, lotide, microblogpub, gancio
 	}
 	return found
 }
