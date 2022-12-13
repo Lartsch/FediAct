@@ -142,6 +142,41 @@ async function makeRequest(method, url, extraheaders) {
     })
 }
 
+async function determineSoftware() {
+	var found = false
+	var host = location.protocol + "//" + location.hostname
+	// return first resolving promise
+	var result = await Promise.any([
+		// use jquery ajax as it always rejects on 404
+		$.ajax(host + '/api/v1/instance'),
+		$.ajax(host + '/nodeinfo/2.0.json'),
+		$.ajax(host + '/nodeinfo/2.1.json'),
+		$.ajax(host + '/api/nodeinfo/2.0.json'),
+		$.ajax(host + '/api/nodeinfo/2.1.json'),
+		$.ajax(host + '/nodeinfo/2.0'),
+		$.ajax(host + '/nodeinfo/2.1'),
+		$.ajax(host + '/api/nodeinfo/2.0'),
+		$.ajax(host + '/api/nodeinfo/2.1')
+	])
+	if (result) {
+		var dataStr = JSON.stringify(result)
+		if (/pleroma|akkoma|rebased/i.test(dataStr)) {
+			settings.fediact_instancetype = "pleroma"
+			found = true
+		} else if (/mastodon|hometown|ecko/i.test(dataStr)) {
+			settings.fediact_instancetype = "mastodon"
+			found = true
+		} else if (/misskey|calckey|groundpolis|foundkey|cherrypick/i.test(dataStr)) {
+			settings.fediact_instancetype = "misskey"
+			found = true
+		} else if (/gnusocial/i.test(dataStr)) {
+			settings.fediact_instancetype = "gnusocial"
+			found = true
+		} 
+	}
+	return found
+}
+
 // Escape characters used for regex
 function escapeRegExp(string) {
 	return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
@@ -891,7 +926,6 @@ async function processFollow() {
 					if (fullHandle.split("@").length-1 == 1) {
 						fullHandle = fullHandle + "@" + settings.fediact_exturi
 					}
-					console.log(fullHandle)
 					break
 				}
 			}
@@ -1067,7 +1101,6 @@ async function checkSite() {
 			} else {
 				settings.fediact_exturi = uri
 			}
-			console.log(settings.fediact_exturi)
 			return true
 		}
 	}
