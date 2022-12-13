@@ -131,7 +131,7 @@ I included all of the default add-ons in the custom collection, so you will not 
 - Support for profiles / card views with no follow button
 - If I find myself to be bored, probably more
 
-## Thanks to...
+## Contributing
 Feel free to create pull requests for whatever improvements you can make! :)
 
 ## Thanks to...
