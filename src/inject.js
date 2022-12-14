@@ -13,6 +13,7 @@ const instanceApi = "/api/v1/instance"
 const statusApi = "/api/v1/statuses"
 const searchApi = "/api/v2/search"
 const accountsApi = "/api/v1/accounts"
+const pollsApi = "/api/v1/polls"
 const apiDelay = 500
 const maxTootCache = 200
 
@@ -111,7 +112,7 @@ var getUrlParameter = function getUrlParameter(sParam) {
 }
 
 // promisified xhr for api calls
-async function makeRequest(method, url, extraheaders) {
+async function makeRequest(method, url, extraheaders, jsonbody) {
 	// try to prevent error 429 too many request by delaying home instance requests
 	if (~url.indexOf(settings.fediact_homeinstance) && settings.fediact_enabledelay) {
 		// get current time
@@ -160,7 +161,12 @@ async function makeRequest(method, url, extraheaders) {
 			resolve(false)
 		}
 		// send the request
-		xhr.send()
+		if (jsonbody) {
+			xhr.setRequestHeader("Content-Type","application/json")
+			xhr.send(JSON.stringify(jsonbody))
+		} else {
+			xhr.send()
+		}
     })
 }
 
@@ -202,9 +208,14 @@ function redirectTo(url) {
 // =-=-=-=-= INTERACTIONS =-=-=-=-=
 // =-=-=-=-==-=-=-=-==-=-=-=-==-=-=
 
-async function executeAction(id, action) {
-	var requestUrl, condition
+async function executeAction(id, action, polldata) {
+	var requestUrl, condition, jsonbody
 	switch (action) {
+		case 'vote':
+			requestUrl = 'https://' + settings.fediact_homeinstance + pollsApi + "/" + id + "/votes"
+			condition = function(response) {return response.voted}
+			jsonbody = polldata
+			break
 		case 'follow':
 			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + id + "/follow"
 			condition = function(response) {return response.following || response.requested}
@@ -241,7 +252,7 @@ async function executeAction(id, action) {
 			log("No valid action specified."); break
 	}
 	if (requestUrl) {
-		var response = await makeRequest("POST",requestUrl,settings.tokenheader)
+		var response = await makeRequest("POST", requestUrl, settings.tokenheader, jsonbody)
 		if (response) {
 			// convert to json object
 			response = JSON.parse(response)
@@ -262,7 +273,7 @@ async function isFollowingHomeInstance(ids) {
 		requestUrl += "id[]=" + id.toString() + "&"
 	}
 	// make the request
-	var responseFollowing = await makeRequest("GET", requestUrl, settings.tokenheader)
+	var responseFollowing = await makeRequest("GET", requestUrl, settings.tokenheader, null)
 	// fill response array according to id amount with false
 	const follows = Array(ids.length).fill(false)
 	// parse the response
@@ -307,7 +318,7 @@ function isMuted(handle) {
 // Return the user id on the users home instance
 async function resolveHandleToHome(handle) {
 	var requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/search?q=" + handle + "&resolve=true&limit=1"
-	var searchResponse = await makeRequest("GET",requestUrl,settings.tokenheader)
+	var searchResponse = await makeRequest("GET", requestUrl, settings.tokenheader, null)
 	if (searchResponse) {
 		searchResponse = JSON.parse(searchResponse)
 		if (searchResponse[0].id) {
@@ -321,19 +332,23 @@ async function resolveHandleToHome(handle) {
 // resolve a toot to the users home instance
 async function resolveTootToHome(searchstring) {
 	var requestUrl = 'https://' + settings.fediact_homeinstance + searchApi + "/?q=" + searchstring + "&resolve=true&limit=1"
-	var response = await makeRequest("GET", requestUrl, settings.tokenheader)
+	var response = await makeRequest("GET", requestUrl, settings.tokenheader, null)
 	if (response) {
 		response = JSON.parse(response)
 		// do we have a status as result?
 		if (!response.accounts.length && response.statuses.length) {
 			var status = response.statuses[0]
-			// return the required status data
-			return [status.account.acct, status.id, status.reblogged, status.favourited, status.bookmarked]
+			if (status.poll) {
+				return [[status.account.acct, status.id, status.reblogged, status.favourited, status.bookmarked], [status.poll.id, status.poll.voted]]
+			} else {
+				// return the required status data
+				return [[status.account.acct, status.id, status.reblogged, status.favourited, status.bookmarked], [false, false]]
+			}
 		} else {
-			return false
+			return [false, false]
 		}
 	} else {
-		return false
+		return [false, false]
 	}
 }
 
@@ -619,14 +634,39 @@ async function processToots() {
 			var boostButton = $(el).find("button:has(i.fa-retweet), a.icon-button:has(i.fa-retweet), a.detailed-status__link:has(i.fa-retweet)").first()
 			var bookmarkButton = $(el).find("button:has(i.fa-bookmark)").first()
 			var replyButton = $(el).find("button:has(i.fa-reply), button:has(i.fa-reply-all), a.icon-button:has(i.fa-reply), a.icon-button:has(i.fa-reply-all)").first()
-			// handles process when a button is clicked
-			async function clickAction(id, e) {
+			var voteButton = $(el).find("div.poll button").first()
+			// handles process when a toot button is clicked
+			async function pollAction(id, redirect, e) {
+				if (settings.fediact_autoaction) {
+					var pollData = {
+						choices: []
+					}
+					var pollDiv = $(e.currentTarget).closest("div.poll")
+					var listEls = $(pollDiv).find("li")
+					for (var i = 0; i < listEls.length; i++) {
+						if ($(listEls[i]).find("span.active").length) {
+							pollData.choices.push(String(i))
+						}
+					}
+					var result = await executeAction(id, "vote", pollData)
+					if (result) {
+						$(e.currentTarget).hide()
+						$(pollDiv).find("ul").replaceWith("<p style='font-style: italic'><a style='font-weight:bold; color:orange' href='" + redirect + "' target='" + settings.fediact_target + "'>View the results</a> on your home instance.<p>")
+						if (cacheIndex) {
+							processed[cacheIndex][9] = !processed[cacheIndex][9]
+						}
+					}
+					return result
+				}
+			}
+			// handles process when a toot button is clicked
+			async function tootAction(id, e) {
 				if (settings.fediact_autoaction) {
 					// determine the action to perform
 					var action = getTootAction(e)
 					if (action) {
 						// resolve url on home instance to get local toot/author identifiers and toot status
-						var actionExecuted = await executeAction(id, action)
+						var actionExecuted = await executeAction(id, action, null)
 						if (actionExecuted) {
 							// if the action was successfully executed, update the element styles
 							if (action == "boost" || action == "unboost") {
@@ -674,6 +714,7 @@ async function processToots() {
 					// otherwise start processing button styles
 					// first enable the bookmark button (is disabled on external instances)
 					$(bookmarkButton).removeClass("disabled").removeAttr("disabled")
+					$(voteButton).removeAttr("disabled")
 					// set the toot buttons to active, depending on the state of the resolved toot and if the element already has the active class
 					if (tootdata[4]) {
 						if (!$(favButton).hasClass("fediactive")) {
@@ -693,6 +734,10 @@ async function processToots() {
 							toggleInlineCss($(bookmarkButton),[["color","!remove","rgb(255, 80, 80)"]], "fediactive")
 						}
 					}
+					if (tootdata[9]) {
+						$(voteButton).hide()
+						$(voteButton).closest("div.poll").find("ul").replaceWith("<p style='font-style: italic'><a style='font-weight:bold; color:orange' href='" + tootdata[6] + "' target='" + settings.fediact_target + "'>View the results</a> on your home instance.<p>")
+					}
 				}
 			}
 			// handles binding of clicks events for all buttons of a toot
@@ -706,7 +751,12 @@ async function processToots() {
 					redirectTo(tootdata[6]+"?fedireply")
 				})
 				// for all other buttons...
-				$([favButton, boostButton, bookmarkButton]).each(function() {
+				$([favButton, boostButton, bookmarkButton, voteButton]).each(function() {
+					if ($(voteButton).length) {
+						if ($(voteButton).get(0).isEqualNode($(this).get(0))) {
+							var isVote = true
+						}
+					}
 					// these behave differently with single / double click
 					// we use a custom solution for handling dblclick since the default event does not work here
 					// init function global vars required for single/double click handling
@@ -721,8 +771,12 @@ async function processToots() {
 						// this will always run, but see below for double click handling
 						if (clicks == 1) {
 							timer = setTimeout(async function() {
-								// execute action on click and get result (fail/success)
-								var actionExecuted = await clickAction(tootdata[2], e)
+								if (isVote && !tootdata[9]) {
+									var actionExecuted = pollAction(tootdata[8], tootdata[6], e)
+								} else {
+									// execute action on click and get result (fail/success)
+									var actionExecuted = await tootAction(tootdata[2], e)
+								}
 								if (!actionExecuted) {
 									log("Action failed.")
 								}
@@ -733,8 +787,12 @@ async function processToots() {
 							// if we get here, the element was clicked twice before the above timeout was over, so this is a double click
 							// reset the above timeout so it wont execute
 							clearTimeout(timer)
-							// same as above, but we redirect if the result is successful
-							var actionExecuted = await clickAction(tootdata[2], e)
+							if (isVote) {
+								var actionExecuted = pollAction(tootdata[8], tootdata[6], e)
+							} else {
+								// execute action on click and get result (fail/success)
+								var actionExecuted = await tootAction(tootdata[2], e)
+							}
 							if (!actionExecuted) {
 								log("Action failed.")
 							} else {
@@ -826,14 +884,14 @@ async function processToots() {
 						// run only if not already resolved
 						if (!resolvedToHomeInstance) {
 							// resolve toot on actual home instance
-							var resolvedToot = await resolveTootToHome(homeResolveString) // [status.account.acct, status.id, status.reblogged, status.favourited, status.bookmarked]
+							var [resolvedToot, poll] = await resolveTootToHome(homeResolveString) // [status.account.acct, status.id, status.reblogged, status.favourited, status.bookmarked], pollid/false
 							if (resolvedToot) {
 								// if successful, set condition to true (so it will not be resolved twice)
 								resolvedToHomeInstance = true
 								// set the redirect to home instance URL in @ format
 								var redirectUrl = 'https://' + settings.fediact_homeinstance + "/@" + resolvedToot[0] + "/" + resolvedToot[1]
 								// prepare the cache entry / toot data entry
-								var fullEntry = [internalIdentifier, ...resolvedToot, redirectUrl, true]
+								var fullEntry = [internalIdentifier, ...resolvedToot, redirectUrl, true, ...poll]
 							}
 						}
 					}
@@ -897,7 +955,7 @@ async function processFollow() {
 		async function execFollow(id) {
 			if (settings.fediact_autoaction) {
 				// execute action and save result
-				var response = await executeAction(id, action)
+				var response = await executeAction(id, action, null)
 				// if action was successful, update button text and action value according to performed action
 				if (action == "follow" && response) {
 					$(el).text("Unfollow")
@@ -1090,7 +1148,7 @@ async function checkSite() {
 	// last check - and probably the most accurate to determine if it actually is mastadon
 	var requestUrl = location.protocol + '//' + location.hostname + instanceApi
 	// call instance api to confirm its mastodon and get normalized handle uri
-	var response = await makeRequest("GET", requestUrl, null)
+	var response = await makeRequest("GET", requestUrl, null, null)
 	if (response) {
 		var uri = JSON.parse(response).uri
 		if (uri) {
