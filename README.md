@@ -54,6 +54,8 @@ If you like this addon, please consider donating: [paypal.me/lartsch](https://pa
 4. Check the other settings (optional)
 5. Click the "Submit" button to save
 
+If you have set your home instance correctly, you can now interact on other instances.
+
 **Only redirect?**  
 Simply turn off auto-action and leave redirect on - double click will then only redirect, not execute the action.
 
