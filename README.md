@@ -141,16 +141,7 @@ I included all of the default add-ons in the custom collection, so you will not 
 6. If you are logged in on another instance than your home instance, the addon will not process that site (so you can still use other instances where you have an account)
 
 ## Todos / Planned features 
-- Replace implementations that require latest browser versions (to support older browsers)
-- Support for Safari (won't happen unless someone wants to pay the 99$ fee to Apple)
-- Update settings in content script without page reload
-- Improve handling of irrelevant errors
-- General performance and code improvements
-- Improve 429 prevention and add resolving fallbacks
-- Add support for other implementations (Plemora, GNU Social, ...)
-- Find additional layouts/flavours to add identifiers for
-- Support for profiles / card views with no follow button
-- If I find myself to be bored, probably more
+Check out the according [Github project](https://github.com/users/Lartsch/projects/2) to see planned features and todos. They are sorted from most important to least important.
 
 ## Contributing
 Feel free to create [issues](https://github.com/Lartsch/FediAct/issues) for bugs and feature suggestions. Even better: Create pull requests for whatever improvements you can make! :)
