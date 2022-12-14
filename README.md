@@ -63,8 +63,13 @@ Simply turn off auto-action and leave redirect on - double click will then only 
 If enabled, your muted/blocked users/instances are synced every minute, so changes may not be reflected instantly. Blocked/muted are treated the same: All boosts, toots and toots with mentions of them will be hidden. There can be edge cases where hiding might fail and also, this feature can decrease performance, so it is disabled by default.
 
 ## FAQ
-**Why does it need permission for all websites?**  
+**Why does it need permission for all websites?**
+
 The addon needs to determine if the site you are currently browsing is a Mastodon instance or not. For that matter, it requires access to all sites. Otherwise, each existing Mastodon instance would have to be explicitly added.
+
+**Can I use this on iOS?**
+
+As of now, this addon does not support Safari and I am not aware of any other browsers on iOS, that support extensions. So no, not at this time.
 
 ## Screenshots / GIFs
 v0.8.0
