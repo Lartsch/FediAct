@@ -48,7 +48,8 @@ div.public-account-header a.logo-button,
 div.account-card a.logo-button,
 div.directory-card a.icon-button,
 div.detailed-status a.logo-button,
-button.remote-button { 
+button.remote-button,
+script#initial-state { 
     -webkit-animation-name: nodeInserted !important;
     -webkit-animation-duration: 0.001s !important;
     -ms-animation-name: nodeInserted !important;

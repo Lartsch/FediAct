@@ -7,7 +7,7 @@ const profileNamePaths = ["div.account__header__tabs__name small", "div.public-a
 const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/
 const handleExtractUrlRegex = /^(?<domain>https?:\/\/(?:\.?[a-z0-9-]+)+(?:\.[a-z]+){1})?\/?@(?<handle>\w+)(?:@(?<handledomain>(?:[\w-]+\.)+?\w+))?(?:\/(?<tootid>\d+))?\/?$/
 const handleExtractUriRegex = /^(?<domain>https?:\/\/(?:\.?[a-z0-9-]+)+(?:\.[a-z]+){1})(?:\/users\/)(?<handle>\w+)(?:(?:\/statuses\/)(?<tootid>\d+))?\/?$/
-const enableConsoleLog = true
+const enableConsoleLog = false
 const logPrepend = "[FediAct]"
 const instanceApi = "/api/v1/instance"
 const statusApi = "/api/v1/statuses"
@@ -74,6 +74,28 @@ function log(text) {
     }
     jQuery.fn.onAppear = jQuery.fn.DOMNodeAppear
 })(jQuery)
+
+// for checking if logged in on an external instance
+function isLoggedIn() {
+	return new Promise(function(resolve) {
+		if ($(document).find("script#initial-state").length) {
+			var initialState = $(document).find("script#initial-state").first()
+			var stateJson = JSON.parse($(initialState).text())
+			if (stateJson.meta.access_token) {
+				resolve(true)
+			}
+		} else {
+			$(document).DOMNodeAppear(function(e) {
+				var initialState = $(e.target)
+				var stateJson = JSON.parse($(initialState).text())
+				if (stateJson.meta.access_token) {
+					resolve(true)
+				}
+			}, "script#initial-state")
+		}
+		resolve(false)
+	})
+}
 
 // extract given url parameter value
 var getUrlParameter = function getUrlParameter(sParam) {
@@ -505,6 +527,16 @@ async function processToots() {
 		// otherwise do the same for any closest article or div with the data-id attribute
 		} else if ($(el).closest("article[data-id], div[data-id]").length) {
 			return $(el).closest("article[data-id], div[data-id]").first().attr("data-id").split("-").slice(-1)[0]
+		} else if ($(el).find("a.icon-button:has(i.fa-star), a.detailed-status__link:has(i.fa-star)").length) {
+			var hrefEl = $(el).find("a.icon-button:has(i.fa-star), a.detailed-status__link:has(i.fa-star)").first()
+			if ($(hrefEl).attr("href")) {
+				var hrefAttr = $(hrefEl).attr("href")
+				if (~hrefAttr.indexOf("interact/")) {
+					var splitted = hrefAttr.split("?")[0].split("/")
+					var lastpart = splitted.pop() || splitted.pop()
+					return lastpart
+				}
+			}
 		}
 	}
 	// check elements that can contain an href (either resolved external link or internal reference)
@@ -517,6 +549,7 @@ async function processToots() {
 		} else if ($(el).find("a.modal-button").length) {
 			return tootHrefCheck($(el).find("a.modal-button").first().attr("href").split("?")[0])
 		}
+		return [false,undefined]
 	}
 	// check toot author, mentions and toot prepend mentions for applying mutes
 	function processMutes(el, tootAuthor) {
@@ -534,7 +567,7 @@ async function processToots() {
 				hrefs.push($(this).find("a").attr("href").split("?")[0])
 			})
 			var processedHrefs = []
-			for (href of hrefs) {
+			for (var href of hrefs) {
 				var splitted = href.split("/")
 				var lastpart = splitted.pop() || splitted.pop()
 				lastpart = lastpart.slice(1)
@@ -562,7 +595,7 @@ async function processToots() {
 	// main function to process each detected toot element
 	async function process(el) {
 		// extra step for detailed status elements to select the correct parent
-		if ($(el).is("div.detailed-status")) {
+		if ($(el).is("div.detailed-status") && $(el).closest("div.focusable").length) {
 			el = $(el).closest("div.focusable")
 		}
 		// get toot data
@@ -582,8 +615,8 @@ async function processToots() {
 			// check if id is already cached
 			var cacheIndex = isInProcessedToots(internalIdentifier)
 			// get all button elements of this toot
-			var favButton = $(el).find("button:has(i.fa-star), a.icon-button:has(i.fa-star)").first()
-			var boostButton = $(el).find("button:has(i.fa-retweet), a.icon-button:has(i.fa-retweet)").first()
+			var favButton = $(el).find("button:has(i.fa-star), a.icon-button:has(i.fa-star), a.detailed-status__link:has(i.fa-star)").first()
+			var boostButton = $(el).find("button:has(i.fa-retweet), a.icon-button:has(i.fa-retweet), a.detailed-status__link:has(i.fa-retweet)").first()
 			var bookmarkButton = $(el).find("button:has(i.fa-bookmark)").first()
 			var replyButton = $(el).find("button:has(i.fa-reply), button:has(i.fa-reply-all), a.icon-button:has(i.fa-reply), a.icon-button:has(i.fa-reply-all)").first()
 			// handles process when a button is clicked
@@ -1067,10 +1100,13 @@ async function checkSite() {
 			} else {
 				settings.fediact_exturi = uri
 			}
-			return true
+			if (await isLoggedIn()) {
+				log("Already logged in to this external instance.")
+			} else {
+				return true
+			}
 		}
 	}
-	log("Does not look like a Mastodon instance.")
 	return false
 }
 
