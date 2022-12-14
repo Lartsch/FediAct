@@ -22,6 +22,7 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 ## Navigation
   * [Installation](#installation)
   * [Setup](#setup)
+  * [FAQ](#faq)
   * [Screenshots / GIFs](#screenshots--gifs)
   * [Manual installation](#manual-installation)
       * [Install in Firefox for Android](#install-in-firefox-for-android)
@@ -59,7 +60,9 @@ Simply turn off auto-action and leave redirect on - double click will then only 
 **"Hide muted" feature**  
 If enabled, your muted/blocked users/instances are synced every minute, so changes may not be reflected instantly. Blocked/muted are treated the same: All boosts, toots and toots with mentions of them will be hidden. There can be edge cases where hiding might fail and also, this feature can decrease performance, so it is disabled by default.
 
-**Please read the [additional notes](#additional-notes).**
+## FAQ
+**Why does it need permission for all websites?**  
+The addon needs to determine if the site you are currently browsing is a Mastodon instance or not. For that matter, it requires access to all sites. Otherwise, each existing Mastodon instance would have to be explicitly added.
 
 ## Screenshots / GIFs
 v0.8.0
@@ -123,6 +126,10 @@ I included all of the default add-ons in the custom collection, so you will not 
 5. If the extension fails to resolve content, the affected buttons will behave like usually (popup modal)
 
 ## Todos / Planned features 
+- Support for Safari
+- Check if user is logged in on the external instance as well
+- Support for poll votes
+- Update settings in content script without page reload
 - Improve handling of irrelevant errors
 - General performance and code improvements
 - Improve 429 prevention and add resolving fallbacks
