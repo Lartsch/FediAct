@@ -184,9 +184,11 @@ function replaceAll(str, find, replace) {
 function redirectTo(url) {
 	// check if redirects are enabled at all
 	if (settings.fediact_redirects) {
-		// check if alert before redirect is enabled and alert if so
+		// check if alert before redirect is enabled and show the prompt if so
 		if (settings.fediact_alert) {
-			alert("Redirecting...")
+			if (!confirm("Redirecting to " + url)) {
+				return
+			}
 		}
 		// open the url in same/new tab
 		var win = window.open(url, settings.fediact_target)
