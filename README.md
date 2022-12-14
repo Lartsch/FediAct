@@ -25,7 +25,7 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
   * [FAQ](#faq)
   * [Screenshots / GIFs](#screenshots--gifs)
   * [Manual installation](#manual-installation)
-      * [Install in Firefox for Mobile](#install-in-firefox-for-mobile)
+      * [Install in Firefox for Android](#install-in-firefox-for-android)
   * [Additional notes](#additional-notes)
   * [Todos / Planned features](#todos--planned-features)
   * [Contributing](#contributing)
@@ -37,7 +37,7 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 
 [<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/chrome/chrome.svg" width="48" alt="Chrome" valign="middle">][link-chrome] [<img valign="middle" src="https://img.shields.io/chrome-web-store/v/lmpcajpkjcclkjbliapfjfolocffednm.svg?label=%20">][link-chrome] + other Chromium browsers
 
-[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fediact.svg?label=%20%20">][link-firefox] including Firefox for Mobile
+[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fediact.svg?label=%20%20">][link-firefox] including Firefox for Android
 
 > **Note**
 > 
@@ -91,7 +91,7 @@ Note: Some Chromium browsers allow to directly load a .zip file - you can use it
 3. Select "This Firefox"
 4. Click the "Load Temporary Add-on" button and then select the downloaded Firefox ZIP file
 
-### Install in Firefox for Mobile
+### Install in Firefox for Android
 Since a while, Firefox on Android only allows a [curated list](https://addons.mozilla.org/en-US/android/search/?promoted=recommended&sort=random&type=extension) of addons to install, preventing installation of anything else. The following explanation will guide you how to install it from the webstore anyways.
 
 **Requirements:**  
