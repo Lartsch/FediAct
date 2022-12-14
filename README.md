@@ -12,7 +12,7 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 
 **Supported browsers**:
 - All up-to-date Chromium browsers, including Kiwi browser on Android
-- Up-to-date Firefox, including Firefox Nightly on Android/iOS
+- Up-to-date Firefox, including Firefox Nightly on Android
 
 **Important notes**:
 - All data is processed locally only
