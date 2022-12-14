@@ -54,7 +54,7 @@ If you like this addon, please consider donating: [paypal.me/lartsch](https://pa
 4. Check out the other settings (optional)
 5. Click the "Submit" button to save
 
-If you have set your home instance correctly, you can now interact on other Mastodon instances. If you are logged in on other instances than your set home instance as well, FediAct will disable itself for these so you can use your actual account there.
+If you have set your home instance correctly, you can now interact on other Mastodon instances.
 
 ### Options explained
 > 
