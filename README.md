@@ -71,6 +71,10 @@ The addon needs to determine if the site you are currently browsing is a Mastodo
 
 As of now, this addon does not support Safari and I am not aware of any other browsers on iOS, that support extensions. So no, not at this time.
 
+**Can you add feature XY?**
+
+Feel free to create an issue here on Github and I will look into it.
+
 ## Screenshots / GIFs
 v0.8.0
 <details>
