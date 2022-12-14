@@ -153,7 +153,7 @@ I included all of the default add-ons in the custom collection, so you will not 
 - If I find myself to be bored, probably more
 
 ## Contributing
-Feel free to create [issues](https://github.com/Lartsch/FediAct) for bugs and feature suggestions. Even better: Create pull requests for whatever improvements you can make! :)
+Feel free to create [issues](https://github.com/Lartsch/FediAct/issues) for bugs and feature suggestions. Even better: Create pull requests for whatever improvements you can make! :)
 
 ## Thanks to...
 @raikasdev because I stole his fix for cross-browser storage API support  
