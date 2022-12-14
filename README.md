@@ -142,7 +142,7 @@ I included all of the default add-ons in the custom collection, so you will not 
 
 ## Todos / Planned features 
 - Replace implementations that require latest browser versions (to support older browsers)
-- Support for Safari
+- Support for Safari (won't happen unless someone wants to pay the 99$ fee to Apple)
 - Update settings in content script without page reload
 - Improve handling of irrelevant errors
 - General performance and code improvements
