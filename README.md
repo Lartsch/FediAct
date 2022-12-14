@@ -12,7 +12,7 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 
 **Supported browsers**:
 - All up-to-date Chromium browsers, including Kiwi browser on Android
-- Up-to-date Firefox, including Firefox Nightly on Android/iOS
+- Up-to-date Firefox, including Firefox Nightly on Android
 
 **Important notes**:
 - All data is processed locally only
@@ -37,7 +37,7 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 
 [<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/chrome/chrome.svg" width="48" alt="Chrome" valign="middle">][link-chrome] [<img valign="middle" src="https://img.shields.io/chrome-web-store/v/lmpcajpkjcclkjbliapfjfolocffednm.svg?label=%20">][link-chrome] + other Chromium browsers
 
-[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fediact.svg?label=%20%20">][link-firefox] including Firefox for Mobile
+[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fediact.svg?label=%20%20">][link-firefox] including Firefox for Android
 
 > **Note**
 > 
@@ -63,8 +63,21 @@ Simply turn off auto-action and leave redirect on - double click will then only 
 If enabled, your muted/blocked users/instances are synced every minute, so changes may not be reflected instantly. Blocked/muted are treated the same: All boosts, toots and toots with mentions of them will be hidden. There can be edge cases where hiding might fail and also, this feature can decrease performance, so it is disabled by default.
 
 ## FAQ
-**Why does it need permission for all websites?**  
+**Why does it need permission for all websites?**
+
 The addon needs to determine if the site you are currently browsing is a Mastodon instance or not. For that matter, it requires access to all sites. Otherwise, each existing Mastodon instance would have to be explicitly added.
+
+**Can I use this on Android?**
+
+Yes! There are three options that I am aware of: Kiwi Browser (Chromium with add-on support), Yandex Browser and Firefox Nightly (see [below](#install-in-firefox-for-android))
+
+**Can I use this on iOS?**
+
+As of now, this addon does not support Safari and I am not aware of any other browsers on iOS, that support extensions. So no, not at this time. PLEASE NOTE: Safari support will NOT happen unless somebody wants to pay the 99$ Apple wants per year for the [Developer Program membership](https://developer.apple.com/support/compare-memberships), which is a requirement.
+
+**Can you add feature XY?**
+
+Feel free to create an issue here on Github and I will look into it.
 
 ## Screenshots / GIFs
 v0.8.0
@@ -95,7 +108,7 @@ Note: Some Chromium browsers allow to directly load a .zip file - you can use it
 Since a while, Firefox on Android only allows a [curated list](https://addons.mozilla.org/en-US/android/search/?promoted=recommended&sort=random&type=extension) of addons to install, preventing installation of anything else. The following explanation will guide you how to install it from the webstore anyways.
 
 **Requirements:**  
-- Firefox **Nightly** for Android  
+- Firefox [**Nightly**](https://play.google.com/store/apps/details?id=org.mozilla.fenix) for Android  
   
 **Steps:**  
 1. In Firefox, go to Settings > About Firefox Nightly
@@ -116,7 +129,6 @@ I included all of the default add-ons in the custom collection, so you will not 
 2. The whitelist mode can be useful if you do not want the extension to run basic checks on every site (since it needs to determine if its a Mastodon site). Not sure if blacklist is good for anything but I still included it.
 3. It can have several reasons why resolving might not work:
     - Not logged in to your home instance
-    - If you scroll fast, there can be a noticeable delay in toot resolving to prevent error 429 (too many requests)
     - Element identifiers have changed / instance uses an unsupported flavour
     - The external instance you are browsing or the originating instance of a toot is not Mastodon
     - Your home instance has strong rate limiting
@@ -124,14 +136,13 @@ I included all of the default add-ons in the custom collection, so you will not 
     - The toot has not yet federated to your home instace (follow the account and toots should start federating)
     - The instance you are browsing does not use 302 redirects for external toots
     - Maybe it also plays a role if the toot is set to unlisted on its original instance
-4. There can be short delays since API calls have to be made
-5. If the extension fails to resolve content, the affected buttons will behave like usually (popup modal)
+4. There can be delays since API calls have to be made and it is attempted to prevent error 429 (too many requests). Especially if a page has many toots or you are scrolling through a feed really fast.
+5. If the extension fails to resolve content, the affected buttons will behave like usually (popup modal) and a notice ("Unresolved") is added to the toot
+6. If you are logged in on another instance than your home instance, the addon will not process that site (so you can still use other instances where you have an account)
 
 ## Todos / Planned features 
 - Replace implementations that require latest browser versions (to support older browsers)
-- Support for Safari
-- Check if user is logged in on the external instance as well
-- Support for poll votes
+- Support for Safari (won't happen unless someone wants to pay the 99$ fee to Apple)
 - Update settings in content script without page reload
 - Improve handling of irrelevant errors
 - General performance and code improvements
@@ -142,7 +153,7 @@ I included all of the default add-ons in the custom collection, so you will not 
 - If I find myself to be bored, probably more
 
 ## Contributing
-Feel free to create pull requests for whatever improvements you can make! :)
+Feel free to create [issues](https://github.com/Lartsch/FediAct/issues) for bugs and feature suggestions. Even better: Create pull requests for whatever improvements you can make! :)
 
 ## Thanks to...
 @raikasdev because I stole his fix for cross-browser storage API support  
