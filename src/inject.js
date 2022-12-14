@@ -630,8 +630,14 @@ async function processToots() {
 			// check if id is already cached
 			var cacheIndex = isInProcessedToots(internalIdentifier)
 			// get all button elements of this toot
-			var favButton = $(el).find("button:has(i.fa-star), a.icon-button:has(i.fa-star), a.detailed-status__link:has(i.fa-star)").first()
-			var boostButton = $(el).find("button:has(i.fa-retweet), a.icon-button:has(i.fa-retweet), a.detailed-status__link:has(i.fa-retweet)").first()
+			var favButton = $(el).find("button:has(i.fa-star)").first()
+			if (!$(favButton).length) {
+				favButton = $(el).find("a.icon-button:has(i.fa-star), a.detailed-status__link:has(i.fa-star)")
+			}
+			var boostButton = $(el).find("button:has(i.fa-retweet)").first()
+			if (!$(boostButton).length) {
+				boostButton = $(el).find("a.icon-button:has(i.fa-retweet), a.detailed-status__link:has(i.fa-retweet)")
+			}
 			var bookmarkButton = $(el).find("button:has(i.fa-bookmark)").first()
 			var replyButton = $(el).find("button:has(i.fa-reply), button:has(i.fa-reply-all), a.icon-button:has(i.fa-reply), a.icon-button:has(i.fa-reply-all)").first()
 			var voteButton = $(el).find("div.poll button").first()
