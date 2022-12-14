@@ -73,7 +73,7 @@ Yes! There are three options that I am aware of: Kiwi Browser (Chromium with add
 
 **Can I use this on iOS?**
 
-As of now, this addon does not support Safari and I am not aware of any other browsers on iOS, that support extensions. So no, not at this time.
+As of now, this addon does not support Safari and I am not aware of any other browsers on iOS, that support extensions. So no, not at this time. PLEASE NOTE: Safari support will NOT happens unless somebody wants to pay the 99$ Apple wants per year for the (Developer Program membership)[https://developer.apple.com/support/compare-memberships/]
 
 **Can you add feature XY?**
 
