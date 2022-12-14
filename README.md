@@ -67,6 +67,10 @@ If enabled, your muted/blocked users/instances are synced every minute, so chang
 
 The addon needs to determine if the site you are currently browsing is a Mastodon instance or not. For that matter, it requires access to all sites. Otherwise, each existing Mastodon instance would have to be explicitly added.
 
+**Can I use this on Android?**
+
+Yes! There are three options that I am aware of: Kiwi Browser (Chromium with add-on support), Yandex Browser and Firefox Nightly (see [below](#install-in-firefox-for-android))
+
 **Can I use this on iOS?**
 
 As of now, this addon does not support Safari and I am not aware of any other browsers on iOS, that support extensions. So no, not at this time.
