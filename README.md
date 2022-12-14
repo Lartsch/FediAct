@@ -25,7 +25,7 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
   * [FAQ](#faq)
   * [Screenshots / GIFs](#screenshots--gifs)
   * [Manual installation](#manual-installation)
-      * [Install in Firefox for Android](#install-in-firefox-for-android)
+      * [Install in Firefox for Mobile](#install-in-firefox-for-mobile)
   * [Additional notes](#additional-notes)
   * [Todos / Planned features](#todos--planned-features)
   * [Contributing](#contributing)
@@ -91,7 +91,7 @@ Note: Some Chromium browsers allow to directly load a .zip file - you can use it
 3. Select "This Firefox"
 4. Click the "Load Temporary Add-on" button and then select the downloaded Firefox ZIP file
 
-### Install in Firefox for Android
+### Install in Firefox for Mobile
 Since a while, Firefox on Android only allows a [curated list](https://addons.mozilla.org/en-US/android/search/?promoted=recommended&sort=random&type=extension) of addons to install, preventing installation of anything else. The following explanation will guide you how to install it from the webstore anyways.
 
 **Requirements:**  
