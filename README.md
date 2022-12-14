@@ -104,7 +104,7 @@ Note: Some Chromium browsers allow to directly load a .zip file - you can use it
 Since a while, Firefox on Android only allows a [curated list](https://addons.mozilla.org/en-US/android/search/?promoted=recommended&sort=random&type=extension) of addons to install, preventing installation of anything else. The following explanation will guide you how to install it from the webstore anyways.
 
 **Requirements:**  
-- Firefox **Nightly** for Android  
+- Firefox [**Nightly**](https://play.google.com/store/apps/details?id=org.mozilla.fenix) for Android  
   
 **Steps:**  
 1. In Firefox, go to Settings > About Firefox Nightly
