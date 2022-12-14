@@ -126,6 +126,7 @@ I included all of the default add-ons in the custom collection, so you will not 
 5. If the extension fails to resolve content, the affected buttons will behave like usually (popup modal)
 
 ## Todos / Planned features 
+- Replace implementations that require latest browser versions (to support older browsers)
 - Support for Safari
 - Check if user is logged in on the external instance as well
 - Support for poll votes
