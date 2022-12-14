@@ -125,12 +125,11 @@ I included all of the default add-ons in the custom collection, so you will not 
     - Maybe it also plays a role if the toot is set to unlisted on its original instance
 4. There can be delays since API calls have to be made and it is attempted to prevent error 429 (too many requests). Especially if a page has many toots or you are scrolling through a feed really fast.
 5. If the extension fails to resolve content, the affected buttons will behave like usually (popup modal) and a notice ("Unresolved") is added to the toot
+6. If you are logged in on another instance than your home instance, the addon will not process that site (so you can still use other instances where you have an account)
 
 ## Todos / Planned features 
 - Replace implementations that require latest browser versions (to support older browsers)
 - Support for Safari
-- Check if user is logged in on the external instance as well
-- Support for poll votes
 - Update settings in content script without page reload
 - Improve handling of irrelevant errors
 - General performance and code improvements
