@@ -397,6 +397,7 @@ function addToProcessedToots(toot) {
 		// remove the first diff items from it
 		processed = processed.splice(0,diff)
 	}
+	return processed.length - 1
 }
 
 // trigger the reply button click - will only run when we are on a home instance url with fedireply parameter
@@ -615,7 +616,7 @@ async function processToots() {
 								if (cacheIndex) {
 									processed[cacheIndex][5] = !processed[cacheIndex][5]
 								}
-							}	
+							}
 							return true
 						} else {
 							log("Could not execute action on home instance.")
@@ -799,28 +800,28 @@ async function processToots() {
 								// set the redirect to home instance URL in @ format
 								var redirectUrl = 'https://' + settings.fediact_homeinstance + "/@" + resolvedToot[0] + "/" + resolvedToot[1]
 								// prepare the cache entry / toot data entry
-								fullEntry = [internalIdentifier, ...resolvedToot, redirectUrl, true]
+								var fullEntry = [internalIdentifier, ...resolvedToot, redirectUrl, true]
 							}
 						}
 					}
 					// was any resolve successful?
 					if (resolvedToHomeInstance) {
 						// yes, so add to processed toots with the full toot data entry
-						addToProcessedToots(fullEntry)
-						// continue with click handling...
-						clickBinder(fullEntry)
+						cacheIndex = addToProcessedToots(fullEntry)
 						// ... and init styles
 						initStyles(fullEntry)
+						// continue with click handling...
+						clickBinder(fullEntry)
 					} else {
 						// no, but we will still add the toot to cache as unresolved
 						log("Failed to resolve: "+homeResolveStrings)
-						addToProcessedToots([internalIdentifier, false])
+						cacheIndex = addToProcessedToots([internalIdentifier, false])
 						initStyles([internalIdentifier, false])
 					}
 				} else {
 					// no resolve possible without any resolve strings, but we will still add the toot to cache as unresolved
 					log("Could not identify a post URI for home resolving.")
-					addToProcessedToots([internalIdentifier, false])
+					cacheIndex = addToProcessedToots([internalIdentifier, false])
 					initStyles([internalIdentifier, false])
 				}
 			} else {
