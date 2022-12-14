@@ -12,7 +12,7 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 
 **Supported browsers**:
 - All up-to-date Chromium browsers, including Kiwi browser on Android
-- Up-to-date Firefox, including Firefox Nightly on Android
+- Up-to-date Firefox, including Firefox Nightly on Android/iOS
 
 **Important notes**:
 - All data is processed locally only
@@ -37,7 +37,7 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 
 [<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/chrome/chrome.svg" width="48" alt="Chrome" valign="middle">][link-chrome] [<img valign="middle" src="https://img.shields.io/chrome-web-store/v/lmpcajpkjcclkjbliapfjfolocffednm.svg?label=%20">][link-chrome] + other Chromium browsers
 
-[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fediact.svg?label=%20%20">][link-firefox] including Firefox for Android
+[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fediact.svg?label=%20%20">][link-firefox] including Firefox for Mobile
 
 > **Note**
 > 
@@ -53,6 +53,8 @@ If you like this addon, please consider donating: [paypal.me/lartsch](https://pa
 3. Set your home instance (required)
 4. Check the other settings (optional)
 5. Click the "Submit" button to save
+
+If you have set your home instance correctly, you can now interact on other instances.
 
 **Only redirect?**  
 Simply turn off auto-action and leave redirect on - double click will then only redirect, not execute the action.
@@ -126,6 +128,7 @@ I included all of the default add-ons in the custom collection, so you will not 
 5. If the extension fails to resolve content, the affected buttons will behave like usually (popup modal)
 
 ## Todos / Planned features 
+- Replace implementations that require latest browser versions (to support older browsers)
 - Support for Safari
 - Check if user is logged in on the external instance as well
 - Support for poll votes
