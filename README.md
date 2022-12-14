@@ -12,7 +12,7 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 
 **Supported browsers**:
 - All up-to-date Chromium browsers, including Kiwi browser on Android
-- Up-to-date Firefox, including Firefox Nightly on Android
+- Up-to-date Firefox, including Firefox Nightly on Android/iOS
 
 **Important notes**:
 - All data is processed locally only
@@ -37,7 +37,7 @@ A Chrome/Firefox extension that simplifies following and post interactions on ot
 
 [<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/chrome/chrome.svg" width="48" alt="Chrome" valign="middle">][link-chrome] [<img valign="middle" src="https://img.shields.io/chrome-web-store/v/lmpcajpkjcclkjbliapfjfolocffednm.svg?label=%20">][link-chrome] + other Chromium browsers
 
-[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fediact.svg?label=%20%20">][link-firefox] including Firefox for Android
+[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fediact.svg?label=%20%20">][link-firefox] including Firefox for Mobile
 
 > **Note**
 > 
