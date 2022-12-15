@@ -10,9 +10,7 @@ const tokenRegex = /"access_token":".*?",/gm
 
 // required settings keys with defauls
 const settingsDefaults = {
-	fediact_homeinstance: null,
-    fediact_showfollows: true,
-    fediact_hidemuted: false,
+	fediact_homeinstance: null
 }
 
 // wrapper to prepend to log messages
@@ -79,31 +77,23 @@ async function fetchBearerToken() {
 // grab all accounts that are muted by the user
 async function fetchMutesAndBlocks() {
     return new Promise(async function(resolve) {
-        if (settings.fediact_hidemuted) {
-            // set empty initially
-            [settings.fediact_mutesblocks, settings.fediact_domainblocks] = [[],[]]
-            var [mutes, blocks, domainblocks] = await Promise.all([
-                fetch("https://" + settings.fediact_homeinstance + mutesApi, {headers: {"Authorization": "Bearer "+settings.fediact_token}}).then((response) => response.json()),
-                fetch("https://" + settings.fediact_homeinstance + blocksApi, {headers: {"Authorization": "Bearer "+settings.fediact_token}}).then((response) => response.json()),
-                fetch("https://" + settings.fediact_homeinstance + domainBlocksApi, {headers: {"Authorization": "Bearer "+settings.fediact_token}}).then((response) => response.json())
-            ])
-            if (mutes.length) {
-                settings.fediact_mutesblocks.push(...mutes.map(acc => acc.acct))
-            }
-            if (blocks.length) {
-                settings.fediact_mutesblocks.push(...blocks.map(acc => acc.acct))
-            }
-            // filter duplicates
-            settings.fediact_mutesblocks = settings.fediact_mutesblocks.filter((element, index) => {
-                return (settings.fediact_mutesblocks.indexOf(element) == index)
-            })
-            if (domainblocks.length) {
-                settings.fediact_domainblocks = domainblocks
-            }
-            resolve(true)
-        } else {
-            resolve(true)
+        // set empty initially
+        [settings.fediact_mutes, settings.fediact_blocks, settings.fediact_domainblocks] = [[],[],[]]
+        var [mutes, blocks, domainblocks] = await Promise.all([
+            fetch("https://" + settings.fediact_homeinstance + mutesApi, {headers: {"Authorization": "Bearer "+settings.fediact_token}}).then((response) => response.json()),
+            fetch("https://" + settings.fediact_homeinstance + blocksApi, {headers: {"Authorization": "Bearer "+settings.fediact_token}}).then((response) => response.json()),
+            fetch("https://" + settings.fediact_homeinstance + domainBlocksApi, {headers: {"Authorization": "Bearer "+settings.fediact_token}}).then((response) => response.json())
+        ])
+        if (mutes.length) {
+            settings.fediact_mutes.push(...mutes.map(acc => acc.acct))
         }
+        if (blocks.length) {
+            settings.fediact_blocks.push(...blocks.map(acc => acc.acct))
+        }
+        if (domainblocks.length) {
+            settings.fediact_domainblocks = domainblocks
+        }
+        resolve(true)
     })
 }
 

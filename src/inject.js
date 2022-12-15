@@ -7,12 +7,14 @@ const profileNamePaths = ["div.account__header__tabs__name small", "div.public-a
 const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/
 const handleExtractUrlRegex = /^(?<domain>https?:\/\/(?:\.?[a-z0-9-]+)+(?:\.[a-z]+){1})?\/?@(?<handle>\w+)(?:@(?<handledomain>(?:[\w-]+\.)+?\w+))?(?:\/(?<tootid>\d+))?\/?$/
 const handleExtractUriRegex = /^(?<domain>https?:\/\/(?:\.?[a-z0-9-]+)+(?:\.[a-z]+){1})(?:\/users\/)(?<handle>\w+)(?:(?:\/statuses\/)(?<tootid>\d+))?\/?$/
-const enableConsoleLog = false
+const enableConsoleLog = true
 const logPrepend = "[FediAct]"
 const instanceApi = "/api/v1/instance"
 const statusApi = "/api/v1/statuses"
 const searchApi = "/api/v2/search"
 const accountsApi = "/api/v1/accounts"
+const mutesApi = "/api/v1/mutes"
+const blocksApi = "/api/v1/blocks"
 const domainBlocksApi = "/api/v1/domain_blocks"
 const pollsApi = "/api/v1/polls"
 const apiDelay = 500
@@ -42,7 +44,8 @@ const settingsDefaults = {
 	fediact_hidemuted: false,
 	fediact_runifloggedin: false,
 	fediact_showtoot: true,
-	fediact_mutesblocks: [],
+	fediact_mutes: [],
+	fediact_blocks: [],
 	fediact_domainblocks: []
 }
 
@@ -221,33 +224,39 @@ function redirectTo(url) {
 // =-=-=-=-==-=-=-=-==-=-=-=-==-=-=
 
 async function executeAction(id, action, polldata) {
-	var requestUrl, condition, jsonbody
+	var requestUrl, condition, jsonbody, after
 	var method = "POST"
 	switch (action) {
 		case 'domainblock':
 			requestUrl = 'https://' + settings.fediact_homeinstance + domainBlocksApi + "?domain=" + id
 			condition = function(response) {if(response){return true}}
+			after = function() {updateMutedBlocked()}
 			break
 		case 'domainunblock':
 			requestUrl = 'https://' + settings.fediact_homeinstance + domainBlocksApi + "?domain=" + id
 			condition = function(response) {if(response){return true}}
 			method = "DELETE"
+			after = function() {updateMutedBlocked()}
 			break
 		case 'mute':
 			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + id + "/mute"
 			condition = function(response) {return response.muting}
+			after = function() {updateMutedBlocked()}
 			break
 		case 'unmute':
 			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + id + "/unmute"
 			condition = function(response) {return !response.muting}
+			after = function() {updateMutedBlocked()}
 			break
 		case 'block':
 			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + id + "/block"
 			condition = function(response) {return response.blocking}
+			after = function() {updateMutedBlocked()}
 			break
 		case 'unblock':
 			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + id + "/unblock"
 			condition = function(response) {return !response.blocking}
+			after = function() {updateMutedBlocked()}
 			break
 		case 'vote':
 			requestUrl = 'https://' + settings.fediact_homeinstance + pollsApi + "/" + id + "/votes"
@@ -295,6 +304,9 @@ async function executeAction(id, action, polldata) {
 			// convert to json object
 			response = JSON.parse(response)
 			if (condition(response)) {
+				if (after !== undefined) {
+					after()
+				}
 				return true
 			}
 		}
@@ -333,8 +345,8 @@ async function isFollowingHomeInstance(ids) {
 	return follows
 }
 
-// check if handle is muted
-function isMuted(handle) {
+// clear handle for comparison with mutes/blocks
+function clearHandle(handle) {
 	// remove leading @
 	if (handle.startsWith("@")) {
 		handle = handle.slice(1)
@@ -343,11 +355,38 @@ function isMuted(handle) {
 	if (handle.split("@").length-1 == 0) {
 		handle = handle + "@" + settings.fediact_exturi
 	}
-	if (settings.fediact_mutesblocks.includes(handle) || settings.fediact_domainblocks.includes(handle.split("@")[1])) {
+	return handle
+}
+
+function isBlocked(handle) {
+	handle = clearHandle(handle)
+	if (settings.fediact_blocks.includes(handle)) {
 		return true
 	}
 }
 
+// check if handle is muted
+function isMuted(handle) {
+	handle = clearHandle(handle)
+	if (settings.fediact_mutes.includes(handle)) {
+		return true
+	}
+}
+
+// check if handle is domain blocked
+function isDomainBlocked(handle) {
+	handle = clearHandle(handle)
+	if (settings.fediact_domainblocks.includes(handle.split("@")[1])) {
+		return true
+	}
+}
+
+//execute the above 3 functions on a handle
+function checkAllMutedBlocked(handle) {
+	if (isMuted(handle) || isBlocked(handle) || isDomainBlocked(handle)) {
+		return true
+	}
+}
 
 // =-=-=-=-==-=-=-=-==-=-=-=-==-=-=
 // =-=-=-=-=-= RESOLVING =-=-==-=-=
@@ -473,6 +512,25 @@ function addToProcessedToots(toot) {
 		processed = processed.splice(0,diff)
 	}
 	return processed.length - 1
+}
+
+async function updateMutedBlocked() {
+	// set empty initially
+	[settings.fediact_mutes, settings.fediact_blocks, settings.fediact_domainblocks] = [[],[],[]]
+	var [mutes, blocks, domainblocks] = await Promise.all([
+		fetch("https://" + settings.fediact_homeinstance + mutesApi, {headers: {"Authorization": "Bearer "+settings.fediact_token}}).then((response) => response.json()),
+		fetch("https://" + settings.fediact_homeinstance + blocksApi, {headers: {"Authorization": "Bearer "+settings.fediact_token}}).then((response) => response.json()),
+		fetch("https://" + settings.fediact_homeinstance + domainBlocksApi, {headers: {"Authorization": "Bearer "+settings.fediact_token}}).then((response) => response.json())
+	])
+	if (mutes.length) {
+		settings.fediact_mutes.push(...mutes.map(acc => acc.acct))
+	}
+	if (blocks.length) {
+		settings.fediact_blocks.push(...blocks.map(acc => acc.acct))
+	}
+	if (domainblocks.length) {
+		settings.fediact_domainblocks = domainblocks
+	}
 }
 
 function showModal(settings) {
@@ -667,7 +725,7 @@ async function processToots() {
 					processedHrefs.push(lastpart + "@" + settings.fediact_exturi)
 				}
 			}
-			if (processedHrefs.some(r=> settings.fediact_mutesblocks.includes(r)) || isMuted(tootAuthor) || processedHrefs.some(r=> settings.fediact_domainblocks.includes(r.split("@")[1]))) {
+			if (processedHrefs.some(r=> checkAllMutedBlocked(r)) || checkAllMutedBlocked(tootAuthor)) {
 				$(el).hide()
 				if (prepended) {
 					$(prepended).hide()
@@ -841,7 +899,23 @@ async function processToots() {
 					// redirect to the resolved URL + fedireply parameter (so the extension can handle it after redirect)
 					var domainsplit = tootdata[1].split("@")
 					var domain = domainsplit.pop() || domainsplit.pop()
-					showModal([["mute",tootdata[6]],["unmute",tootdata[6]],["block",tootdata[6]],["unblock",tootdata[6]],["domainblock",domain],["domainunblock",domain]])
+					var modalLinks = []
+					if (isBlocked(tootdata[1])) {
+						modalLinks.push(["unblock",tootdata[6]])
+					} else {
+						modalLinks.push(["block",tootdata[6]])
+					}
+					if (isMuted(tootdata[1])) {
+						modalLinks.push(["unmute",tootdata[6]])
+					} else {
+						modalLinks.push(["mute",tootdata[6]])
+					}
+					if (isDomainBlocked(tootdata[1])) {
+						modalLinks.push(["domainunblock",domain])
+					} else {
+						modalLinks.push(["domainblock",domain])
+					}
+					showModal(modalLinks)
 				})
 				// for all other buttons...
 				$([favButton, boostButton, bookmarkButton, voteButton]).each(function() {
