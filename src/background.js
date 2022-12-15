@@ -74,7 +74,10 @@ async function fetchBearerToken() {
     })
 }
 
-// grab all accounts that are muted by the user
+// grab all accounts/instances that are muted/blocked by the user
+// this is only done here in the bg script so we have data available on load of pages without first performing 3 (!) requests
+// otherwise this would lead to problems with element detection / low performance (espcially v3 instances)
+// mutes/blocks are updated in content script on page context changes and after performing mutes/block actions
 async function fetchMutesAndBlocks() {
     return new Promise(async function(resolve) {
         // set empty initially
