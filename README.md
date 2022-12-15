@@ -57,29 +57,29 @@ If you like this addon, please consider donating: [paypal.me/lartsch](https://pa
 If you have set your home instance correctly, you can now interact on other Mastodon instances.
 
 ### Options explained
-> 
-> **Redirect settings**
-> 
-> - Enable: Set if redirects (when replying or double-clicking) should be performed at all (default: on)
-> - Prompt: Set if a prompt should be displayed before redirecting, including the URL (default: on)
-> - Open in: Set if redirects should happen in the same or a new tab (default: same tab)
-> 
-> **Other**
-> 
-> - Actions: Set if actions (following, boosting etc.) should be performed when clicking or double clicking (default: on)
->     - _**Usage tip:**_ Disable this if you only want redirects on double click or when replying without automatically performing the action
-> - Show follows: Set if the following state of accounts should be reflected on profiles / account cards (default: on)
->   - _**Please note:**_ When disabled, the state will still be changed on interaction and stored until the page is reloaded of left
-> - Show toot state: Set if the state of toots (favourited, boosted, bookmarked) should be reflected (default: on)
->   - _**Please note:**_ When disabled, the state will still be changed on interaction and stored until the page is reloaded of left
-> - Hide muted/blocked: If enabled, your blocked/muted users/instances will be synched every 60 seconds and all according toots, boosts and toots with mentions will be hidden (default: off)
->   - _**Please note:**_ There are cases where hiding can fail and this is disabled by default because it can decrease performance
-> - API delay: If enabled, there can only be one API request to your home instance per 500ms (default: on)
->   - _**Please note:**_ Disabling this will likely lead to the extension stopping to work because your home instance uses rate limiting if too many requests come from your IP. 500ms have proven to prevent error 429 for the instances I have tested.
-> 
-> **Mode**
-> - Run if logged in: Enable FediAct on external instances if you are logged in there as well (default: off)
-> - Blacklist (default) / Whitelist: Run the extension on _all_ domains except those on the blacklist / Run the extension on _no_ domains except those on the whitelist
+
+**Redirect settings**
+
+- Enable: Set if redirects (when replying or double-clicking) should be performed at all (default: on)
+- Prompt: Set if a prompt should be displayed before redirecting, including the URL (default: on)
+- Open in: Set if redirects should happen in the same or a new tab (default: same tab)
+
+**Other**
+
+- Actions: Set if actions (following, boosting etc.) should be performed when clicking or double clicking (default: on)
+    - _**Usage tip:**_ Disable this if you only want redirects on double click or when replying without automatically performing the action
+- Show follows: Set if the following state of accounts should be reflected on profiles / account cards (default: on)
+  - _**Please note:**_ When disabled, the state will still be changed on interaction and stored until the page is reloaded of left
+- Show toot state: Set if the state of toots (favourited, boosted, bookmarked) should be reflected (default: on)
+  - _**Please note:**_ When disabled, the state will still be changed on interaction and stored until the page is reloaded of left
+- Hide muted/blocked: If enabled, your blocked/muted users/instances will be synched every 60 seconds and all according toots, boosts and toots with mentions will be hidden (default: off)
+  - _**Please note:**_ There are cases where hiding can fail and this is disabled by default because it can decrease performance
+- API delay: If enabled, there can only be one API request to your home instance per 500ms (default: on)
+  - _**Please note:**_ Disabling this will likely lead to the extension stopping to work because your home instance uses rate limiting if too many requests come from your IP. 500ms have proven to prevent error 429 for the instances I have tested.
+
+**Mode**
+- Run if logged in: Enable FediAct on external instances if you are logged in there as well (default: off)
+- Blacklist (default) / Whitelist: Run the extension on _all_ domains except those on the blacklist / Run the extension on _no_ domains except those on the whitelist
 
 ## FAQ
 **Why does it need permission for all websites?**
