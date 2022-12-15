@@ -7,7 +7,7 @@ const profileNamePaths = ["div.account__header__tabs__name small", "div.public-a
 const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/
 const handleExtractUrlRegex = /^(?<domain>https?:\/\/(?:\.?[a-z0-9-]+)+(?:\.[a-z]+){1})?\/?@(?<handle>\w+)(?:@(?<handledomain>(?:[\w-]+\.)+?\w+))?(?:\/(?<tootid>\d+))?\/?$/
 const handleExtractUriRegex = /^(?<domain>https?:\/\/(?:\.?[a-z0-9-]+)+(?:\.[a-z]+){1})(?:\/users\/)(?<handle>\w+)(?:(?:\/statuses\/)(?<tootid>\d+))?\/?$/
-const enableConsoleLog = true
+const enableConsoleLog = false
 const logPrepend = "[FediAct]"
 const instanceApi = "/api/v1/instance"
 const statusApi = "/api/v1/statuses"
@@ -841,7 +841,6 @@ async function processToots() {
 					// redirect to the resolved URL + fedireply parameter (so the extension can handle it after redirect)
 					var domainsplit = tootdata[1].split("@")
 					var domain = domainsplit.pop() || domainsplit.pop()
-					console.log(domain)
 					showModal([["mute",tootdata[6]],["unmute",tootdata[6]],["block",tootdata[6]],["unblock",tootdata[6]],["domainblock",domain],["domainunblock",domain]])
 				})
 				// for all other buttons...
