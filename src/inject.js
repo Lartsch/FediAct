@@ -32,6 +32,8 @@ const settingsDefaults = {
 	fediact_redirects: true,
 	fediact_enabledelay: true,
 	fediact_hidemuted: false,
+	fediact_runifloggedin: false,
+	fediact_showtoot: true,
 	fediact_mutesblocks: [],
 	fediact_domainblocks: []
 }
@@ -643,7 +645,7 @@ async function processToots() {
 			var bookmarkButton = $(el).find("button:has(i.fa-bookmark)").first()
 			var replyButton = $(el).find("button:has(i.fa-reply), button:has(i.fa-reply-all), a.icon-button:has(i.fa-reply), a.icon-button:has(i.fa-reply-all)").first()
 			var voteButton = $(el).find("div.poll button").first()
-			// handles process when a toot button is clicked
+			// handles process when a vote button is clicked
 			async function pollAction(id, redirect, e) {
 				if (settings.fediact_autoaction) {
 					var pollData = {
@@ -662,6 +664,7 @@ async function processToots() {
 						$(pollDiv).find("ul").replaceWith("<p style='font-style: italic'><a style='font-weight:bold; color:orange' href='" + redirect + "' target='" + settings.fediact_target + "'>View the results</a> on your home instance.<p>")
 						if (cacheIndex) {
 							processed[cacheIndex][9] = !processed[cacheIndex][9]
+							processed[cacheIndex][9] = true
 						}
 					}
 					return result
@@ -676,6 +679,10 @@ async function processToots() {
 						// resolve url on home instance to get local toot/author identifiers and toot status
 						var actionExecuted = await executeAction(id, action, null)
 						if (actionExecuted) {
+							if (cacheIndex) {
+								// set interacted to true
+								processed[cacheIndex][10] = true
+							}
 							// if the action was successfully executed, update the element styles
 							if (action == "boost" || action == "unboost") {
 								// toggle inline css styles
@@ -719,32 +726,34 @@ async function processToots() {
 					// yes, then add the Unresolved indicator
 					$("<span class='feditriggered' style='color: orange; padding-right: 10px; padding-left: 10px'>Unresolved</span>").insertAfter($(favButton))
 				} else {
-					// otherwise start processing button styles
+					// otherwise start processing button styles (if enabled OR if the toot was already interacted with, to restore the state while still on the same page)
 					// first enable the bookmark button (is disabled on external instances)
 					$(bookmarkButton).removeClass("disabled").removeAttr("disabled")
 					$(voteButton).removeAttr("disabled")
-					// set the toot buttons to active, depending on the state of the resolved toot and if the element already has the active class
-					if (tootdata[4]) {
-						if (!$(favButton).hasClass("fediactive")) {
-							toggleInlineCss($(favButton),[["color","!remove","rgb(202, 143, 4)"]], "fediactive")
-							toggleInlineCss($(favButton).find("i"),[["animation","spring-rotate-out 1s linear","spring-rotate-in 1s linear"]], "fediactive")
+					if (settings.fediact_showtoot || tootdata[10]) {
+						// set the toot buttons to active, depending on the state of the resolved toot and if the element already has the active class
+						if (tootdata[4]) {
+							if (!$(favButton).hasClass("fediactive")) {
+								toggleInlineCss($(favButton),[["color","!remove","rgb(202, 143, 4)"]], "fediactive")
+								toggleInlineCss($(favButton).find("i"),[["animation","spring-rotate-out 1s linear","spring-rotate-in 1s linear"]], "fediactive")
+							}
 						}
-					}
-					// repeat for other buttons
-					if (tootdata[3]) {
-						if (!$(boostButton).find("i.fediactive").length) {
-							toggleInlineCss($(boostButton),[["color","!remove","rgb(140, 141, 255)"]], "fediactive")
-							toggleInlineCss($(boostButton).find("i"),[["transition-duration", "!remove", "0.9s"],["background-position", "!remove", "0px 100%"]], "fediactive")
+						// repeat for other buttons
+						if (tootdata[3]) {
+							if (!$(boostButton).find("i.fediactive").length) {
+								toggleInlineCss($(boostButton),[["color","!remove","rgb(140, 141, 255)"]], "fediactive")
+								toggleInlineCss($(boostButton).find("i"),[["transition-duration", "!remove", "0.9s"],["background-position", "!remove", "0px 100%"]], "fediactive")
+							}
 						}
-					}
-					if (tootdata[5]) {
-						if (!$(bookmarkButton).hasClass("fediactive")) {
-							toggleInlineCss($(bookmarkButton),[["color","!remove","rgb(255, 80, 80)"]], "fediactive")
+						if (tootdata[5]) {
+							if (!$(bookmarkButton).hasClass("fediactive")) {
+								toggleInlineCss($(bookmarkButton),[["color","!remove","rgb(255, 80, 80)"]], "fediactive")
+							}
 						}
-					}
-					if (tootdata[9]) {
-						$(voteButton).hide()
-						$(voteButton).closest("div.poll").find("ul").replaceWith("<p style='font-style: italic'><a style='font-weight:bold; color:orange' href='" + tootdata[6] + "' target='" + settings.fediact_target + "'>View the results</a> on your home instance.<p>")
+						if (tootdata[9]) {
+							$(voteButton).hide()
+							$(voteButton).closest("div.poll").find("ul").replaceWith("<p style='font-style: italic'><a style='font-weight:bold; color:orange' href='" + tootdata[6] + "' target='" + settings.fediact_target + "'>View the results</a> on your home instance.<p>")
+						}
 					}
 				}
 			}
@@ -899,7 +908,8 @@ async function processToots() {
 								// set the redirect to home instance URL in @ format
 								var redirectUrl = 'https://' + settings.fediact_homeinstance + "/@" + resolvedToot[0] + "/" + resolvedToot[1]
 								// prepare the cache entry / toot data entry
-								var fullEntry = [internalIdentifier, ...resolvedToot, redirectUrl, true, ...poll]
+								var fullEntry = [internalIdentifier, ...resolvedToot, redirectUrl, true, ...poll, false]
+								// 0: internal identifier; 1: toot home acct / false 2: toot home id 3: toot reblogged 4: toot favourited 5: toot bookmarked 6: redirect url 7: ??? crap! 8: poll id / false 9: poll voted 10: interacted
 							}
 						}
 					}
@@ -1166,14 +1176,19 @@ async function checkSite() {
 			} else {
 				settings.fediact_exturi = uri
 			}
-			if (await isLoggedIn()) {
-				log("Already logged in to this external instance.")
-			} else {
-				return true
+			if (!settings.fediact_runifloggedin) {
+				if (await isLoggedIn()) {
+					log("Already logged in to this external instance.")
+					return false
+				}
 			}
+		} else {
+			return false
 		}
+	} else {
+		return false
 	}
-	return false
+	return true
 }
 
 async function backgroundProcessor() {

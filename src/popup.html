@@ -16,48 +16,51 @@
 		<script src="lib/jquery-3.6.1.min.js"></script>
 		<script src="popup.min.js"></script>
   </head>
-  <body style="min-width: 300px">
+  <body style="min-width: 350px; font-size:12px">
    <div id="mhi-wrapper">
     <div id="mhi-containers">
 			<form id="fediact-settings">
-				<p><b>General</b></p>
-				<label class="pad" for="homeinstance">Home instance (make sure you are logged in):</label>
+				<p><b>Home instance</b></p>
+				<label class="pad" for="homeinstance">Make sure you are logged in to the instance you set here:</label>
 				<input type="text" id="homeinstance" name="homeinstance" placeholder="example.social"><br>
 				<p><b>Redirect settings</b></p>
 				<input type="checkbox" id="redirects" name="redirects">
 				<label for="redirects">Enable</label><br>
 				<input type="checkbox" id="alert" name="alert">
-				<label for="alert">Alert on redirect</label><br>
-				<label style="padding-right: 5px" for="target">Open in</label>
+				<label for="alert">Prompt</label><br>
+				<label style="padding-right: 5px" for="target">Open in...</label>
 				<select style="margin-top: 5px;" name="target" id="target" selected="_blank">
 					<option id="target_blank" value="_blank">New tab</option>
 					<option id="target_self" value="_self">Same tab</option>
 				</select><br>
 				<p><b>Other</b></p>
 				<input type="checkbox" id="autoaction" name="autoaction">
-				<label for="autoaction">Auto-action</label><br>
+				<label for="autoaction">Actions</label><br>
 				<input type="checkbox" id="showfollows" name="showfollows">
-				<label for="showfollows">Show external follows</label><br>
+				<label for="showfollows">Show follows</label><br>
+				<input type="checkbox" id="showtoot" name="showtoot">
+				<label for="showtoot">Show toot state</label><br>
 				<input type="checkbox" id="hidemuted" name="hidemuted">
-				<label for="hidemuted">Hide muted</label><br>
+				<label for="hidemuted">Hide muted/blocked</label><br>
 				<input type="checkbox" id="delay" name="delay">
-				<label for="delay">Enable API delay</label><br>
+				<label for="delay">API delay</label><br>
 				<p><b>Mode</b></p>
-				<select name="mode" id="mode" selected="blacklist">
-					<option id="blacklist" value="blacklist">All (with blacklist)</option>
+				<input type="checkbox" id="runifloggedin" name="runifloggedin">
+				<label for="runifloggedin">Run if logged in</label><br>
+				<label style="padding-right: 5px" for="mode">Use...</label>
+				<select style="margin-top: 5px;" name="mode" id="mode" selected="blacklist">
+					<option id="blacklist" value="blacklist">Blacklist</option>
 					<option id="whitelist" value="whitelist">Whitelist</option>
 				</select><br>
-				<div class="hide" id="blacklist_input">
-					<label for="blacklist_content">Blacklist:</label><br>
+				<div style="margin-top: 5px;" class="hide" id="blacklist_input">
 					<textarea id="blacklist_content" name="blacklist_content" placeholder="example.social&#10;example2.social"></textarea><br>
 				</div>
-				<div class="hide" id="whitelist_input">
-					<label for="whitelist_content">Whitelist:</label><br>
+				<div style="margin-top: 5px;" class="hide" id="whitelist_input">
 					<textarea id="whitelist_content" name="whitelist_content" placeholder="example.social&#10;example2.social"></textarea><br>
 				</div><br>
 				<input type="submit" value="Submit">
 				<span id="indicator" style="display:none">Settings saved!</span>
-				<br><br><span>Made by <a target="_blank" href="https://github.com/lartsch">github.com/lartsch</a></span>
+				<br><br><span>Information and help at <a target="_blank" href="https://github.com/lartsch/FediAct">github.com/lartsch/FediAct</a></span><br>
 			</form>
     </div>
    </div>
