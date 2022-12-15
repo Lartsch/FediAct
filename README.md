@@ -145,8 +145,7 @@ I included all of the default add-ons in the custom collection, so you will not 
 
 ## Additional notes
 1. Support for other Fedi software is planned
-2. The whitelist mode can be useful if you do not want the extension to run basic checks on every site (since it needs to determine if its a Mastodon site). Not sure if blacklist is good for anything but I still included it.
-3. It can have several reasons why resolving/interacting might not work:
+2. It can have several reasons why resolving/interacting might not work:
     - Not logged in to your home instance
     - Element identifiers have changed / instance uses an unsupported flavour
     - The external instance you are browsing or the originating instance of a toot is not Mastodon
@@ -156,9 +155,8 @@ I included all of the default add-ons in the custom collection, so you will not 
     - The instance you are browsing does not use 302 redirects for external toots
     - The network conditions of your home instance or the external instance are bad (slow speed)
     - Maybe it also plays a role if the toot is set to unlisted on its original instance
-4. There can be delays since API calls have to be made and it is attempted to prevent error 429 (too many requests). Especially if a page has many toots or you are scrolling through a feed really fast.
-5. If the extension fails to resolve content, the affected buttons will behave like usually (popup modal) and a notice ("Unresolved") is added to the toot
-6. If you are logged in on another instance than your home instance, the addon will not process that site (so you can still use other instances where you have an account)
+3. There can be delays since API calls have to be made and it is attempted to prevent error 429 (too many requests). Especially if a page has many toots or you are scrolling through a feed really fast.
+4. If the extension fails to resolve content, the affected buttons will behave like usually (popup modal) and a notice ("Unresolved") is added to the toot
 
 ## Todos / Planned features 
 Check out the according [Github project](https://github.com/users/Lartsch/projects/2) to see planned features and todos. They are sorted from most important to least important.
