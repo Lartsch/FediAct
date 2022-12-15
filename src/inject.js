@@ -321,7 +321,7 @@ function isMuted(handle) {
 
 // Return the user id on the users home instance
 async function resolveHandleToHome(handle) {
-	var requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/search?q=" + handle + "&resolve=true&limit=1"
+	var requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/search?q=" + handle + "&resolve=true&limit=1&exclude_unreviewed=false"
 	var searchResponse = await makeRequest("GET", requestUrl, settings.tokenheader, null)
 	if (searchResponse) {
 		searchResponse = JSON.parse(searchResponse)
@@ -335,7 +335,7 @@ async function resolveHandleToHome(handle) {
 
 // resolve a toot to the users home instance
 async function resolveTootToHome(searchstring) {
-	var requestUrl = 'https://' + settings.fediact_homeinstance + searchApi + "/?q=" + searchstring + "&resolve=true&limit=1"
+	var requestUrl = 'https://' + settings.fediact_homeinstance + searchApi + "/?q=" + searchstring + "&resolve=true&limit=1&exclude_unreviewed=false"
 	var response = await makeRequest("GET", requestUrl, settings.tokenheader, null)
 	if (response) {
 		response = JSON.parse(response)
