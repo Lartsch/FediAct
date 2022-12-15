@@ -1176,6 +1176,12 @@ async function checkSite() {
 			} else {
 				settings.fediact_exturi = uri
 			}
+			// at this point, we know that it's mastodon and the background processor should start running
+			if (!backgroundProcessor()) {
+				log("Could not start background process")
+				return false
+			}
+			// if option is enabled, check if logged in on that instance and stop
 			if (!settings.fediact_runifloggedin) {
 				if (await isLoggedIn()) {
 					log("Already logged in to this external instance.")
@@ -1251,12 +1257,8 @@ async function run() {
 			if (fedireply) {
 				processReply()
 			} else {
-				if (backgroundProcessor()) {
-					processFollow()
-					processToots()
-				} else {
-					log("Failed to initialize background script.")
-				}
+				processFollow()
+				processToots()
 			}
 		} else {
 			log("Will not process this site.")
