@@ -7,15 +7,23 @@ const profileNamePaths = ["div.account__header__tabs__name small", "div.public-a
 const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/
 const handleExtractUrlRegex = /^(?<domain>https?:\/\/(?:\.?[a-z0-9-]+)+(?:\.[a-z]+){1})?\/?@(?<handle>\w+)(?:@(?<handledomain>(?:[\w-]+\.)+?\w+))?(?:\/(?<tootid>\d+))?\/?$/
 const handleExtractUriRegex = /^(?<domain>https?:\/\/(?:\.?[a-z0-9-]+)+(?:\.[a-z]+){1})(?:\/users\/)(?<handle>\w+)(?:(?:\/statuses\/)(?<tootid>\d+))?\/?$/
-const enableConsoleLog = false
+const enableConsoleLog = true
 const logPrepend = "[FediAct]"
 const instanceApi = "/api/v1/instance"
 const statusApi = "/api/v1/statuses"
 const searchApi = "/api/v2/search"
 const accountsApi = "/api/v1/accounts"
+const domainBlocksApi = "/api/v1/domain_blocks"
 const pollsApi = "/api/v1/polls"
 const apiDelay = 500
 const maxTootCache = 200
+const modalHtml = `
+<div style="position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgb(0,0,0); background-color: rgba(0,0,0,0.4); margin: 0; padding: 0;" class="fedimodal">
+	<div style="background-color: #494949; border: 1px solid #888; width: 50%; max-width: 300px; left: 50%; top: 50%; transform: translate(-50%, -50%); position: absolute; margin: 0; padding: 0;" class="fedimodal-content">
+		<ul style="width: 100%; margin: 0; padding: 0;">
+		</ul>
+	</div>
+</div>`
 
 // settings keys with defauls
 var settings = {}
@@ -214,7 +222,33 @@ function redirectTo(url) {
 
 async function executeAction(id, action, polldata) {
 	var requestUrl, condition, jsonbody
+	var method = "POST"
 	switch (action) {
+		case 'domainblock':
+			requestUrl = 'https://' + settings.fediact_homeinstance + domainBlocksApi + "?domain=" + id
+			condition = function(response) {if(response){return true}}
+			break
+		case 'domainunblock':
+			requestUrl = 'https://' + settings.fediact_homeinstance + domainBlocksApi + "?domain=" + id
+			condition = function(response) {if(response){return true}}
+			method = "DELETE"
+			break
+		case 'mute':
+			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + id + "/mute"
+			condition = function(response) {return response.muting}
+			break
+		case 'unmute':
+			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + id + "/unmute"
+			condition = function(response) {return !response.muting}
+			break
+		case 'block':
+			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + id + "/block"
+			condition = function(response) {return response.blocking}
+			break
+		case 'unblock':
+			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + id + "/unblock"
+			condition = function(response) {return !response.blocking}
+			break
 		case 'vote':
 			requestUrl = 'https://' + settings.fediact_homeinstance + pollsApi + "/" + id + "/votes"
 			condition = function(response) {return response.voted}
@@ -256,7 +290,7 @@ async function executeAction(id, action, polldata) {
 			log("No valid action specified."); break
 	}
 	if (requestUrl) {
-		var response = await makeRequest("POST", requestUrl, settings.tokenheader, jsonbody)
+		var response = await makeRequest(method, requestUrl, settings.tokenheader, jsonbody)
 		if (response) {
 			// convert to json object
 			response = JSON.parse(response)
@@ -343,10 +377,10 @@ async function resolveTootToHome(searchstring) {
 		if (!response.accounts.length && response.statuses.length) {
 			var status = response.statuses[0]
 			if (status.poll) {
-				return [[status.account.acct, status.id, status.reblogged, status.favourited, status.bookmarked], [status.poll.id, status.poll.voted]]
+				return [[status.account.acct, status.id, status.reblogged, status.favourited, status.bookmarked, status.account.id], [status.poll.id, status.poll.voted]]
 			} else {
 				// return the required status data
-				return [[status.account.acct, status.id, status.reblogged, status.favourited, status.bookmarked], [false, false]]
+				return [[status.account.acct, status.id, status.reblogged, status.favourited, status.bookmarked, status.account.id], [false, false]]
 			}
 		} else {
 			return [false, false]
@@ -439,6 +473,37 @@ function addToProcessedToots(toot) {
 		processed = processed.splice(0,diff)
 	}
 	return processed.length - 1
+}
+
+function showModal(settings) {
+	// [ [action,tootdata],[action,tootdata] ]
+	var baseEl = $(modalHtml)
+	var appendTo = $(baseEl).find("ul")
+	for (const entry of settings) {
+		var nameUppercase = entry[0].charAt(0).toUpperCase() + entry[0].slice(1);
+		var append = "<li style='cursor: pointer; width: 100%; padding: 5px 10px; box-sizing: border-box;'><a style='font-size: 16px; cursor: pointer; text-decoration: none; color: white;' fediaction='" + entry[0] + "' fediid='" + entry[1] + "'>" + nameUppercase + "</a></li>"
+		$(appendTo).append($(append))
+	}
+	$("body").append($(baseEl))
+	$("body").on("click", function(e) {
+		if ($(e.target).is(".fedimodal li, .fedimodal li a")) {
+			if ($(e.target).is(".fedimodal li")) {
+				e.target = $(e.target).find("a")
+			}
+			var action = $(e.target).attr("fediaction")
+			var id = $(e.target).attr("fediid")
+			var done = executeAction(id, action, null)
+			if (done) {
+				$(baseEl).remove()
+				$("body").off()
+			} else {
+				alert("Failed to " + action)
+			}
+		} else {
+			$(baseEl).remove()
+			$("body").off()
+		}
+	})
 }
 
 // trigger the reply button click - will only run when we are on a home instance url with fedireply parameter
@@ -645,6 +710,7 @@ async function processToots() {
 			var bookmarkButton = $(el).find("button:has(i.fa-bookmark)").first()
 			var replyButton = $(el).find("button:has(i.fa-reply), button:has(i.fa-reply-all), a.icon-button:has(i.fa-reply), a.icon-button:has(i.fa-reply-all)").first()
 			var voteButton = $(el).find("div.poll button").first()
+			var moreButton = $(el).find("button:has(i.fa-ellipsis-h)").first()
 			// handles process when a vote button is clicked
 			async function pollAction(id, redirect, e) {
 				if (settings.fediact_autoaction) {
@@ -663,8 +729,8 @@ async function processToots() {
 						$(e.currentTarget).hide()
 						$(pollDiv).find("ul").replaceWith("<p style='font-style: italic'><a style='font-weight:bold; color:orange' href='" + redirect + "' target='" + settings.fediact_target + "'>View the results</a> on your home instance.<p>")
 						if (cacheIndex) {
-							processed[cacheIndex][9] = !processed[cacheIndex][9]
-							processed[cacheIndex][9] = true
+							processed[cacheIndex][10] = true
+							processed[cacheIndex][11] = true
 						}
 					}
 					return result
@@ -681,7 +747,7 @@ async function processToots() {
 						if (actionExecuted) {
 							if (cacheIndex) {
 								// set interacted to true
-								processed[cacheIndex][10] = true
+								processed[cacheIndex][11] = true
 							}
 							// if the action was successfully executed, update the element styles
 							if (action == "boost" || action == "unboost") {
@@ -729,8 +795,9 @@ async function processToots() {
 					// otherwise start processing button styles (if enabled OR if the toot was already interacted with, to restore the state while still on the same page)
 					// first enable the bookmark button (is disabled on external instances)
 					$(bookmarkButton).removeClass("disabled").removeAttr("disabled")
+					$(moreButton).removeClass("disabled").removeAttr("disabled")
 					$(voteButton).removeAttr("disabled")
-					if (settings.fediact_showtoot || tootdata[10]) {
+					if (settings.fediact_showtoot || tootdata[11]) {
 						// set the toot buttons to active, depending on the state of the resolved toot and if the element already has the active class
 						if (tootdata[4]) {
 							if (!$(favButton).hasClass("fediactive")) {
@@ -750,9 +817,9 @@ async function processToots() {
 								toggleInlineCss($(bookmarkButton),[["color","!remove","rgb(255, 80, 80)"]], "fediactive")
 							}
 						}
-						if (tootdata[9]) {
+						if (tootdata[10]) {
 							$(voteButton).hide()
-							$(voteButton).closest("div.poll").find("ul").replaceWith("<p style='font-style: italic'><a style='font-weight:bold; color:orange' href='" + tootdata[6] + "' target='" + settings.fediact_target + "'>View the results</a> on your home instance.<p>")
+							$(voteButton).closest("div.poll").find("ul").replaceWith("<p style='font-style: italic'><a style='font-weight:bold; color:orange' href='" + tootdata[7] + "' target='" + settings.fediact_target + "'>View the results</a> on your home instance.<p>")
 						}
 					}
 				}
@@ -765,7 +832,17 @@ async function processToots() {
 					e.preventDefault()
 					e.stopImmediatePropagation()
 					// redirect to the resolved URL + fedireply parameter (so the extension can handle it after redirect)
-					redirectTo(tootdata[6]+"?fedireply")
+					redirectTo(tootdata[7]+"?fedireply")
+				})
+				$(moreButton).on("click", function(e){
+					// prevent default and immediate propagation
+					e.preventDefault()
+					e.stopImmediatePropagation()
+					// redirect to the resolved URL + fedireply parameter (so the extension can handle it after redirect)
+					var domainsplit = tootdata[1].split("@")
+					var domain = domainsplit.pop() || domainsplit.pop()
+					console.log(domain)
+					showModal([["mute",tootdata[6]],["unmute",tootdata[6]],["block",tootdata[6]],["unblock",tootdata[6]],["domainblock",domain],["domainunblock",domain]])
 				})
 				// for all other buttons...
 				$([favButton, boostButton, bookmarkButton, voteButton]).each(function() {
@@ -788,8 +865,8 @@ async function processToots() {
 						// this will always run, but see below for double click handling
 						if (clicks == 1) {
 							timer = setTimeout(async function() {
-								if (isVote && !tootdata[9]) {
-									var actionExecuted = pollAction(tootdata[8], tootdata[6], e)
+								if (isVote && !tootdata[10]) {
+									var actionExecuted = pollAction(tootdata[9], tootdata[7], e)
 								} else {
 									// execute action on click and get result (fail/success)
 									var actionExecuted = await tootAction(tootdata[2], e)
@@ -805,7 +882,7 @@ async function processToots() {
 							// reset the above timeout so it wont execute
 							clearTimeout(timer)
 							if (isVote) {
-								var actionExecuted = pollAction(tootdata[8], tootdata[6], e)
+								var actionExecuted = pollAction(tootdata[9], tootdata[7], e)
 							} else {
 								// execute action on click and get result (fail/success)
 								var actionExecuted = await tootAction(tootdata[2], e)
@@ -814,7 +891,7 @@ async function processToots() {
 								log("Action failed.")
 							} else {
 								// redirect to home instance with the resolved toot url
-								redirectTo(tootdata[6])
+								redirectTo(tootdata[7])
 							}
 							// reset clicks
 							clicks = 0
@@ -901,7 +978,7 @@ async function processToots() {
 						// run only if not already resolved
 						if (!resolvedToHomeInstance) {
 							// resolve toot on actual home instance
-							var [resolvedToot, poll] = await resolveTootToHome(homeResolveString) // [status.account.acct, status.id, status.reblogged, status.favourited, status.bookmarked], pollid/false
+							var [resolvedToot, poll] = await resolveTootToHome(homeResolveString) // [status.account.acct, status.id, status.reblogged, status.favourited, status.bookmarked, status.account.id], [pollid/false, voted]
 							if (resolvedToot) {
 								// if successful, set condition to true (so it will not be resolved twice)
 								resolvedToHomeInstance = true
@@ -909,7 +986,7 @@ async function processToots() {
 								var redirectUrl = 'https://' + settings.fediact_homeinstance + "/@" + resolvedToot[0] + "/" + resolvedToot[1]
 								// prepare the cache entry / toot data entry
 								var fullEntry = [internalIdentifier, ...resolvedToot, redirectUrl, true, ...poll, false]
-								// 0: internal identifier; 1: toot home acct / false 2: toot home id 3: toot reblogged 4: toot favourited 5: toot bookmarked 6: redirect url 7: ??? crap! 8: poll id / false 9: poll voted 10: interacted
+								// 0: internal identifier; 1: toot home acct / false 2: toot home id 3: toot reblogged 4: toot favourited 5: toot bookmarked 6: home account id 7: redirect url 8: ??? crap! 9: poll id / false 10: poll voted 11: interacted
 							}
 						}
 					}
