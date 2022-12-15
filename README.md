@@ -146,14 +146,15 @@ I included all of the default add-ons in the custom collection, so you will not 
 ## Additional notes
 1. Support for other Fedi software is planned
 2. The whitelist mode can be useful if you do not want the extension to run basic checks on every site (since it needs to determine if its a Mastodon site). Not sure if blacklist is good for anything but I still included it.
-3. It can have several reasons why resolving might not work:
+3. It can have several reasons why resolving/interacting might not work:
     - Not logged in to your home instance
     - Element identifiers have changed / instance uses an unsupported flavour
     - The external instance you are browsing or the originating instance of a toot is not Mastodon
-    - Your home instance has strong rate limiting
+    - Your home instance has strong rate limiting and limited your IP
     - Your home instance / the external instance / the original instance of a toot have defederated / are moderated
     - The toot has not yet federated to your home instace (follow the account and toots should start federating)
     - The instance you are browsing does not use 302 redirects for external toots
+    - The network conditions of your home instance or the external instance are bad (slow speed)
     - Maybe it also plays a role if the toot is set to unlisted on its original instance
 4. There can be delays since API calls have to be made and it is attempted to prevent error 429 (too many requests). Especially if a page has many toots or you are scrolling through a feed really fast.
 5. If the extension fails to resolve content, the affected buttons will behave like usually (popup modal) and a notice ("Unresolved") is added to the toot
