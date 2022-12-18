@@ -11,8 +11,8 @@ A Chrome/Firefox extension that simplifies follow and post interactions on Masto
 - Customizable
 
 **Supported browsers**:
-- All up-to-date Chromium browsers, including Kiwi browser on Android
-- Up-to-date Firefox (v107+), including Firefox Nightly on Android
+- All up-to-date Chromium browsers, including Kiwi and Yandex browsers on Android
+- Up-to-date Firefox (v107+), including Firefox Nightly on Android, Orion on iOS
 
 **Important notes**:
 - All data is processed locally only
