@@ -7,7 +7,7 @@ const profileNamePaths = ["div.account__header__tabs__name small", "div.public-a
 const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/
 const handleExtractUrlRegex = /^(?<domain>https?:\/\/(?:\.?[a-z0-9-]+)+(?:\.[a-z]+){1})?\/?@(?<handle>\w+)(?:@(?<handledomain>(?:[\w-]+\.)+?\w+))?(?:\/(?<tootid>\d+))?\/?$/
 const handleExtractUriRegex = /^(?<domain>https?:\/\/(?:\.?[a-z0-9-]+)+(?:\.[a-z]+){1})(?:\/users\/)(?<handle>\w+)(?:(?:\/statuses\/)(?<tootid>\d+))?\/?$/
-const enableConsoleLog = true
+const enableConsoleLog = false
 const logPrepend = "[FediAct]"
 const instanceApi = "/api/v1/instance"
 const statusApi = "/api/v1/statuses"
@@ -26,6 +26,7 @@ const modalHtml = `
 		</ul>
 	</div>
 </div>`
+const timeout = 15000
 
 // settings keys with defauls
 var settings = {}
@@ -157,7 +158,7 @@ async function makeRequest(method, url, extraheaders, jsonbody) {
 		// open it with the method and url specified
         xhr.open(method, url)
 		// set timeout
-        xhr.timeout = 5000
+        xhr.timeout = timeout
 		// set extra headers if any were given
 		if (extraheaders) {
 			for (var key in extraheaders) {
@@ -175,6 +176,7 @@ async function makeRequest(method, url, extraheaders, jsonbody) {
             }
         }
 		xhr.ontimeout = function() {
+			log("Timed out")
 			resolve(false)
 		}
 		// on any error, resolve false
@@ -771,6 +773,7 @@ async function processToots() {
 			if (!$(favButton).length) {
 				favButton = $(el).find("a.icon-button:has(i.fa-star), a.detailed-status__link:has(i.fa-star)")
 			}
+			$("<span class='fediactprocessing' style='color: white; padding-right: 10px; padding-left: 10px'>Resolving...</span>").insertAfter($(favButton))
 			var boostButton = $(el).find("button:has(i.fa-retweet)").first()
 			if (!$(boostButton).length) {
 				boostButton = $(el).find("a.icon-button:has(i.fa-retweet), a.detailed-status__link:has(i.fa-retweet)")
@@ -854,11 +857,12 @@ async function processToots() {
 			// handles initialization of element styles
 			function initStyles(tootdata) {
 				// always remove any existing "Unresolved" indicator from the element first
-				$(el).find(".feditriggered").remove()
+				$(el).find(".fediactunresolved").remove()
+				$(el).find(".fediactprocessing").remove()
 				// is the toot unresolved?
 				if (!tootdata[1]) {
 					// yes, then add the Unresolved indicator
-					$("<span class='feditriggered' style='color: orange; padding-right: 10px; padding-left: 10px'>Unresolved</span>").insertAfter($(favButton))
+					$("<span class='fediactunresolved' style='color: orange; padding-right: 10px; padding-left: 10px'>Unresolved</span>").insertAfter($(favButton))
 				} else {
 					// otherwise start processing button styles (if enabled OR if the toot was already interacted with, to restore the state while still on the same page)
 					// first enable the bookmark button (is disabled on external instances)

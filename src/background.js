@@ -5,6 +5,7 @@ const tokenInterval = 1 // minutes
 const mutesApi = "/api/v1/mutes"
 const blocksApi = "/api/v1/blocks"
 const domainBlocksApi = "/api/v1/domain_blocks"
+const timeout = 15000
 
 const tokenRegex = /"access_token":".*?",/gm
 
@@ -26,8 +27,9 @@ async function resolveToot(url) {
         try {
             const controller = new AbortController()
             const timeoutId = setTimeout(() => {
+                log("Timed out")
                 controller.abort()
-            }, 5000)
+            }, timeout)
             var res = await fetch(url, {method: 'HEAD', signal: controller.signal})
             clearTimeout(timeoutId)
             if (res.redirected) {
