@@ -68,10 +68,6 @@ If you have set your home instance correctly, you can now interact on other Mast
 
 - Actions: Set if actions (following, boosting, etc.) should be performed when clicking or double clicking (default: on)
     - _**Usage tip:**_ Disable this if you only want redirects on double click or when replying without automatically performing the action
-- Show follows: Set if the following state of accounts should be reflected on profiles / account cards (default: on)
-  - _**Please note:**_ When disabled, the state will still be changed when interacting and stored until the page is reloaded or left
-- Show toot state: Set if the state of toots (favourited, boosted, bookmarked) should be reflected (default: on)
-  - _**Please note:**_ When disabled, the state will still be changed when interacting and stored until the page is reloaded or left
 - Hide muted/blocked: If enabled, your blocked/muted users/instances will be synched every 60 seconds and all matching toots, boosts and toots with mentions will be hidden (default: off)
   - _**Please note:**_ There are cases where hiding can fail and this is disabled by default because it can decrease performance
 - API delay: If enabled, there can only be one API request to your home instance per 500ms (default: on)
