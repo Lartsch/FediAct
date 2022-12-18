@@ -2,7 +2,7 @@
 A Chrome/Firefox extension that simplifies follow and post interactions on Mastodon instances other than your own.
 
 **Features**:
-- Supports Mastodon v3 + v4
+- Supports Mastodon v3 + v4 (some features only for v4)
 - Follow, boost, bookmark, reply, favourite and vote polls on external instances while only being logged in to your home instance
 - Show following status and toot status (boosted, faved, bookmarked) on external instances
 - Single click to execute action only, double click to redirect to content on home instance
