@@ -1,4 +1,4 @@
-# FediAct (v0.9.7)
+# FediAct (v0.9.8)
 A Chrome/Firefox extension that simplifies follow and post interactions on Mastodon instances other than your own.
 
 **Features**:
@@ -11,8 +11,8 @@ A Chrome/Firefox extension that simplifies follow and post interactions on Masto
 - Customizable
 
 **Supported browsers**:
-- All up-to-date Chromium browsers, including Kiwi browser on Android
-- Up-to-date Firefox (v107+), including Firefox Nightly on Android
+- All up-to-date Chromium browsers, including Kiwi and Yandex browsers on Android
+- Up-to-date Firefox (v107+), including Firefox Nightly on Android, Orion on iOS
 
 **Important notes**:
 - All data is processed locally only
@@ -35,9 +35,9 @@ A Chrome/Firefox extension that simplifies follow and post interactions on Masto
 [link-chrome]: https://chrome.google.com/webstore/detail/fediact/lmpcajpkjcclkjbliapfjfolocffednm 'Version published on Chrome Web Store'
 [link-firefox]: https://addons.mozilla.org/en-US/firefox/addon/fediact/ 'Version published on Mozilla Add-ons'
 
-[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/chrome/chrome.svg" width="48" alt="Chrome" valign="middle">][link-chrome] [<img valign="middle" src="https://img.shields.io/chrome-web-store/v/lmpcajpkjcclkjbliapfjfolocffednm.svg?label=%20">][link-chrome] + other Chromium browsers
+[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/chrome/chrome.svg" width="48" alt="Chrome" valign="middle">][link-chrome] [<img valign="middle" src="https://img.shields.io/chrome-web-store/v/lmpcajpkjcclkjbliapfjfolocffednm.svg?label=%20">][link-chrome] and other Chromium browsers
 
-[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fediact.svg?label=%20%20">][link-firefox] including Firefox for Android
+[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fediact.svg?label=%20%20">][link-firefox] including Nightly for Android, Orion on iOS
 
 > **Note**
 > 
@@ -85,7 +85,7 @@ Yes! There are three options that I am aware of: Kiwi Browser (Chromium with add
 
 **Can I use this on iOS?**
 
-As of now, this addon does not support Safari and I am not aware of any other browsers on iOS, that support extensions. So, no, not at this time. PLEASE NOTE: Safari support will not happen at this time since Apple wants 99$ per year for the [Developer Program membership](https://developer.apple.com/support/compare-memberships), which is a requirement.
+There is only one way to use FediAct on iOS: [Orion Browser](https://apps.apple.com/gb/app/orion-browser-by-kagi/id1484498200). As of now, this addon does **not** support Safari. Safari support will not happen at this time since Apple wants 99$ per year for the [Developer Program membership](https://developer.apple.com/support/compare-memberships), which is a requirement.
 
 **Can you add feature XY?**
 
