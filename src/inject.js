@@ -38,12 +38,10 @@ const settingsDefaults = {
 	fediact_target: "_self",
 	fediact_autoaction: true,
 	fediact_token: null,
-	fediact_showfollows: true,
 	fediact_redirects: true,
 	fediact_enabledelay: true,
 	fediact_hidemuted: false,
 	fediact_runifloggedin: false,
-	fediact_showtoot: true,
 	fediact_mutes: [],
 	fediact_blocks: [],
 	fediact_domainblocks: []
@@ -864,35 +862,35 @@ async function processToots() {
 					$(bookmarkButton).removeClass("disabled").removeAttr("disabled")
 					$(moreButton).removeClass("disabled").removeAttr("disabled")
 					$(voteButton).removeAttr("disabled")
-					if (settings.fediact_showtoot || tootdata[11]) {
-						// set the toot buttons to active, depending on the state of the resolved toot and if the element already has the active class
-						if (tootdata[4]) {
-							if (!$(favButton).hasClass("fediactive")) {
-								toggleInlineCss($(favButton),[["color","!remove","rgb(202, 143, 4)"]], "fediactive")
-								toggleInlineCss($(favButton).find("i"),[["animation","spring-rotate-out 1s linear","spring-rotate-in 1s linear"]], "fediactive")
-							}
+					// set the toot buttons to active, depending on the state of the resolved toot and if the element already has the active class
+					if (tootdata[4]) {
+						if (!$(favButton).hasClass("fediactive")) {
+							toggleInlineCss($(favButton),[["color","!remove","rgb(202, 143, 4)"]], "fediactive")
+							toggleInlineCss($(favButton).find("i"),[["animation","spring-rotate-out 1s linear","spring-rotate-in 1s linear"]], "fediactive")
 						}
-						// repeat for other buttons
-						if (tootdata[3]) {
-							if (!$(boostButton).find("i.fediactive").length) {
-								toggleInlineCss($(boostButton),[["color","!remove","rgb(140, 141, 255)"]], "fediactive")
-								toggleInlineCss($(boostButton).find("i"),[["transition-duration", "!remove", "0.9s"],["background-position", "!remove", "0px 100%"]], "fediactive")
-							}
+					}
+					// repeat for other buttons
+					if (tootdata[3]) {
+						if (!$(boostButton).find("i.fediactive").length) {
+							toggleInlineCss($(boostButton),[["color","!remove","rgb(140, 141, 255)"]], "fediactive")
+							toggleInlineCss($(boostButton).find("i"),[["transition-duration", "!remove", "0.9s"],["background-position", "!remove", "0px 100%"]], "fediactive")
 						}
-						if (tootdata[5]) {
-							if (!$(bookmarkButton).hasClass("fediactive")) {
-								toggleInlineCss($(bookmarkButton),[["color","!remove","rgb(255, 80, 80)"]], "fediactive")
-							}
+					}
+					if (tootdata[5]) {
+						if (!$(bookmarkButton).hasClass("fediactive")) {
+							toggleInlineCss($(bookmarkButton),[["color","!remove","rgb(255, 80, 80)"]], "fediactive")
 						}
-						if (tootdata[10]) {
-							$(voteButton).hide()
-							$(voteButton).closest("div.poll").find("ul").replaceWith("<p style='font-style: italic'><a style='font-weight:bold; color:orange' href='" + tootdata[7] + "' target='" + settings.fediact_target + "'>View the results</a> on your home instance.<p>")
-						}
+					}
+					if (tootdata[10]) {
+						$(voteButton).hide()
+						$(voteButton).closest("div.poll").find("ul").replaceWith("<p style='font-style: italic'><a style='font-weight:bold; color:orange' href='" + tootdata[7] + "' target='" + settings.fediact_target + "'>View the results</a> on your home instance.<p>")
 					}
 				}
 			}
 			// handles binding of clicks events for all buttons of a toot
 			function clickBinder(tootdata) {
+				var domainsplit = tootdata[1].split("@")
+				var domain = domainsplit.pop() || domainsplit.pop()
 				// reply button is simple, it will always redirect to the homeinstance with the fedireply parameter set
 				$(replyButton).on("click", function(e){
 					// prevent default and immediate propagation
@@ -905,9 +903,6 @@ async function processToots() {
 					// prevent default and immediate propagation
 					e.preventDefault()
 					e.stopImmediatePropagation()
-					// redirect to the resolved URL + fedireply parameter (so the extension can handle it after redirect)
-					var domainsplit = tootdata[1].split("@")
-					var domain = domainsplit.pop() || domainsplit.pop()
 					var modalLinks = []
 					if (isBlocked(tootdata[1])) {
 						modalLinks.push(["unblock",tootdata[6]])
@@ -1128,6 +1123,10 @@ async function processFollow() {
 	async function process(el) {
 		var fullHandle
 		var action = "follow"
+		var moreButton = $(el).siblings("button:has(i.fa-ellipsis-fw,i.fa-ellipsis-v)")
+		if ($(moreButton).length) {
+			$(moreButton).removeClass("disabled").removeAttr("disabled")
+		}
 		// wrapper for follow/unfollow action
 		async function execFollow(id) {
 			if (settings.fediact_autoaction) {
@@ -1171,17 +1170,38 @@ async function processFollow() {
 				var resolvedHandle = await resolveHandleToHome(fullHandle)
 				if (resolvedHandle) {
 					tmpSettings.processedFollow.push(fullHandle)
+					var domainsplit = fullHandle.split("@")
+					var domain = domainsplit.pop() || domainsplit.pop()
 					// successfully resolved
-					// if showfollows is enabled...
-					if (settings.fediact_showfollows) {
-						// ... then check if user is already following
-						var isFollowing = await isFollowingHomeInstance([resolvedHandle[0]])
-						// update button text and action if already following
-						if (isFollowing[0]) {
-							$(el).text("Unfollow")
-							action = "unfollow"
-						}
+					// ... then check if user is already following
+					var isFollowing = await isFollowingHomeInstance([resolvedHandle[0]])
+					// update button text and action if already following
+					if (isFollowing[0]) {
+						$(el).text("Unfollow")
+						action = "unfollow"
 					}
+					$(moreButton).on("click", function(e){
+						// prevent default and immediate propagation
+						e.preventDefault()
+						e.stopImmediatePropagation()
+						var modalLinks = []
+						if (isBlocked(fullHandle)) {
+							modalLinks.push(["unblock",resolvedHandle[0]])
+						} else {
+							modalLinks.push(["block",resolvedHandle[0]])
+						}
+						if (isMuted(fullHandle)) {
+							modalLinks.push(["unmute",resolvedHandle[0]])
+						} else {
+							modalLinks.push(["mute",resolvedHandle[0]])
+						}
+						if (isDomainBlocked(fullHandle)) {
+							modalLinks.push(["domainunblock",domain])
+						} else {
+							modalLinks.push(["domainblock",domain])
+						}
+						showModal(modalLinks)
+					})
 					// single and double click handling (see toot processing for explanation, is the same basically)
 					var clicks = 0
 					var timer
@@ -1246,7 +1266,6 @@ async function processFollow() {
 
 // process white/blacklist from ext settings
 function processDomainList(newLineList) {
-	console.log(newLineList)
 	// split by new line
 	var arrayFromList = newLineList.split(/\r?\n/)
 	// array to put checked domains into
@@ -1396,7 +1415,6 @@ function getSettings() {
 			resolve(false)
 		}
 		if (settings) {
-			console.log(settings)
 			// validate settings
 			if (checkSettings()) {
 				resolve(true)
