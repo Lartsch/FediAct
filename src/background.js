@@ -24,7 +24,12 @@ function log(text) {
 async function resolveToot(url) {
     return new Promise(async function(resolve) {
         try {
-            var res = await fetch(url, {method: 'HEAD'})
+            const controller = new AbortController()
+            const timeoutId = setTimeout(() => {
+                controller.abort()
+            }, 1000)
+            var res = await fetch(url, {method: 'HEAD', signal: controller.signal})
+            clearTimeout(timeoutId)
             if (res.redirected) {
                 resolve(res.url)
             } else {

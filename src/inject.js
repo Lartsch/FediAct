@@ -157,7 +157,7 @@ async function makeRequest(method, url, extraheaders, jsonbody) {
 		// open it with the method and url specified
         xhr.open(method, url)
 		// set timeout
-        xhr.timeout = 1500
+        xhr.timeout = 1000
 		// set extra headers if any were given
 		if (extraheaders) {
 			for (var key in extraheaders) {
