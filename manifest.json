@@ -1,6 +1,6 @@
 {
   "name": "FediAct",
-  "version": "0.9.7.2",
+  "version": "0.9.8",
   "description": "Simplifies interactions on other Mastodon instances than your own. Visit https://github.com/lartsch/FediAct for more.",
   "manifest_version": 3,
   "content_scripts": [
@@ -10,7 +10,7 @@
       ],
       "js": [
         "src/lib/jquery-3.6.1.min.js",
-        "src/inject.min.js"
+        "src/inject.js"
       ],
       "css": [
         "src/nodeinserted.min.css"

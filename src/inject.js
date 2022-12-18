@@ -48,12 +48,20 @@ const settingsDefaults = {
 	fediact_blocks: [],
 	fediact_domainblocks: []
 }
+const tmpSettings = {
+	fedireply: undefined,
+	lasthomerequest: undefined,
+	whitelist: undefined,
+	blacklist: undefined,
+	exturi: undefined,
+	tokenheader: undefined,
+	processed: [],
+	processedFollow: [],
+	isProcessing: []
+}
 
 // fix for cross-browser storage api compatibility and other global vars
-var browser, chrome, lasthomerequest, fedireply
-// currently, the only reliable way to detect all toots etc. has the drawback that the same element could be processed multiple times
-// this will store already processed elements to compare prior to processing and will reset as soon as the site context changes
-var [processed, processedFollow, isProcessing] = [[],[],[]]
+var browser, chrome
 
 
 // =-=-=-=-==-=-=-=-==-=-=-=-=-
@@ -131,7 +139,7 @@ async function makeRequest(method, url, extraheaders, jsonbody) {
 		// get current time
 		var currenttime = Date.now()
 		// get difference of current time and time of last request
-		var difference = currenttime - lasthomerequest
+		var difference = currenttime - tmpSettings.lasthomerequest
 		// if difference is smaller than our set api delay value...
 		if (difference < apiDelay) {
 			// ... then wait the time required to reach the api delay value...
@@ -142,7 +150,7 @@ async function makeRequest(method, url, extraheaders, jsonbody) {
 			})
 		}
 		// TODO: move this to the top? or get new Date.now() here?
-		lasthomerequest = currenttime
+		tmpSettings.lasthomerequest = currenttime
 	}
 	// return a new promise...
     return new Promise(function (resolve) {
@@ -299,7 +307,7 @@ async function executeAction(id, action, polldata) {
 			log("No valid action specified."); break
 	}
 	if (requestUrl) {
-		var response = await makeRequest(method, requestUrl, settings.tokenheader, jsonbody)
+		var response = await makeRequest(method, requestUrl, tmpSettings.tokenheader, jsonbody)
 		if (response) {
 			// convert to json object
 			response = JSON.parse(response)
@@ -323,7 +331,7 @@ async function isFollowingHomeInstance(ids) {
 		requestUrl += "id[]=" + id.toString() + "&"
 	}
 	// make the request
-	var responseFollowing = await makeRequest("GET", requestUrl, settings.tokenheader, null)
+	var responseFollowing = await makeRequest("GET", requestUrl, tmpSettings.tokenheader, null)
 	// fill response array according to id amount with false
 	const follows = Array(ids.length).fill(false)
 	// parse the response
@@ -353,7 +361,7 @@ function clearHandle(handle) {
 	}
 	// add local uri if handle has no domain already
 	if (handle.split("@").length-1 == 0) {
-		handle = handle + "@" + settings.fediact_exturi
+		handle = handle + "@" + tmpSettings.exturi
 	}
 	return handle
 }
@@ -395,7 +403,7 @@ function checkAllMutedBlocked(handle) {
 // Return the user id on the users home instance
 async function resolveHandleToHome(handle) {
 	var requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/search?q=" + handle + "&resolve=true&limit=1&exclude_unreviewed=false"
-	var searchResponse = await makeRequest("GET", requestUrl, settings.tokenheader, null)
+	var searchResponse = await makeRequest("GET", requestUrl, tmpSettings.tokenheader, null)
 	if (searchResponse) {
 		searchResponse = JSON.parse(searchResponse)
 		if (searchResponse[0].id) {
@@ -409,7 +417,7 @@ async function resolveHandleToHome(handle) {
 // resolve a toot to the users home instance
 async function resolveTootToHome(searchstring) {
 	var requestUrl = 'https://' + settings.fediact_homeinstance + searchApi + "/?q=" + searchstring + "&resolve=true&limit=1&exclude_unreviewed=false"
-	var response = await makeRequest("GET", requestUrl, settings.tokenheader, null)
+	var response = await makeRequest("GET", requestUrl, tmpSettings.tokenheader, null)
 	if (response) {
 		response = JSON.parse(response)
 		// do we have a status as result?
@@ -489,9 +497,9 @@ function toggleInlineCss(el, styles, toggleclass) {
 // check if an toot identifier is already in the "processed" array
 function isInProcessedToots(id) {
 	// iterate array
-	for (var i = 0; i < processed.length; i++) {
+	for (var i = 0; i < tmpSettings.processed.length; i++) {
 		// if the the first value of the nested array at the current index matches the id we look for...
-		if (processed[i][0] == id) {
+		if (tmpSettings.processed[i][0] == id) {
 			// return the index
 			return i
 		}
@@ -503,15 +511,15 @@ function isInProcessedToots(id) {
 // add a toot to the "processed" array
 function addToProcessedToots(toot) {
 	// push the array first
-	processed.push(toot)
+	tmpSettings.processed.push(toot)
 	// check the difference of the max elements to cache and the current length of the processed array
-	var diff = processed.length - maxTootCache
+	var diff = tmpSettings.processed.length - maxTootCache
 	// if diff is greater than 0...
 	if (diff > 0) {
 		// remove the first diff items from it
-		processed = processed.splice(0,diff)
+		tmpSettings.processed = tmpSettings.processed.splice(0,diff)
 	}
-	return processed.length - 1
+	return tmpSettings.processed.length - 1
 }
 
 async function updateMutedBlocked() {
@@ -531,6 +539,7 @@ async function updateMutedBlocked() {
 	if (domainblocks.length) {
 		settings.fediact_domainblocks = domainblocks
 	}
+	updateSettings()
 }
 
 function showModal(settings) {
@@ -715,14 +724,14 @@ async function processToots() {
 				lastpart = lastpart.slice(1)
 				if (href.startsWith("http")) {
 					var url = new URL(href)
-					if (url.hostname != settings.fediact_exturi && url.hostname != location.hostname) {
+					if (url.hostname != tmpSettings.exturi && url.hostname != location.hostname) {
 						// external handle
 						processedHrefs.push(lastpart + "@" + url.hostname)
 					} else {
-						processedHrefs.push(lastpart + "@" + settings.fediact_exturi)
+						processedHrefs.push(lastpart + "@" + tmpSettings.exturi)
 					}
 				} else {
-					processedHrefs.push(lastpart + "@" + settings.fediact_exturi)
+					processedHrefs.push(lastpart + "@" + tmpSettings.exturi)
 				}
 			}
 			if (processedHrefs.some(r=> checkAllMutedBlocked(r)) || checkAllMutedBlocked(tootAuthor)) {
@@ -787,8 +796,8 @@ async function processToots() {
 						$(e.currentTarget).hide()
 						$(pollDiv).find("ul").replaceWith("<p style='font-style: italic'><a style='font-weight:bold; color:orange' href='" + redirect + "' target='" + settings.fediact_target + "'>View the results</a> on your home instance.<p>")
 						if (cacheIndex) {
-							processed[cacheIndex][10] = true
-							processed[cacheIndex][11] = true
+							tmpSettings.processed[cacheIndex][10] = true
+							tmpSettings.processed[cacheIndex][11] = true
 						}
 					}
 					return result
@@ -805,7 +814,7 @@ async function processToots() {
 						if (actionExecuted) {
 							if (cacheIndex) {
 								// set interacted to true
-								processed[cacheIndex][11] = true
+								tmpSettings.processed[cacheIndex][11] = true
 							}
 							// if the action was successfully executed, update the element styles
 							if (action == "boost" || action == "unboost") {
@@ -814,19 +823,19 @@ async function processToots() {
 								toggleInlineCss($(e.currentTarget).find("i"),[["transition-duration", "!remove", "0.9s"],["background-position", "!remove", "0px 100%"]], "fediactive")
 								// update element in cache if exists
 								if (cacheIndex) {
-									processed[cacheIndex][3] = !processed[cacheIndex][3]
+									tmpSettings.processed[cacheIndex][3] = !tmpSettings.processed[cacheIndex][3]
 								}
 							// same for favourite, bookmarked....
 							} else if (action == "favourite" || action == "unfavourite") {
 								toggleInlineCss($(e.currentTarget),[["color","!remove","rgb(202, 143, 4)"]], "fediactive")
 								toggleInlineCss($(e.currentTarget).find("i"),[["animation","spring-rotate-out 1s linear","spring-rotate-in 1s linear"]], "fediactive")
 								if (cacheIndex) {
-									processed[cacheIndex][4] = !processed[cacheIndex][4]
+									tmpSettings.processed[cacheIndex][4] = !tmpSettings.processed[cacheIndex][4]
 								}
 							} else {
 								toggleInlineCss($(e.currentTarget),[["color","!remove","rgb(255, 80, 80)"]], "fediactive")
 								if (cacheIndex) {
-									processed[cacheIndex][5] = !processed[cacheIndex][5]
+									tmpSettings.processed[cacheIndex][5] = !tmpSettings.processed[cacheIndex][5]
 								}
 							}
 							return true
@@ -1085,7 +1094,7 @@ async function processToots() {
 				}
 			} else {
 				// the toot is already in cache, so grab it
-				var toot = processed[cacheIndex]
+				var toot = tmpSettings.processed[cacheIndex]
 				// init stylings
 				initStyles(toot)
 				// if it is NOT unresolved, bind click handlers again
@@ -1099,15 +1108,15 @@ async function processToots() {
 	}
 	// One DOMNodeAppear to rule them all
 	$(document).DOMNodeAppear(async function(e) {
-		if (!isProcessing.includes($(e.target).get(0))) {
-			isProcessing.push($(e.target).get(0))
+		if (!tmpSettings.isProcessing.includes($(e.target).get(0))) {
+			tmpSettings.isProcessing.push($(e.target).get(0))
 			process($(e.target))
 		}
 	}, "div.status, div.detailed-status")
 	// try to find all existing elements (fixes some elements not being detected by DOMNodeAppear in rare cases, esp. v3)
 	$(document).find("div.status, div.detailed-status").each(function(){
-		if (!isProcessing.includes($(this).get(0))) {
-			isProcessing.push($(this).get(0))
+		if (!tmpSettings.isProcessing.includes($(this).get(0))) {
+			tmpSettings.isProcessing.push($(this).get(0))
 			process($(this))
 		}
 	})
@@ -1149,7 +1158,7 @@ async function processFollow() {
 				if ($(selector).length) {
 					fullHandle = $(selector).text().trim()
 					if (fullHandle.split("@").length-1 == 1) {
-						fullHandle = fullHandle + "@" + settings.fediact_exturi
+						fullHandle = fullHandle + "@" + tmpSettings.exturi
 					}
 					break
 				}
@@ -1157,11 +1166,11 @@ async function processFollow() {
 		}
 		// do we have a full handle?
 		if (fullHandle) {
-			if (!processedFollow.includes(fullHandle)) {
+			if (!tmpSettings.processedFollow.includes(fullHandle)) {
 				// yes, so resolve it to a user id on our homeinstance
 				var resolvedHandle = await resolveHandleToHome(fullHandle)
 				if (resolvedHandle) {
-					processedFollow.push(fullHandle)
+					tmpSettings.processedFollow.push(fullHandle)
 					// successfully resolved
 					// if showfollows is enabled...
 					if (settings.fediact_showfollows) {
@@ -1216,15 +1225,15 @@ async function processFollow() {
 	var allFollowPaths = followButtonPaths.join(",")
 	// one domnodeappear to rule them all
 	$(document).DOMNodeAppear(async function(e) {
-		if (!isProcessing.includes($(e.target).get(0))) {
-			isProcessing.push($(e.target).get(0))
+		if (!tmpSettings.isProcessing.includes($(e.target).get(0))) {
+			tmpSettings.isProcessing.push($(e.target).get(0))
 			process($(e.target))
 		}
 	}, allFollowPaths)
 	// try to find all existing elements (fixes some elements not being detected by DOMNodeAppear in rare cases, esp. v3)
 	$(document).find(allFollowPaths).each(function(){
-		if (!isProcessing.includes($(this).get(0))) {
-			isProcessing.push($(this).get(0))
+		if (!tmpSettings.isProcessing.includes($(this).get(0))) {
+			tmpSettings.isProcessing.push($(this).get(0))
 			process($(this))
 		}
 	})
@@ -1237,6 +1246,7 @@ async function processFollow() {
 
 // process white/blacklist from ext settings
 function processDomainList(newLineList) {
+	console.log(newLineList)
 	// split by new line
 	var arrayFromList = newLineList.split(/\r?\n/)
 	// array to put checked domains into
@@ -1267,7 +1277,7 @@ function checkSettings() {
 		log("No API token available. Are you logged in to your home instance? If yes, wait for 1-2 minutes and reload page.")
 		return false
 	} else {
-		settings.tokenheader = {"Authorization":"Bearer " + settings.fediact_token,}
+		tmpSettings.tokenheader = {"Authorization":"Bearer " + settings.fediact_token,}
 	}
 	// if the value looks like a domain...
 	if (!(domainRegex.test(settings.fediact_homeinstance))) {
@@ -1276,14 +1286,14 @@ function checkSettings() {
 	}
 	if (settings.fediact_mode == "whitelist") {
 		// if in whitelist mode and the cleaned whitelist is empty, return false
-		settings.fediact_whitelist = processDomainList(settings.fediact_whitelist)
-		if (settings.fediact_whitelist.length < 1) {
+		tmpSettings.whitelist = processDomainList(settings.fediact_whitelist)
+		if (tmpSettings.whitelist.length < 1) {
 			log("Whitelist is empty or invalid.")
 			return false
 		}
 	} else {
 		// also process the blacklist if in blacklist mode, but an empty blacklist is OK so we do not return false
-		settings.fediact_blacklist = processDomainList(settings.fediact_blacklist)
+		tmpSettings.blacklist = processDomainList(settings.fediact_blacklist)
 	}
 	return true
 }
@@ -1293,8 +1303,8 @@ function checkSettings() {
 async function checkSite() {
 	// is this site on our home instance?
 	if (location.hostname == settings.fediact_homeinstance) {
-		fedireply = getUrlParameter("fedireply")
-		if (!fedireply) {
+		tmpSettings.fedireply = getUrlParameter("fedireply")
+		if (!tmpSettings.fedireply) {
 			log("Current site is your home instance.")
 			return false
 		}
@@ -1302,13 +1312,13 @@ async function checkSite() {
 	// are we in whitelist mode?
 	if (settings.fediact_mode == "whitelist") {
 		// if so, check if site is NOT in whitelist
-		if ($.inArray(location.hostname, settings.fediact_whitelist) < 0) {
+		if ($.inArray(location.hostname, tmpSettings.whitelist) < 0) {
 			log("Current site is not in whitelist.")
 			return false
 		}
 	} else {
 		// otherwise we are in blacklist mode, so check if site is on blacklist
-		if ($.inArray(location.hostname, settings.fediact_blacklist) > -1) {
+		if ($.inArray(location.hostname, tmpSettings.blacklist) > -1) {
 			log("Current site is in blacklist.")
 			return false
 		}
@@ -1322,9 +1332,9 @@ async function checkSite() {
 		if (uri) {
 			if (uri.startsWith("http")) {
 				uri = new URL(uri)
-				settings.fediact_exturi = uri.hostname
+				tmpSettings.exturi = uri.hostname
 			} else {
-				settings.fediact_exturi = uri
+				tmpSettings.exturi = uri
 			}
 			// at this point, we know that it's mastodon and the background processor should start running
 			if (!backgroundProcessor()) {
@@ -1332,7 +1342,7 @@ async function checkSite() {
 				return false
 			}
 			// if option is enabled, check if logged in on that instance and stop
-			if (!settings.fediact_runifloggedin) {
+			if (!settings.fediact_runifloggedin && !tmpSettings.fedireply) {
 				if (await isLoggedIn()) {
 					log("Already logged in to this external instance.")
 					return false
@@ -1352,9 +1362,9 @@ async function backgroundProcessor() {
 	chrome.runtime.onMessage.addListener(async function(request, sender, sendResponse) {
 		if (request.urlchanged) {
 			// reset already processed elements
-			processed = []
-			processedFollow = []
-			isProcessing = []
+			tmpSettings.processed = []
+			tmpSettings.processedFollow = []
+			tmpSettings.isProcessing = []
 			// rerun getSettings to keep mutes/blocks up to date while not reloading the page
 			if (!await getSettings()) {
 				// but reload if settings are invalid
@@ -1386,6 +1396,7 @@ function getSettings() {
 			resolve(false)
 		}
 		if (settings) {
+			console.log(settings)
 			// validate settings
 			if (checkSettings()) {
 				resolve(true)
@@ -1398,13 +1409,21 @@ function getSettings() {
 	})
 }
 
+async function updateSettings() {
+	await (browser || chrome).storage.local.set(settings)
+	if (!await getSettings()) {
+		// but reload if settings are invalid
+		location.reload()
+	}
+}
+
 // run wrapper
 async function run() {
 	// validate settings
 	if (await getSettings()) {
 		// check site (if and which scripts should run)
 		if (await checkSite()) {
-			if (fedireply) {
+			if (tmpSettings.fedireply) {
 				processReply()
 			} else {
 				processFollow()
