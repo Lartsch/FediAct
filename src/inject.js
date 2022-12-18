@@ -19,13 +19,7 @@ const domainBlocksApi = "/api/v1/domain_blocks"
 const pollsApi = "/api/v1/polls"
 const apiDelay = 500
 const maxTootCache = 200
-const modalHtml = `
-<div style="position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgb(0,0,0); background-color: rgba(0,0,0,0.4); margin: 0; padding: 0;" class="fedimodal">
-	<div style="background-color: #494949; border: 1px solid #888; width: 50%; max-width: 300px; left: 50%; top: 50%; transform: translate(-50%, -50%); position: absolute; margin: 0; padding: 0;" class="fedimodal-content">
-		<ul style="width: 100%; margin: 0; padding: 0;">
-		</ul>
-	</div>
-</div>`
+const modalHtml = '<div class="fediactmodal"><div class="fediactmodalinner"><ul class="fediactmodallist"></ul></div></div>'
 const timeout = 15000
 
 // settings keys with defauls
@@ -551,17 +545,17 @@ function showModal(settings) {
 	var appendTo = $(baseEl).find("ul")
 	for (const entry of settings) {
 		var nameUppercase = entry[0].charAt(0).toUpperCase() + entry[0].slice(1);
-		var append = "<li style='cursor: pointer; width: 100%; padding: 5px 10px; box-sizing: border-box;'><a style='font-size: 16px; cursor: pointer; text-decoration: none; color: white;' fediaction='" + entry[0] + "' fediid='" + entry[1] + "'>" + nameUppercase + "</a></li>"
+		var append = "<li class='fediactmodalitem'><a class='fediactmodallink' fediactaction='" + entry[0] + "' fediactid='" + entry[1] + "'>" + nameUppercase + "</a></li>"
 		$(appendTo).append($(append))
 	}
 	$("body").append($(baseEl))
 	$("body").on("click", function(e) {
-		if ($(e.target).is(".fedimodal li, .fedimodal li a")) {
-			if ($(e.target).is(".fedimodal li")) {
+		if ($(e.target).is(".fediactmodal li, .fediactmodal li a")) {
+			if ($(e.target).is(".fediactmodal li")) {
 				e.target = $(e.target).find("a")
 			}
-			var action = $(e.target).attr("fediaction")
-			var id = $(e.target).attr("fediid")
+			var action = $(e.target).attr("fediactaction")
+			var id = $(e.target).attr("fediactid")
 			var done = executeAction(id, action, null)
 			if (done) {
 				$(baseEl).remove()
@@ -773,7 +767,7 @@ async function processToots() {
 			if (!$(favButton).length) {
 				favButton = $(el).find("a.icon-button:has(i.fa-star), a.detailed-status__link:has(i.fa-star)")
 			}
-			$("<span class='fediactprocessing' style='color: white; padding-right: 10px; padding-left: 10px'>Resolving...</span>").insertAfter($(favButton))
+			$("<span class='fediactprocessing'>Resolving...</span>").insertAfter($(favButton))
 			var boostButton = $(el).find("button:has(i.fa-retweet)").first()
 			if (!$(boostButton).length) {
 				boostButton = $(el).find("a.icon-button:has(i.fa-retweet), a.detailed-status__link:has(i.fa-retweet)")
@@ -798,7 +792,7 @@ async function processToots() {
 					var result = await executeAction(id, "vote", pollData)
 					if (result) {
 						$(e.currentTarget).hide()
-						$(pollDiv).find("ul").replaceWith("<p style='font-style: italic'><a style='font-weight:bold; color:orange' href='" + redirect + "' target='" + settings.fediact_target + "'>View the results</a> on your home instance.<p>")
+						$(pollDiv).find("ul").replaceWith("<p class='fediactvoted'><a href='" + redirect + "' target='" + settings.fediact_target + "'>View the results</a> on your home instance.<p>")
 						if (cacheIndex) {
 							tmpSettings.processed[cacheIndex][10] = true
 							tmpSettings.processed[cacheIndex][11] = true
@@ -862,7 +856,7 @@ async function processToots() {
 				// is the toot unresolved?
 				if (!tootdata[1]) {
 					// yes, then add the Unresolved indicator
-					$("<span class='fediactunresolved' style='color: orange; padding-right: 10px; padding-left: 10px'>Unresolved</span>").insertAfter($(favButton))
+					$("<span class='fediactunresolved'>Unresolved</span>").insertAfter($(favButton))
 				} else {
 					// otherwise start processing button styles (if enabled OR if the toot was already interacted with, to restore the state while still on the same page)
 					// first enable the bookmark button (is disabled on external instances)
@@ -890,7 +884,7 @@ async function processToots() {
 					}
 					if (tootdata[10]) {
 						$(voteButton).hide()
-						$(voteButton).closest("div.poll").find("ul").replaceWith("<p style='font-style: italic'><a style='font-weight:bold; color:orange' href='" + tootdata[7] + "' target='" + settings.fediact_target + "'>View the results</a> on your home instance.<p>")
+						$(voteButton).closest("div.poll").find("ul").replaceWith("<p class='fediactvoted'><a href='" + tootdata[7] + "' target='" + settings.fediact_target + "'>View the results</a> on your home instance.<p>")
 					}
 				}
 			}
@@ -1173,6 +1167,7 @@ async function processFollow() {
 		// do we have a full handle?
 		if (fullHandle) {
 			if (!tmpSettings.processedFollow.includes(fullHandle)) {
+				$("<span class='fediactprocessing'>Resolving...&nbsp;&nbsp;</span>").insertBefore($(el))
 				// yes, so resolve it to a user id on our homeinstance
 				var resolvedHandle = await resolveHandleToHome(fullHandle)
 				if (resolvedHandle) {
@@ -1245,6 +1240,7 @@ async function processFollow() {
 				} else {
 					log("Could not resolve user home ID.")
 				}
+				$(el).siblings(".fediactprocessing").remove()
 			}
 		}
 	}

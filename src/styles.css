@@ -1,3 +1,75 @@
+/*
+    Normal stylings
+*/
+
+.fediactmodal {
+    position: fixed;
+    z-index: 99999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+    margin: 0;
+    padding: 0;
+}
+
+.fediactmodalinner {
+    background-color: #494949;
+	border: 1px solid #888;
+	width: 50%;
+	max-width: 300px;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	position: absolute;
+	margin: 0;
+	padding: 0;
+}
+
+.fediactmodallist {
+    width: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+.fediactmodalitem {
+    cursor: pointer;
+	width: 100%;
+	padding: 5px 10px;
+	box-sizing: border-box;
+}
+
+.fediactmodallink {
+    font-size: 16px;
+	cursor: pointer;
+	text-decoration: none;
+	color: white;
+}
+
+.fediactprocessing {
+    color: white;
+	padding-right: 10px;
+	padding-left: 10px
+}
+
+.fediactunresolved {
+    color: orange;
+    padding-right: 10px;
+    padding-left: 10px
+}
+
+.fediactvoted {
+    font-style: italic;
+}
+
+.fediactvoted > a {
+    font-weight: bold;
+    color: orange
+}
+
+
 /*  
     We insert these styles for the DOMNodeAppeared function as separate stylesheet (see manifest) to fix
     Firefox blocking script-inserted <style> elements due to the site's CSP (long time bug)

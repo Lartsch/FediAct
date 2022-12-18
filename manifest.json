@@ -13,7 +13,7 @@
         "src/inject.js"
       ],
       "css": [
-        "src/nodeinserted.min.css"
+        "src/styles.min.css"
       ],
       "run_at": "document_start"
     }
