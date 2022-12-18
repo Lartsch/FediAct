@@ -7,7 +7,7 @@ const profileNamePaths = ["div.account__header__tabs__name small", "div.public-a
 const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/
 const handleExtractUrlRegex = /^(?<domain>https?:\/\/(?:\.?[a-z0-9-]+)+(?:\.[a-z]+){1})?\/?@(?<handle>\w+)(?:@(?<handledomain>(?:[\w-]+\.)+?\w+))?(?:\/(?<tootid>\d+))?\/?$/
 const handleExtractUriRegex = /^(?<domain>https?:\/\/(?:\.?[a-z0-9-]+)+(?:\.[a-z]+){1})(?:\/users\/)(?<handle>\w+)(?:(?:\/statuses\/)(?<tootid>\d+))?\/?$/
-const enableConsoleLog = false
+const enableConsoleLog = true
 const logPrepend = "[FediAct]"
 const instanceApi = "/api/v1/instance"
 const statusApi = "/api/v1/statuses"
@@ -157,7 +157,7 @@ async function makeRequest(method, url, extraheaders, jsonbody) {
 		// open it with the method and url specified
         xhr.open(method, url)
 		// set timeout
-        xhr.timeout = 1000
+        xhr.timeout = 5000
 		// set extra headers if any were given
 		if (extraheaders) {
 			for (var key in extraheaders) {
@@ -174,6 +174,9 @@ async function makeRequest(method, url, extraheaders, jsonbody) {
                 resolve(false)
             }
         }
+		xhr.ontimeout = function() {
+			resolve(false)
+		}
 		// on any error, resolve false
 		xhr.onerror = function() {
 			log("Request to " + url + " failed.")
