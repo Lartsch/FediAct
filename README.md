@@ -12,7 +12,7 @@ A Chrome/Firefox extension that simplifies follow and post interactions on Masto
 
 **Supported browsers**:
 - All up-to-date Chromium browsers, including Kiwi browser on Android
-- Up-to-date Firefox, including Firefox Nightly on Android
+- Up-to-date Firefox (v107+), including Firefox Nightly on Android
 
 **Important notes**:
 - All data is processed locally only
