@@ -67,11 +67,11 @@ If you have set your home instance correctly, you can now interact on other Mast
 **Other**
 
 - Actions: Set if actions (following, boosting, etc.) should be performed when clicking or double clicking (default: on)
-    - _**Usage tip:**_ Disable this if you only want redirects on double click or when replying without automatically performing the action
+> **Usage tip:** Disable this if you only want redirects on double click or when replying without automatically performing the action
 - Hide muted/blocked: If enabled, your blocked/muted users/instances will be synched every 60 seconds and all matching toots, boosts and toots with mentions will be hidden (default: off)
-  - _**Please note:**_ There are cases where hiding can fail and this is disabled by default because it can decrease performance
+> **Note:** There are cases where hiding can fail and this is disabled by default because it can decrease performance
 - API delay: If enabled, there can only be one API request to your home instance per 500ms (default: on)
-  - _**Please note:**_ Disabling this will likely result in the extension not working because your home instance uses rate limiting if too many requests come from your IP. 500ms has proven to prevent error 429 for the instances I have tested.
+> **Note:** Disabling this will likely result in the extension not working because your home instance uses rate limiting if too many requests come from your IP. 500ms has proven to prevent error 429 for the instances I have tested.
 
 **Mode**
 - Run if logged in: Enable FediAct on external instances if you are logged in there as well (default: off)
