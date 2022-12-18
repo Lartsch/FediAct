@@ -1125,9 +1125,6 @@ async function processFollow() {
 		var fullHandle
 		var action = "follow"
 		var moreButton = $(el).siblings("button:has(i.fa-ellipsis-fw,i.fa-ellipsis-v,i.fa-ellipsis-h)")
-		if ($(moreButton).length) {
-			$(moreButton).removeClass("disabled").removeAttr("disabled")
-		}
 		// wrapper for follow/unfollow action
 		async function execFollow(id) {
 			if (settings.fediact_autoaction) {
@@ -1172,6 +1169,9 @@ async function processFollow() {
 				var resolvedHandle = await resolveHandleToHome(fullHandle)
 				if (resolvedHandle) {
 					tmpSettings.processedFollow.push(fullHandle)
+					if ($(moreButton).length) {
+						$(moreButton).removeClass("disabled").removeAttr("disabled")
+					}
 					var domainsplit = fullHandle.split("@")
 					var domain = domainsplit.pop() || domainsplit.pop()
 					// successfully resolved
