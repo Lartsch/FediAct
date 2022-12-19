@@ -77,6 +77,10 @@
     color: green;
 }
 
+.fediactrunning.fediv3 {
+    padding-right: 10px;
+}
+
 
 /*  
     We insert these styles for the DOMNodeAppeared function as separate stylesheet (see manifest) to fix
