@@ -3,7 +3,7 @@ A Chrome/Firefox extension that simplifies follow and post interactions on Masto
 
 **Features**:
 - Supports Mastodon v3 + v4 (some features v4 only)
-- Follow, boost, bookmark, reply, favourite, vote polls and mute/block on external instances while only being logged in to your home instance
+- Follow, boost, bookmark, reply, fav, vote polls and mute/block on external instances while only being logged in to your home instance
 - Show following status and toot status (boosted, faved, bookmarked) on external instances
 - Single click to execute action only, double click to redirect to content on home instance
 - Reply button on external instances always redirects to home instance and enters reply-mode
@@ -15,8 +15,8 @@ A Chrome/Firefox extension that simplifies follow and post interactions on Masto
 - Up-to-date Firefox (v107+), including Firefox Nightly on Android, Orion on iOS
 
 **Important notes**:
-- All data is processed locally only
-- Performance depends on the performance (and rate limiting) of your home instance and to some degree of the external instance you are browsing (read more [below](#additional-notes))
+- Data is processed locally only
+- Performance depends on your home instance and to some degree on the external instance you are browsing (read more [below](#additional-notes))
 - Some toots cannot be resolved to your home (in cases where searching for the post manually would not work either)
 
 ## Navigation
