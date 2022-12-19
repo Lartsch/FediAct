@@ -38,7 +38,7 @@ function popupTasks() {
 	// get all current values and write them to the local storage
 	async function updateSettings(){
 		// update settings values
-		settings.fediact_homeinstance = $("input#homeinstance").val().trim()
+		settings.fediact_homeinstance = $("input#homeinstance").val().trim().toLowerCase()
 		settings.fediact_alert = $("input#alert").is(':checked')
 		settings.fediact_mode = $("select#mode").val()
 		settings.fediact_whitelist = $("textarea#whitelist_content").val()
