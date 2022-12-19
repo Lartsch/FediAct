@@ -10,7 +10,7 @@
       ],
       "js": [
         "src/lib/jquery-3.6.1.min.js",
-        "src/inject.js"
+        "src/inject.min.js"
       ],
       "css": [
         "src/styles.min.css"
