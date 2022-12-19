@@ -47,7 +47,7 @@ input[type="text"] {
 input[type="text"]:invalid {
 	border: 1px solid rgba(223,64,90,.5);
 }
-input[type="submit"] {
+section#submit button {
     border-radius: 4px;
     background: #595aff;
     border: none;

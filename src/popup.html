@@ -3,7 +3,7 @@
 <head>
 	<link rel="stylesheet" href="popup.css">
 	<script src="lib/jquery-3.6.1.min.js"></script>
-	<script src="popup.min.js"></script>
+	<script src="popup.js"></script>
 	<title></title>
 </head>
 <body>
@@ -53,12 +53,12 @@
 				<textarea id="whitelist_content" name="whitelist_content" placeholder="example.social example2.social"></textarea>
 			</div>
 		</section>	
-		<section id="submit">
-			<input type="submit" value="Submit"> <span id="indicator" style="display:none">Settings saved!</span>
-		</section>
 	</form>
+	<section id="submit">
+		<button type="button">Save...</button>
+	</section>
 </div>
-<footer>
+<footer>	
 	<span>Information and help at <a target="_blank" href="https://github.com/lartsch/FediAct">github.com/lartsch/FediAct</a></span>
 </footer>
 </body>

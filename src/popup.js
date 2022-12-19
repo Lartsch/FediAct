@@ -30,9 +30,10 @@ function log(text) {
 function popupTasks() {
 	// function to show confirmation when settings were updated successfully
 	function showConfirmation() {
-		$("span#indicator").show()
+		let saveButton = $("section#submit button");
+		saveButton.text("Settings saved!")
 		setTimeout(function() {
-			$("span#indicator").hide()
+			saveButton.text("Save...")
 		}, 1500)
 	}
 	// get all current values and write them to the local storage
@@ -94,7 +95,7 @@ function popupTasks() {
 		// restore the form values
 		restoreForm()
 		// perform storage actions on form submit
-		$("form#fediact-settings").on('submit', async function(e){
+		$("#submit button").click(async function(e){
 			// prevent default
 			e.preventDefault()
 			// update settings
