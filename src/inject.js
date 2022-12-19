@@ -575,9 +575,11 @@ function showModal(settings) {
 function addFediElements() {
 	if (!$(".fediactrunning").length) {
 		if ($("div.ui__header").is(":visible")) {
+			$("a.ui__header__logo").remove()
 			$("div.ui__header__links").prepend("<span class='fediactrunning'>FediAct running</span>")
 			$("div.ui__header__links").append("<a target='" + settings.fediact_target + "' href='https://" + settings.fediact_homeinstance + "' class='button button-tertiary fediactgohome'><span>Go home</span></a>")
 		} else if ($("nav.header").length) {
+			$("nav.header a.brand").remove()
 			$("nav.header div.nav-right").prepend("<span class='fediactrunning fediv3'>FediAct running</span>")
 			$("nav.header div.nav-right").append("<a target='" + settings.fediact_target + "' class='webapp-btn nav-link nav-button fediactgohome' href='https://" + settings.fediact_homeinstance + "'>Go home</a>")
 		} else if ($("div.sign-in-banner").length) {
