@@ -1,0 +1,15 @@
+div#mhi-wrapper {
+	min-width: 350px;
+	font-size: 12px;
+	padding: 10px
+}
+.hide {
+	display: none;
+}
+label.pad {
+	margin-bottom: 4px;
+	display: block;
+}
+p {
+	margin-bottom: 5px;
+}
