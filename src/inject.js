@@ -574,18 +574,7 @@ function showModal(settings) {
 
 function addFediElements() {
 	if (!$(".fediactrunning").length) {
-		if ($("div.ui__header").is(":visible")) {
-			$("a.ui__header__logo").remove()
-			$("div.ui__header__links").prepend("<span class='fediactrunning'>FediAct running</span>")
-			$("div.ui__header__links").append("<a target='" + settings.fediact_target + "' href='https://" + settings.fediact_homeinstance + "' class='button button-tertiary fediactgohome'><span>Go home</span></a>")
-		} else if ($("nav.header").length) {
-			$("nav.header a.brand").remove()
-			$("nav.header div.nav-right").prepend("<span class='fediactrunning fediv3'>FediAct running</span>")
-			$("nav.header div.nav-right").append("<a target='" + settings.fediact_target + "' class='webapp-btn nav-link nav-button fediactgohome' href='https://" + settings.fediact_homeinstance + "'>Go home</a>")
-		} else if ($("div.sign-in-banner").length) {
-			$("div.sign-in-banner").append("<a target='" + settings.fediact_target + "' href='https://" + settings.fediact_homeinstance + "' class='button button--block button-tertiary fediactgohome'><span>Go home</span></a>")
-			$("div.sign-in-banner").append("<span class='fediactrunning'>FediAct running</p>")
-		}
+		$("body").append("<div class='fediactrunning'><span>FediAct running</span> - <a target='" + settings.fediact_target + "' href='https://" + settings.fediact_homeinstance + "'>Go home</a></div>")
 	}
 }
 
@@ -1419,7 +1408,6 @@ async function backgroundProcessor() {
 			tmpSettings.processedFollow = []
 			tmpSettings.isProcessing = []
 			$(".fediactrunning").remove()
-			$(".fediactgohome").remove()
 			// rerun getSettings to keep mutes/blocks up to date while not reloading the page
 			if (!await getSettings()) {
 				// but reload if settings are invalid
