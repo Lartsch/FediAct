@@ -39,6 +39,7 @@ input, select, textarea {
 }
 label { 
 	display: block; 
+	line-height: 1.25rem;
 }
 input[type="text"] {
 	color: #595aff;
@@ -66,11 +67,12 @@ div#mhi-wrapper {
 #mhi-wrapper section { 
 	margin-bottom: 0.2125rem;
 }
+#server-specific textarea {
+	margin-top: 0.2125rem;
+    width: 98%;
+}
 
 .hide {
 	display: none;
 }
-label.pad {
-	margin-bottom: 4px;
-	display: block;
-}
+

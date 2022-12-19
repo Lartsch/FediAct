@@ -14,44 +14,53 @@
 	<form id="fediact-settings" name="fediact-settings">
 		<section id="instance">
 			<h2>Your home instance</h2>
-			<label for="homeinstance">Instance domain <input type="text" id="homeinstance" name="homeinstance" placeholder="example.social" required></label>		 	
+			<label for="homeinstance"><input type="text" id="homeinstance" name="homeinstance" placeholder="example.social" required></label>		 	
+			<span><em>Make sure you are logged in to this instance.</em></span>
+			
 		</section>	
 		<section id="redirect">			
 			<h2>Redirect behavior</h2>
-			<label for="redirects"><input type="checkbox" id="redirects" name="redirects"> Enable</label>
-			<label for="alert"><input type="checkbox" id="alert" name="alert"> Prompt</label>
-			<label for="target">Open in...</label> <select name="target" id="target" selected="_blank">
-				<option id="target_blank" value="_blank">
-					New tab
-				</option>
-				<option id="target_self" value="_self">
-					Same tab
-				</option>
-			</select>
+			<label for="redirects"><input type="checkbox" id="redirects" name="redirects"> Redirect replies and double-clicks to my home instance</label>
+			<label for="alert"><input type="checkbox" id="alert" name="alert"> Prompt before redirecting?</label>
+			<label for="target">Open redirects in...  
+				<select name="target" id="target" selected="_blank">
+					<option id="target_blank" value="_blank">
+						New tab
+					</option>
+					<option id="target_self" value="_self">
+						Same tab
+					</option>
+				</select>
+			</label>
 		</section>
 		<section id="other">
 			<h2>Other settings</h2>
-			<label for="autoaction"><input type="checkbox" id="autoaction" name="autoaction"> Actions</label>
-			<label for="hidemuted"><input type="checkbox" id="hidemuted" name="hidemuted">  Hide muted/blocked</label>
+			<label for="autoaction"><input type="checkbox" id="autoaction" name="autoaction"> Perform actions (e.g. follows) from my home instance</label>
+			<label for="hidemuted"><input type="checkbox" id="hidemuted" name="hidemuted">  Hide muted/blocked from my home instance</label>
 			<label for="delay"><input type="checkbox" id="delay" name="delay"> API delay</label>
 		</section>
 		<section id="mode">	
 			<h2>Where extension runs</h2>
-			<label for="runifloggedin"><input type="checkbox" id="runifloggedin" name="runifloggedin"> Run if logged in</label>
-			<label for="mode">Use...</label> <select name="mode" id="mode" selected="blacklist">
-				<option id="blacklist" value="blacklist">
-					Blacklist
-				</option>
-				<option id="whitelist" value="whitelist">
-					Whitelist
-				</option>
-			</select>
-			<div class="hide" id="blacklist_input">
-				<textarea id="blacklist_content" name="blacklist_content" placeholder="example.social example2.social"></textarea>
-			</div>
-			<div class="hide" id="whitelist_input">
-				<textarea id="whitelist_content" name="whitelist_content" placeholder="example.social example2.social"></textarea>
-			</div>
+			<label for="runifloggedin"><input type="checkbox" id="runifloggedin" name="runifloggedin"> Also enable on instances where I'm logged in</label>
+		</section>
+		<section id="server-specific">	
+			<h2>Server-specific settings</h2>
+			<label for="mode">Mode
+				<select name="mode" id="mode" selected="blacklist">
+					<option id="blacklist" value="blacklist">
+						Never run on these servers
+					</option>
+					<option id="whitelist" value="whitelist">
+						Only run on these servers
+					</option>
+				</select>
+				<div class="hide" id="blacklist_input">
+					<textarea id="blacklist_content" name="blacklist_content" placeholder="example.social&#13;&#10;example2.social"></textarea>
+				</div>
+				<div class="hide" id="whitelist_input">
+					<textarea id="whitelist_content" name="whitelist_content" placeholder="example.social&#13;&#10;example2.social"></textarea>
+				</div>
+			</label>
 		</section>	
 	</form>
 	<section id="submit">
