@@ -1,51 +1,65 @@
 <!DOCTYPE html>
 <html>
-  <head>
-  	<link rel="stylesheet" href="popup.css">
+<head>
+	<link rel="stylesheet" href="popup.css">
 	<script src="lib/jquery-3.6.1.min.js"></script>
 	<script src="popup.min.js"></script>
-  </head>
-  <body>
-   <div id="mhi-wrapper">
-	<form id="fediact-settings">
-		<p><b>Home instance</b></p>
-		<label class="pad" for="homeinstance">Make sure you are logged in to the instance you set here:</label>
-		<input type="text" id="homeinstance" name="homeinstance" placeholder="example.social"><br>
-		<p><b>Redirect settings</b></p>
-		<input type="checkbox" id="redirects" name="redirects">
-		<label for="redirects">Enable</label><br>
-		<input type="checkbox" id="alert" name="alert">
-		<label for="alert">Prompt</label><br>
-		<label style="padding-right: 5px" for="target">Open in...</label>
-		<select style="margin-top: 5px;" name="target" id="target" selected="_blank">
-			<option id="target_blank" value="_blank">New tab</option>
-			<option id="target_self" value="_self">Same tab</option>
-		</select><br>
-		<p><b>Other</b></p>
-		<input type="checkbox" id="autoaction" name="autoaction">
-		<label for="autoaction">Actions</label><br>
-		<input type="checkbox" id="hidemuted" name="hidemuted">
-		<label for="hidemuted">Hide muted/blocked</label><br>
-		<input type="checkbox" id="delay" name="delay">
-		<label for="delay">API delay</label><br>
-		<p><b>Mode</b></p>
-		<input type="checkbox" id="runifloggedin" name="runifloggedin">
-		<label for="runifloggedin">Run if logged in</label><br>
-		<label style="padding-right: 5px" for="mode">Use...</label>
-		<select style="margin-top: 5px;" name="mode" id="mode" selected="blacklist">
-			<option id="blacklist" value="blacklist">Blacklist</option>
-			<option id="whitelist" value="whitelist">Whitelist</option>
-		</select><br>
-		<div style="margin-top: 5px;" class="hide" id="blacklist_input">
-			<textarea id="blacklist_content" name="blacklist_content" placeholder="example.social&#10;example2.social"></textarea><br>
-		</div>
-		<div style="margin-top: 5px;" class="hide" id="whitelist_input">
-			<textarea id="whitelist_content" name="whitelist_content" placeholder="example.social&#10;example2.social"></textarea><br>
-		</div><br>
-		<input type="submit" value="Submit">
-		<span id="indicator" style="display:none">Settings saved!</span>
-		<br><br><span>Information and help at <a target="_blank" href="https://github.com/lartsch/FediAct">github.com/lartsch/FediAct</a></span><br>
+	<title></title>
+</head>
+<body>
+<header>
+	<h1>FediAct settings</h1>
+</header>
+<div id="mhi-wrapper">
+	<form id="fediact-settings" name="fediact-settings">
+		<section id="instance">
+			<h2>Your home instance</h2>
+			<label for="homeinstance">Instance domain <input type="text" id="homeinstance" name="homeinstance" placeholder="example.social" required></label>		 	
+		</section>	
+		<section id="redirect">			
+			<h2>Redirect behavior</h2>
+			<label for="redirects"><input type="checkbox" id="redirects" name="redirects"> Enable</label>
+			<label for="alert"><input type="checkbox" id="alert" name="alert"> Prompt</label>
+			<label for="target">Open in...</label> <select name="target" id="target" selected="_blank">
+				<option id="target_blank" value="_blank">
+					New tab
+				</option>
+				<option id="target_self" value="_self">
+					Same tab
+				</option>
+			</select>
+		</section>
+		<section id="other">
+			<h2>Other settings</h2>
+			<label for="autoaction"><input type="checkbox" id="autoaction" name="autoaction"> Actions</label>
+			<label for="hidemuted"><input type="checkbox" id="hidemuted" name="hidemuted">  Hide muted/blocked</label>
+			<label for="delay"><input type="checkbox" id="delay" name="delay"> API delay</label>
+		</section>
+		<section id="mode">	
+			<h2>Where extension runs</h2>
+			<label for="runifloggedin"><input type="checkbox" id="runifloggedin" name="runifloggedin"> Run if logged in</label>
+			<label for="mode">Use...</label> <select name="mode" id="mode" selected="blacklist">
+				<option id="blacklist" value="blacklist">
+					Blacklist
+				</option>
+				<option id="whitelist" value="whitelist">
+					Whitelist
+				</option>
+			</select>
+			<div class="hide" id="blacklist_input">
+				<textarea id="blacklist_content" name="blacklist_content" placeholder="example.social example2.social"></textarea>
+			</div>
+			<div class="hide" id="whitelist_input">
+				<textarea id="whitelist_content" name="whitelist_content" placeholder="example.social example2.social"></textarea>
+			</div>
+		</section>	
+		<section id="submit">
+			<input type="submit" value="Submit"> <span id="indicator" style="display:none">Settings saved!</span>
+		</section>
 	</form>
-   </div>
-  </body>
+</div>
+<footer>
+	<span>Information and help at <a target="_blank" href="https://github.com/lartsch/FediAct">github.com/lartsch/FediAct</a></span>
+</footer>
+</body>
 </html>
