@@ -12,7 +12,7 @@ A Chrome/Firefox extension that simplifies follow and post interactions on Masto
 
 **Supported browsers**:
 - All up-to-date Chromium browsers, including Kiwi and Yandex browsers on Android
-- Up-to-date Firefox (v107+), including Firefox Nightly on Android, Orion on iOS
+- Up-to-date Firefox (v107+), including Firefox Nightly on Android, Orion on iOS (untested)
 
 **Important notes**:
 - Data is processed locally only
@@ -39,7 +39,7 @@ A Chrome/Firefox extension that simplifies follow and post interactions on Masto
 and other Chromium browsers
 
 [<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fediact.svg?label=%20%20">][link-firefox]  
-including Nightly for Android, Orion on iOS
+including Nightly for Android, Orion on iOS (untested)
 
 > **Note**
 > 
@@ -87,7 +87,7 @@ Yes! There are three options that I am aware of: Kiwi Browser (Chromium with add
 
 **Can I use this on iOS?**
 
-There is only one way to use FediAct on iOS: [Orion Browser](https://apps.apple.com/gb/app/orion-browser-by-kagi/id1484498200). As of now, this addon does **not** support Safari. Safari support will not happen at this time since Apple wants 99$ per year for the [Developer Program membership](https://developer.apple.com/support/compare-memberships), which is a requirement.
+There is only one **untested** way to use FediAct on iOS: [Orion Browser](https://apps.apple.com/gb/app/orion-browser-by-kagi/id1484498200). I can not test it myself as I own no Apple devices and this is not guaranteed to work - I can't give support for this. As of now, this addon does **not** support Safari. Safari support will not happen at this time since Apple wants 99$ per year for the [Developer Program membership](https://developer.apple.com/support/compare-memberships), which is a requirement.
 
 **Can you add feature XY?**
 
