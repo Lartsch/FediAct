@@ -572,6 +572,18 @@ function showModal(settings) {
 	})
 }
 
+function addFediElements() {
+	if (!$(".fediactrunning").length) {
+		if ($("div.ui__header").is(":visible")) {
+			$("div.ui__header__links").prepend("<span class='fediactrunning'>FediAct running&nbsp;&nbsp;</span>")
+		} else if ($("nav.header").length) {
+			$("nav.header div.nav-right").prepend("<span class='fediactrunning'>FediAct running&nbsp;&nbsp;</span>")
+		} else if ($("div.sign-in-banner").length) {
+			$("div.sign-in-banner").append("<span class='fediactrunning'>FediAct running</p>")
+		}
+	}
+}
+
 // trigger the reply button click - will only run when we are on a home instance url with fedireply parameter
 async function processReply() {
 	// wait for the detailed status action bar to appear
@@ -744,6 +756,7 @@ async function processToots() {
 	}
 	// main function to process each detected toot element
 	async function process(el) {
+		addFediElements()
 		// extra step for detailed status elements to select the correct parent
 		if ($(el).is("div.detailed-status") && $(el).closest("div.focusable").length) {
 			el = $(el).closest("div.focusable")
@@ -1126,10 +1139,11 @@ async function processToots() {
 	})
 }
 
-// main function to listen for the follow button pressed and open a new tab with the home instance
-async function processFollow() {
+// main function to process profile views / follow buttons
+async function processProfile() {
 	// for mastodon v3 - v4 does not show follow buttons / account cards on /explore
 	async function process(el) {
+		addFediElements()
 		var fullHandle
 		var action = "follow"
 		var moreButton = $(el).siblings("button:has(i.fa-ellipsis-fw,i.fa-ellipsis-v,i.fa-ellipsis-h)")
@@ -1399,6 +1413,7 @@ async function backgroundProcessor() {
 			tmpSettings.processed = []
 			tmpSettings.processedFollow = []
 			tmpSettings.isProcessing = []
+			$(".fediactrunning").remove()
 			// rerun getSettings to keep mutes/blocks up to date while not reloading the page
 			if (!await getSettings()) {
 				// but reload if settings are invalid
@@ -1459,7 +1474,7 @@ async function run() {
 			if (tmpSettings.fedireply) {
 				processReply()
 			} else {
-				processFollow()
+				processProfile()
 				processToots()
 			}
 		} else {

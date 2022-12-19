@@ -69,6 +69,14 @@
     color: orange
 }
 
+.fediactrunning {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: green;
+}
+
 
 /*  
     We insert these styles for the DOMNodeAppeared function as separate stylesheet (see manifest) to fix
