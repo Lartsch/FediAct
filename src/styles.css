@@ -75,17 +75,17 @@
     right: 0;
     bottom: 0;
     background-color: rgba(0,0,0,0.7);
-    color: white;
+    color: white !important;
     margin: 0;
     padding: 10px 15px;
 }
 
 .fediactrunning span {
-    color: green;
+    color: green !important;
 }
 
 .fediactrunning a {
-    color: white;
+    color: white !important;
 }
 
 

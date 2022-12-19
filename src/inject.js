@@ -2,7 +2,7 @@
 // =-=-=-=-=-= CONSTANTS =-==-=-=-=
 // =-=-=-=-==-=-=-=-==-=-=-=-==-=-=
 
-const followButtonPaths = ["div.account__header button.logo-button","div.public-account-header a.logo-button","div.account-card a.logo-button","div.directory-card a.icon-button", "div.detailed-status a.logo-button", "button.remote-button", "div.account__header button.button--follow"]
+const followButtonPaths = ["div.account__header button.logo-button","div.public-account-header a.logo-button","div.account-card a.logo-button","div.directory-card a.icon-button", "div.directory__card a.icon-button", "div.detailed-status a.logo-button", "button.remote-button", "div.account__header button.button--follow"]
 const profileNamePaths = ["div.account__header__tabs__name small", "div.public-account-header__tabs__name small", "div.detailed-status span.display-name__account", "div.display-name > span", "a.user-screen-name", "div.profile-info-panel small"]
 const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/
 const handleExtractUrlRegex = /^(?<domain>https?:\/\/(?:\.?[a-z0-9-]+)+(?:\.[a-z]+){1})?\/?@(?<handle>\w+)(?:@(?<handledomain>(?:[\w-]+\.)+?\w+))?(?:\/(?<tootid>\d+))?\/?$/
@@ -1138,7 +1138,7 @@ async function processProfile() {
 	// for mastodon v3 - v4 does not show follow buttons / account cards on /explore
 	async function process(el) {
 		addFediElements()
-		var fullHandle
+		var fullHandle, icon
 		var action = "follow"
 		var moreButton = $(el).siblings("button:has(i.fa-ellipsis-fw,i.fa-ellipsis-v,i.fa-ellipsis-h)")
 		// wrapper for follow/unfollow action
@@ -1148,12 +1148,24 @@ async function processProfile() {
 				var response = await executeAction(id, action, null)
 				// if action was successful, update button text and action value according to performed action
 				if (action == "follow" && response) {
-					$(el).text("Unfollow")
+					if ($(icon).length) {
+						$(icon).removeClass("fa-user-plus").addClass("fa-user")
+						$(el).append("-")
+						$(el).attr("title","Unfollow")
+					} else {
+						$(el).text("Unfollow")
+					}
 					action = "unfollow"
 					return true
 				// repeat for unfollow action
 				} else if (action == "unfollow" && response) {
-					$(el).text("Follow")
+					if ($(icon).length) {
+						$(icon).removeClass("fa-user").addClass("fa-user-plus")
+						$(el).contents().filter((_, node) => node.nodeType === 3).remove();
+						$(el).attr("title","Follow")
+					} else {
+						$(el).text("Follow")
+					}
 					action = "follow"
 					return true
 				}
@@ -1165,6 +1177,9 @@ async function processProfile() {
 		// for mastodon v3 explore page
 		if ($(el).closest("div.account-card").length) {
 			fullHandle = $(el).closest("div.account-card").find("div.display-name > span").text().trim()
+		} else if($(el).closest("div.directory__card").length) {
+			fullHandle = $(el).closest("div.directory__card").find("div.display-name > span").text().trim()
+			icon = $(el).find("i").first()
 		} else {
 			// for all other pages, where only one of the selection elements is present
 			for (const selector of profileNamePaths) {
@@ -1195,7 +1210,13 @@ async function processProfile() {
 					var isFollowing = await isFollowingHomeInstance([resolvedHandle[0]])
 					// update button text and action if already following
 					if (isFollowing[0]) {
-						$(el).text("Unfollow")
+						if ($(icon).length) {
+							$(icon).removeClass("fa-user-plus").addClass("fa-user")
+							$(el).append("-")
+							$(el).attr("title","Unfollow")
+						} else {
+							$(el).text("Unfollow")
+						}
 						action = "unfollow"
 					}
 					$(moreButton).on("click", function(e){
@@ -1240,12 +1261,21 @@ async function processProfile() {
 								clearTimeout(timer)
 								var done = await execFollow(resolvedHandle[0])
 								if (done) {
-									var saveText = $(el).text()
 									var redirectUrl = 'https://' + settings.fediact_homeinstance + '/@' + resolvedHandle[1]
-									$(el).text("Redirecting...")
+									if ($(icon).length) {
+										var classes = $(icon).attr("class")
+										$(icon).removeClass("fa-user").removeClass("fa-user-plus").addClass("fa-arrow-right")
+									} else {
+										var saveText = $(el).text()
+										$(el).text("Redirecting...")
+									}
 									setTimeout(function() {
 										redirectTo(redirectUrl)
-										$(el).text(saveText)
+										if ($(icon).length) {
+											$(icon).attr("class", classes)
+										} else {
+											$(el).text(saveText)
+										}
 									}, 1000)
 								} else {
 									log("Action failed.")
