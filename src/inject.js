@@ -550,22 +550,24 @@ function showModal(settings) {
 	}
 	$("body").append($(baseEl))
 	$("body").on("click", function(e) {
-		if ($(e.target).is(".fediactmodal li, .fediactmodal li a")) {
-			if ($(e.target).is(".fediactmodal li")) {
-				e.target = $(e.target).find("a")
-			}
-			var action = $(e.target).attr("fediactaction")
-			var id = $(e.target).attr("fediactid")
-			var done = executeAction(id, action, null)
-			if (done) {
+		if (e.originalEvent.isTrusted) {
+			if ($(e.target).is(".fediactmodal li, .fediactmodal li a")) {
+				if ($(e.target).is(".fediactmodal li")) {
+					e.target = $(e.target).find("a")
+				}
+				var action = $(e.target).attr("fediactaction")
+				var id = $(e.target).attr("fediactid")
+				var done = executeAction(id, action, null)
+				if (done) {
+					$(baseEl).remove()
+					$("body").off()
+				} else {
+					alert("Failed to " + action)
+				}
+			} else {
 				$(baseEl).remove()
 				$("body").off()
-			} else {
-				alert("Failed to " + action)
 			}
-		} else {
-			$(baseEl).remove()
-			$("body").off()
 		}
 	})
 }
@@ -897,30 +899,34 @@ async function processToots() {
 					// prevent default and immediate propagation
 					e.preventDefault()
 					e.stopImmediatePropagation()
-					// redirect to the resolved URL + fedireply parameter (so the extension can handle it after redirect)
-					redirectTo(tootdata[7]+"?fedireply")
+					if (e.originalEvent.isTrusted) {
+						// redirect to the resolved URL + fedireply parameter (so the extension can handle it after redirect)
+						redirectTo(tootdata[7]+"?fedireply")
+					}
 				})
 				$(moreButton).on("click", function(e){
 					// prevent default and immediate propagation
 					e.preventDefault()
 					e.stopImmediatePropagation()
-					var modalLinks = []
-					if (isBlocked(tootdata[1])) {
-						modalLinks.push(["unblock",tootdata[6]])
-					} else {
-						modalLinks.push(["block",tootdata[6]])
+					if (e.originalEvent.isTrusted) {
+						var modalLinks = []
+						if (isBlocked(tootdata[1])) {
+							modalLinks.push(["unblock",tootdata[6]])
+						} else {
+							modalLinks.push(["block",tootdata[6]])
+						}
+						if (isMuted(tootdata[1])) {
+							modalLinks.push(["unmute",tootdata[6]])
+						} else {
+							modalLinks.push(["mute",tootdata[6]])
+						}
+						if (isDomainBlocked(tootdata[1])) {
+							modalLinks.push(["domainunblock",domain])
+						} else {
+							modalLinks.push(["domainblock",domain])
+						}
+						showModal(modalLinks)
 					}
-					if (isMuted(tootdata[1])) {
-						modalLinks.push(["unmute",tootdata[6]])
-					} else {
-						modalLinks.push(["mute",tootdata[6]])
-					}
-					if (isDomainBlocked(tootdata[1])) {
-						modalLinks.push(["domainunblock",domain])
-					} else {
-						modalLinks.push(["domainblock",domain])
-					}
-					showModal(modalLinks)
 				})
 				// for all other buttons...
 				$([favButton, boostButton, bookmarkButton, voteButton]).each(function() {
@@ -938,12 +944,29 @@ async function processToots() {
 						// prevent default and immediate propagation
 						e.preventDefault()
 						e.stopImmediatePropagation()
-						// increase click counter
-						clicks++
-						// this will always run, but see below for double click handling
-						if (clicks == 1) {
-							timer = setTimeout(async function() {
-								if (isVote && !tootdata[10]) {
+						if (e.originalEvent.isTrusted) {
+							// increase click counter
+							clicks++
+							// this will always run, but see below for double click handling
+							if (clicks == 1) {
+								timer = setTimeout(async function() {
+									if (isVote && !tootdata[10]) {
+										var actionExecuted = pollAction(tootdata[9], tootdata[7], e)
+									} else {
+										// execute action on click and get result (fail/success)
+										var actionExecuted = await tootAction(tootdata[2], e)
+									}
+									if (!actionExecuted) {
+										log("Action failed.")
+									}
+									// reset clicks
+									clicks = 0
+								}, 350)
+							} else {
+								// if we get here, the element was clicked twice before the above timeout was over, so this is a double click
+								// reset the above timeout so it wont execute
+								clearTimeout(timer)
+								if (isVote) {
 									var actionExecuted = pollAction(tootdata[9], tootdata[7], e)
 								} else {
 									// execute action on click and get result (fail/success)
@@ -951,28 +974,13 @@ async function processToots() {
 								}
 								if (!actionExecuted) {
 									log("Action failed.")
+								} else {
+									// redirect to home instance with the resolved toot url
+									redirectTo(tootdata[7])
 								}
 								// reset clicks
 								clicks = 0
-							}, 350)
-						} else {
-							// if we get here, the element was clicked twice before the above timeout was over, so this is a double click
-							// reset the above timeout so it wont execute
-							clearTimeout(timer)
-							if (isVote) {
-								var actionExecuted = pollAction(tootdata[9], tootdata[7], e)
-							} else {
-								// execute action on click and get result (fail/success)
-								var actionExecuted = await tootAction(tootdata[2], e)
 							}
-							if (!actionExecuted) {
-								log("Action failed.")
-							} else {
-								// redirect to home instance with the resolved toot url
-								redirectTo(tootdata[7])
-							}
-							// reset clicks
-							clicks = 0
 						}
 					}).on("dblclick", function(e) {
 						// default dblclick event must be prevented
@@ -1186,23 +1194,25 @@ async function processFollow() {
 						// prevent default and immediate propagation
 						e.preventDefault()
 						e.stopImmediatePropagation()
-						var modalLinks = []
-						if (isBlocked(fullHandle)) {
-							modalLinks.push(["unblock",resolvedHandle[0]])
-						} else {
-							modalLinks.push(["block",resolvedHandle[0]])
+						if (e.originalEvent.isTrusted) {
+							var modalLinks = []
+							if (isBlocked(fullHandle)) {
+								modalLinks.push(["unblock",resolvedHandle[0]])
+							} else {
+								modalLinks.push(["block",resolvedHandle[0]])
+							}
+							if (isMuted(fullHandle)) {
+								modalLinks.push(["unmute",resolvedHandle[0]])
+							} else {
+								modalLinks.push(["mute",resolvedHandle[0]])
+							}
+							if (isDomainBlocked(fullHandle)) {
+								modalLinks.push(["domainunblock",domain])
+							} else {
+								modalLinks.push(["domainblock",domain])
+							}
+							showModal(modalLinks)
 						}
-						if (isMuted(fullHandle)) {
-							modalLinks.push(["unmute",resolvedHandle[0]])
-						} else {
-							modalLinks.push(["mute",resolvedHandle[0]])
-						}
-						if (isDomainBlocked(fullHandle)) {
-							modalLinks.push(["domainunblock",domain])
-						} else {
-							modalLinks.push(["domainblock",domain])
-						}
-						showModal(modalLinks)
 					})
 					// single and double click handling (see toot processing for explanation, is the same basically)
 					var clicks = 0
@@ -1211,27 +1221,29 @@ async function processFollow() {
 						// prevent default and immediate propagation
 						e.preventDefault()
 						e.stopImmediatePropagation()
-						clicks++
-						if (clicks == 1) {
-							timer = setTimeout(async function() {
-								execFollow(resolvedHandle[0])
-								clicks = 0
-							}, 350)
-						} else {
-							clearTimeout(timer)
-							var done = await execFollow(resolvedHandle[0])
-							if (done) {
-								var saveText = $(el).text()
-								var redirectUrl = 'https://' + settings.fediact_homeinstance + '/@' + resolvedHandle[1]
-								$(el).text("Redirecting...")
-								setTimeout(function() {
-									redirectTo(redirectUrl)
-									$(el).text(saveText)
-								}, 1000)
+						if (e.originalEvent.isTrusted) {
+							clicks++
+							if (clicks == 1) {
+								timer = setTimeout(async function() {
+									execFollow(resolvedHandle[0])
+									clicks = 0
+								}, 350)
 							} else {
-								log("Action failed.")
+								clearTimeout(timer)
+								var done = await execFollow(resolvedHandle[0])
+								if (done) {
+									var saveText = $(el).text()
+									var redirectUrl = 'https://' + settings.fediact_homeinstance + '/@' + resolvedHandle[1]
+									$(el).text("Redirecting...")
+									setTimeout(function() {
+										redirectTo(redirectUrl)
+										$(el).text(saveText)
+									}, 1000)
+								} else {
+									log("Action failed.")
+								}
+								clicks = 0
 							}
-							clicks = 0
 						}
 					}).on("dblclick", function(e) {
 						e.preventDefault()
