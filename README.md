@@ -56,7 +56,7 @@ If you like this addon, please consider donating: [paypal.me/lartsch](https://pa
 4. Check out the other settings (optional)
 5. Click the "Submit" button to save
 
-If you have set your home server correctly, you can now interact on other Mastodon servers. If FediAct is running, a small box will be displayed in the bottom right corner. Also, it is indicated while content is resolving / could not be resolved.
+If you have set your home server correctly, you can now interact on other Mastodon servers. If FediAct is running, a small icon will be displayed in the bottom right corner. Also, it is indicated while content is resolving / could not be resolved.
 
 **Please note:** It is NOT recommended to disable the API delay, since most servers use rate limiting and might block your IP if requests happen too frequent, which will lead to FediAct not working anymore.
 
