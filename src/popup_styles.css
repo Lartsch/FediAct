@@ -2,7 +2,6 @@ html, body {
     margin: 0;
     height: var(--popup-height);
     min-width: 300px;
-
 }
 html {
     --highlight: rgba(130,130,150,0.1);
@@ -23,7 +22,6 @@ html {
     height: 100%;
 }
 body {
-    /* width: 300px; */
     -webkit-box-flex: 1;
         -ms-flex-positive: 1;
             flex-grow: 1;
