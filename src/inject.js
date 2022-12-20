@@ -228,76 +228,80 @@ function redirectTo(url) {
 // =-=-=-=-= INTERACTIONS =-=-=-=-=
 // =-=-=-=-==-=-=-=-==-=-=-=-==-=-=
 
-async function executeAction(id, action, polldata) {
+async function executeAction(data, action, polldata) {
 	var requestUrl, condition, jsonbody, after
 	var method = "POST"
 	switch (action) {
+		case 'copy':
+			// special action. only copy to clipboard and return
+			navigator.clipboard.writeText(data)
+			return
 		case 'domainblock':
-			requestUrl = 'https://' + settings.fediact_homeinstance + domainBlocksApi + "?domain=" + id
+			requestUrl = 'https://' + settings.fediact_homeinstance + domainBlocksApi + "?domain=" + data
 			condition = function(response) {if(response){return true}}
 			after = function() {updateMutedBlocked()}
 			break
 		case 'domainunblock':
-			requestUrl = 'https://' + settings.fediact_homeinstance + domainBlocksApi + "?domain=" + id
+			requestUrl = 'https://' + settings.fediact_homeinstance + domainBlocksApi + "?domain=" + data
 			condition = function(response) {if(response){return true}}
 			method = "DELETE"
 			after = function() {updateMutedBlocked()}
 			break
 		case 'mute':
-			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + id + "/mute"
+			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + data + "/mute"
 			condition = function(response) {return response.muting}
 			after = function() {updateMutedBlocked()}
 			break
 		case 'unmute':
-			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + id + "/unmute"
+			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + data + "/unmute"
 			condition = function(response) {return !response.muting}
 			after = function() {updateMutedBlocked()}
 			break
 		case 'block':
-			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + id + "/block"
+			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + data + "/block"
 			condition = function(response) {return response.blocking}
 			after = function() {updateMutedBlocked()}
 			break
 		case 'unblock':
-			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + id + "/unblock"
+			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + data + "/unblock"
 			condition = function(response) {return !response.blocking}
 			after = function() {updateMutedBlocked()}
 			break
 		case 'vote':
-			requestUrl = 'https://' + settings.fediact_homeinstance + pollsApi + "/" + id + "/votes"
+			requestUrl = 'https://' + settings.fediact_homeinstance + pollsApi + "/" + data + "/votes"
 			condition = function(response) {return response.voted}
 			jsonbody = polldata
 			break
 		case 'follow':
-			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + id + "/follow"
+			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + data + "/follow"
 			condition = function(response) {return response.following || response.requested}
 			break
 		case 'boost':
-			requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/" + id + "/reblog"
+			requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/" + data + "/reblog"
 			condition = function(response) {return response.reblogged}
 			break
 		case 'favourite':
-			requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + id + "/favourite"
+			requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + data + "/favourite"
 			condition = function(response) {return response.favourited}
 			break
 		case 'bookmark':
-			requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + id + "/bookmark"
+			requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + data + "/bookmark"
 			condition = function(response) {return response.bookmarked}
 			break
 		case 'unfollow':
-			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + id + "/unfollow"
+			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + data + "/unfollow"
 			condition = function(response) {return !response.following && !response.requested}
 			break
 		case 'unboost':
-			requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/" + id + "/unreblog"
+			requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/" + data + "/unreblog"
 			condition = function(response) {return !response.reblogged}
 			break
 		case 'unfavourite':
-			requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + id + "/unfavourite"
+			requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + data + "/unfavourite"
 			condition = function(response) {return !response.favourited}
 			break
 		case 'unbookmark':
-			requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + id + "/unbookmark"
+			requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + data + "/unbookmark"
 			condition = function(response) {return !response.bookmarked}
 			break
 		default:
@@ -544,8 +548,7 @@ function showModal(settings) {
 	var baseEl = $(modalHtml)
 	var appendTo = $(baseEl).find("ul")
 	for (const entry of settings) {
-		var nameUppercase = entry[0].charAt(0).toUpperCase() + entry[0].slice(1);
-		var append = "<li class='fediactmodalitem'><a class='fediactmodallink' fediactaction='" + entry[0] + "' fediactid='" + entry[1] + "'>" + nameUppercase + "</a></li>"
+		var append = "<li class='fediactmodalitem'><a class='fediactmodallink' fediactaction='" + entry[0] + "' fediactdata='" + entry[1] + "'>" + entry[2] + "</a></li>"
 		$(appendTo).append($(append))
 	}
 	$("body").append($(baseEl))
@@ -556,8 +559,8 @@ function showModal(settings) {
 					e.target = $(e.target).find("a")
 				}
 				var action = $(e.target).attr("fediactaction")
-				var id = $(e.target).attr("fediactid")
-				var done = executeAction(id, action, null)
+				var data = $(e.target).attr("fediactdata")
+				var done = executeAction(data, action, null)
 				if (done) {
 					$(baseEl).remove()
 					$("body").off()
@@ -932,20 +935,22 @@ async function processToots() {
 					if (e.originalEvent.isTrusted) {
 						var modalLinks = []
 						if (isBlocked(tootdata[1])) {
-							modalLinks.push(["unblock",tootdata[6]])
+							modalLinks.push(["unblock",tootdata[6],"Unblock user"])
 						} else {
-							modalLinks.push(["block",tootdata[6]])
+							modalLinks.push(["block",tootdata[6],"Block user"])
 						}
 						if (isMuted(tootdata[1])) {
-							modalLinks.push(["unmute",tootdata[6]])
+							modalLinks.push(["unmute",tootdata[6],"Unmute user"])
 						} else {
-							modalLinks.push(["mute",tootdata[6]])
+							modalLinks.push(["mute",tootdata[6],"Mute user"])
 						}
 						if (isDomainBlocked(tootdata[1])) {
-							modalLinks.push(["domainunblock",domain])
+							modalLinks.push(["domainunblock",domain,"Unblock domain"])
 						} else {
-							modalLinks.push(["domainblock",domain])
+							modalLinks.push(["domainblock",domain,"Block domain"])
 						}
+						modalLinks.push(["copy",tootdata[12],"Copy URL"])
+						modalLinks.push(["copy",tootdata[7],"Copy home URL"])
 						showModal(modalLinks)
 					}
 				})
@@ -1092,8 +1097,8 @@ async function processToots() {
 								// set the redirect to home instance URL in @ format
 								var redirectUrl = 'https://' + settings.fediact_homeinstance + "/@" + resolvedToot[0] + "/" + resolvedToot[1]
 								// prepare the cache entry / toot data entry
-								var fullEntry = [internalIdentifier, ...resolvedToot, redirectUrl, true, ...poll, false]
-								// 0: internal identifier; 1: toot home acct / false 2: toot home id 3: toot reblogged 4: toot favourited 5: toot bookmarked 6: home account id 7: redirect url 8: ??? crap! 9: poll id / false 10: poll voted 11: interacted
+								var fullEntry = [internalIdentifier, ...resolvedToot, redirectUrl, true, ...poll, false, homeResolveString]
+								// 0: internal identifier; 1: toot home acct / false 2: toot home id 3: toot reblogged 4: toot favourited 5: toot bookmarked 6: home account id 7: redirect url 8: ??? crap! 9: poll id / false 10: poll voted 11: interacted 12: original URL that was resolved
 							}
 						}
 					}
@@ -1175,7 +1180,7 @@ async function processProfile() {
 				} else if (action == "unfollow" && response) {
 					if ($(icon).length) {
 						$(icon).removeClass("fa-user").addClass("fa-user-plus")
-						$(el).contents().filter((_, node) => node.nodeType === 3).remove();
+						$(el).contents().filter((_, node) => node.nodeType === 3).remove()
 						$(el).attr("title","Follow")
 					} else {
 						$(el).text("Follow")
@@ -1219,6 +1224,7 @@ async function processProfile() {
 					}
 					var domainsplit = fullHandle.split("@")
 					var domain = domainsplit.pop() || domainsplit.pop()
+					var redirectUrl = 'https://' + settings.fediact_homeinstance + '/@' + resolvedHandle[1]
 					// successfully resolved
 					// ... then check if user is already following
 					var isFollowing = await isFollowingHomeInstance([resolvedHandle[0]])
@@ -1240,20 +1246,21 @@ async function processProfile() {
 						if (e.originalEvent.isTrusted) {
 							var modalLinks = []
 							if (isBlocked(fullHandle)) {
-								modalLinks.push(["unblock",resolvedHandle[0]])
+								modalLinks.push(["unblock",resolvedHandle[0],"Unblock user"])
 							} else {
-								modalLinks.push(["block",resolvedHandle[0]])
+								modalLinks.push(["block",resolvedHandle[0],"Block user"])
 							}
 							if (isMuted(fullHandle)) {
-								modalLinks.push(["unmute",resolvedHandle[0]])
+								modalLinks.push(["unmute",resolvedHandle[0],"Unmute user"])
 							} else {
-								modalLinks.push(["mute",resolvedHandle[0]])
+								modalLinks.push(["mute",resolvedHandle[0],"Mute user"])
 							}
 							if (isDomainBlocked(fullHandle)) {
-								modalLinks.push(["domainunblock",domain])
+								modalLinks.push(["domainunblock",domain,"Unblock domain"])
 							} else {
-								modalLinks.push(["domainblock",domain])
+								modalLinks.push(["domainblock",domain,"Block domain"])
 							}
+							modalLinks.push(["copy",redirectUrl,"Copy home URL"])
 							showModal(modalLinks)
 						}
 					})
@@ -1275,7 +1282,6 @@ async function processProfile() {
 								clearTimeout(timer)
 								var done = await execFollow(resolvedHandle[0])
 								if (done) {
-									var redirectUrl = 'https://' + settings.fediact_homeinstance + '/@' + resolvedHandle[1]
 									if ($(icon).length) {
 										var classes = $(icon).attr("class")
 										$(icon).removeClass("fa-user").removeClass("fa-user-plus").addClass("fa-arrow-right")
