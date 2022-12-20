@@ -16,7 +16,7 @@ A Chrome/Firefox extension that simplifies follow and post interactions on Masto
 
 **Important notes**:
 - Data is processed locally only
-- Performance depends on your home server and to some degree on the external server you are browsing (read more [below](#additional-notes))
+- Performance depends on your home server and the external server you are browsing (read more [below](#additional-notes))
 - Some toots cannot be resolved to your home (in cases where searching for the post manually would not work either)
 
 ## Navigation
