@@ -1,24 +1,26 @@
 html, body {
     margin: 0;
+    height: var(--popup-height);
+    min-width: 300px;
+
 }
 html {
-    --highlight: rgba(132, 150, 130, 0.1);
-    --confirmed: rgb(0, 124, 6);
+    --highlight: rgba(130,130,150,0.1);
+    --confirmation: rgb(38, 133, 0);
     --hover: rgba(120,120,130,0.15);
     --border: rgba(120,120,130,0.3);
     --border-2: rgba(130,130,150,0.3);
     --radius: 12px;
-    --popup-min-height: 450px;
-    --popup-height: 100%;
-    --popup-min-width: 350px;
-    --popup-width: 100%;
+    --popup-height: 400px;
     overflow: hidden !important;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 body {
-    min-width: var(--popup-min-width);
-    width: var(--popup-width);
-    min-height: var(--popup-min-height);
-    height: var(--popup-height);
+    /* width: 300px; */
+    flex-grow: 1;
+    min-height: var(--popup-height);
     overflow: hidden;
 }
 .hide {
@@ -35,24 +37,16 @@ h2 {
     display: contents;
 }
 form {
-    display: -webkit-box;
-    display: -ms-flexbox;
     display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-        -ms-flex-direction: column;
-            flex-direction: column;
-    height: 100vh;
+    flex-direction: column;
+    height: 100%;
 }
 .scroller {
     height: 0;
     overflow-y: auto;
-    -webkit-box-flex: 1;
-        -ms-flex-positive: 1;
-            flex-grow: 1;
+    flex-grow: 1;
     padding: 10px;
-    -webkit-box-sizing: border-box;
-            box-sizing: border-box;
+    box-sizing: border-box;
 }
 fieldset {
     border: 0;
@@ -66,18 +60,12 @@ fieldset > h2, summary {
 .row {
     background-color: var(--highlight);
     padding: .8em;
-    -webkit-box-sizing: border-box;
-            box-sizing: border-box;
-    display: -webkit-box;
-    display: -ms-flexbox;
+    box-sizing: border-box;
     display: flex;
-    -ms-flex-wrap: wrap;
-        flex-wrap: wrap;
+    flex-wrap: wrap;
     margin-bottom: 2px;
     position: relative;
     gap: .4em;
-    -webkit-transition: background-color .1s;
-    -o-transition: background-color .1s;
     transition: background-color .1s;
 }
 .row:hover, .row:focus-within {
@@ -93,9 +81,7 @@ fieldset > h2, summary {
 }
 label {
     width: 0;
-    -webkit-box-flex: 9999;
-        -ms-flex-positive: 9999;
-            flex-grow: 9999;
+    flex-grow: 9999;
 }
 label::before { /* Make entire .row clickable */
     content: "";
@@ -116,11 +102,8 @@ input, textarea, select {
     padding: .7em;
     border-radius: calc(var(--radius) / 2);
     font-size: inherit;
-    -webkit-box-flex: 1;
-        -ms-flex-positive: 1;
-            flex-grow: 1;
-    -webkit-box-sizing: border-box;
-            box-sizing: border-box;
+    flex-grow: 1;
+    box-sizing: border-box;
     position: relative;
     z-index: 2;
 }
@@ -141,27 +124,17 @@ select {
 }
 .footer {
     padding: 10px;
-    display: -webkit-box;
-    display: -ms-flexbox;
     display: flex;
-    -ms-flex-wrap: wrap;
-        flex-wrap: wrap;
-    -webkit-box-align: center;
-        -ms-flex-align: center;
-            align-items: center;
-    -webkit-box-pack: justify;
-        -ms-flex-pack: justify;
-            justify-content: space-between;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
     border-top: 1px dashed var(--border-2);
     position: relative;
     background-color: var(--highlight);
-    -webkit-box-shadow: 0 0 24px rgba(0,0,0,0.1);
-            box-shadow: 0 0 24px rgba(0,0,0,0.1);
+    box-shadow: 0 0 24px rgba(0,0,0,0.1);
 }
 [type="submit"] {
-    -webkit-box-flex: 0;
-        -ms-flex-positive: 0;
-            flex-grow: 0;
+    flex-grow: 0;
     padding-inline: 2em;
 }
 [type="submit"]:not(:hover):not(:focus) {
@@ -169,9 +142,7 @@ select {
 }
 .footer span {
     width: 0;
-    -webkit-box-flex: 1;
-        -ms-flex-positive: 1;
-            flex-grow: 1;
+    flex-grow: 1;
     text-align: right;
     padding-inline: 1em;
 }
@@ -181,15 +152,13 @@ select {
     color: inherit;
 }
 #indicator {
-    -webkit-box-ordinal-group: 0;
-        -ms-flex-order: -1;
-            order: -1;
+    order: -1;
     width: calc(100% + 20px);
     font-weight: 600;
     padding: .7em;
     margin: -10px;
     margin-bottom: 8px;
-    background-color: var(--confirmed);
+    background-color: var(--confirmation);
     text-align: center;
     color: white;
 }
