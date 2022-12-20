@@ -1,13 +1,13 @@
 # FediAct (v0.9.8)
-A Chrome/Firefox extension that simplifies follow and post interactions on Mastodon instances other than your own.
+A Chrome/Firefox extension that simplifies follow and post interactions on Mastodon servers other than your own.
 
 **Features**:
 - Supports Mastodon v3 + v4 (some features v4 only)
-- Follow, boost, bookmark, reply, fav, vote polls and mute/block on external instances while only being logged in to your home instance
-- Show following status and toot status (boosted, faved, bookmarked) on external instances
-- Single click to execute action only, double click to redirect to content on home instance
-- Reply button on external instances always redirects to home instance and enters reply-mode
-- Hide muted content on external instances if enabled
+- Follow, boost, bookmark, reply, fav, vote polls and mute/block on external servers while only being logged in to your home server
+- Show following status and toot status (boosted, faved, bookmarked) on external servers
+- Single click to execute action only, double click to redirect to content on home server
+- Reply button on external servers always redirects to home instance and enters reply-mode
+- Hide muted content on external servers if enabled
 - Customizable
 
 **Supported browsers**:
@@ -16,7 +16,7 @@ A Chrome/Firefox extension that simplifies follow and post interactions on Masto
 
 **Important notes**:
 - Data is processed locally only
-- Performance depends on your home instance and to some degree on the external instance you are browsing (read more [below](#additional-notes))
+- Performance depends on your home server and to some degree on the external server you are browsing (read more [below](#additional-notes))
 - Some toots cannot be resolved to your home (in cases where searching for the post manually would not work either)
 
 ## Navigation
@@ -50,20 +50,20 @@ If you like this addon, please consider donating: [paypal.me/lartsch](https://pa
 
 ## Setup
 
-1. Make sure you are logged in to your home instance
+1. Make sure you are logged in to your home server
 2. Click the extension icon or open its settings page
-3. Set your home instance (required)
+3. Set your home server domain (required)
 4. Check out the other settings (optional)
 5. Click the "Submit" button to save
 
-If you have set your home instance correctly, you can now interact on other Mastodon instances. If FediAct is running, a small box will be displayed in the bottom right corner. Also, it is indicated while content is resolving / could not be resolved.
+If you have set your home server correctly, you can now interact on other Mastodon servers. If FediAct is running, a small box will be displayed in the bottom right corner. Also, it is indicated while content is resolving / could not be resolved.
 
-**Please note:** It is NOT recommended to disable the API delay, since most instances use rate limiting and might block your requests if they happen too frequent, which will lead to FediAct not working anymore.
+**Please note:** It is NOT recommended to disable the API delay, since most servers use rate limiting and might block your IP if requests happen too frequent, which will lead to FediAct not working anymore.
 
 ## FAQ
 **Why does it need permission for all websites?**
 
-The addon needs to determine whether or not the site you are currently browsing is a Mastodon instance. For that to work, it requires access to all sites. Otherwise, each existing Mastodon instance would have to be explicitly added.
+The addon needs to determine whether or not the site you are currently browsing is a Mastodon server. For that to work, it requires access to all sites. Otherwise, each existing Mastodon server would have to be explicitly added.
 
 **Can I use this on Android?**
 
@@ -81,7 +81,7 @@ Feel free to create an issue here on GitHub and I will look into it.
 
 **Is this safe to use?**  
 This project is open source. Anyone with some programming knowledge can check out the source code, either here on GitHub or by extracting the addon file from the addon stores.  
-Considering the implementation, I am not aware of any risks. Efforts were made to prevent instances from abusing this addon to perform actions on the user's behalf (which already was a really specific and rather low risk). All data is stored in your browser locally. The only sensitive data it stores is your API token. This token is **only** sent to your home instance. No other data ever leaves your device. As far as I know, external instances cannot access the requests made by FediAct and can therefore not gain your token.
+Considering the implementation, I am not aware of any risks. Efforts were made to prevent servers from abusing this addon to perform actions on the user's behalf (which already was a really specific and rather low risk). All data is stored in your browser locally. The only sensitive data it stores is your API token. This token is **only** sent to your home server. No other data ever leaves your device. As far as I know, external servers cannot access the requests made by FediAct and can therefore not gain your token.
 
 ## Screenshots / GIFs
 v0.8.0
@@ -131,15 +131,15 @@ I included all of the default add-ons in the custom collection, so you will not 
 ## Additional notes
 1. Support for other Fedi software is planned
 2. There are several reasons why resolving/interacting might not work including:
-    - Not being logged in to your home instance
-    - Element identifiers have changed / the instance uses an unsupported flavour
-    - The external instance you are browsing or the originating instance of a toot is not Mastodon
-    - Your home instance has strong rate limiting and limited your IP
-    - Your home instance / the external instance / the original instance of a toot have defederated / are moderated
+    - Not being logged in to your home server
+    - Element identifiers have changed / the server uses an unsupported flavour
+    - The external server you are browsing or the originating server of a toot is not Mastodon
+    - Your home server has strong rate limiting and limited your IP
+    - Your home server / the external server / the original server of a toot have defederated / are moderated
     - The toot has not yet federated to your home instace (follow the account and toots should start federating)
-    - The instance you are browsing does not use 302 redirects for external toots
-    - The network conditions of your home instance or the external instance are bad (slow speed)
-    - That a toot is set to unlisted on its original instance may play a role
+    - The server you are browsing does not use 302 redirects for external toots
+    - The network conditions of your home server or the external server are bad (slow speed)
+    - That a toot is set to unlisted on its original server may play a role
 3. There can be delays because API calls have to be made and it is tries to avoid error 429 (too many requests). Especially if a page has many toots or you are scrolling through a feed really fast.
 4. If the extension fails to resolve content, the affected buttons will behave as if the extension weren't active (popup modal) and a notice ("Unresolved") is added to the toot
 
