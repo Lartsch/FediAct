@@ -6,7 +6,6 @@
 		<style>
 			html, body {
 				margin: 0;
-				color: unset !important; /* Fix for dark mode text, caused by extension.css stylesheet */
 			}
 			html {
 				--highlight: rgba(130,130,150,0.1);
@@ -159,6 +158,11 @@
 				margin-bottom: 8px;
 				background-color: var(--highlight);
 				text-align: center;
+			}
+			@media (prefers-color-scheme: dark) {
+				body {
+					color: white;
+				}
 			}
 		</style>
 		<script src="lib/jquery-3.6.1.min.js"></script>
