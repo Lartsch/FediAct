@@ -75,18 +75,18 @@ function popupTasks() {
 		$("input#runifloggedin").prop('checked', settings.fediact_runifloggedin)
 		// both containers are hidden by default
 		if ($("select#mode").val() == "whitelist") {
-			$("div#whitelist_input").show()
+			$("div#whitelist_input").removeClass("hide")
 		} else {
-			$("div#blacklist_input").show()
+			$("div#blacklist_input").removeClass("hide")
 		}
 		// check changes of the select to update whitelist/blacklist input
 		$("select#mode").change(function() {
 			if ($("select#mode").val() == "whitelist") {
-				$("div#blacklist_input").hide()
-				$("div#whitelist_input").show()
+				$("div#blacklist_input").addClass("hide")
+				$("div#whitelist_input").removeClass("hide")
 			} else {
-				$("div#whitelist_input").hide()
-				$("div#blacklist_input").show()
+				$("div#whitelist_input").addClass("hide")
+				$("div#blacklist_input").removeClass("hide")
 			}
 		})
 	}
