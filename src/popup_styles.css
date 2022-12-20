@@ -8,12 +8,16 @@ html {
     --border: rgba(120,120,130,0.3);
     --border-2: rgba(130,130,150,0.3);
     --radius: 12px;
-    --popup-height: 400px;
-    --popup-width: 300px;
+    --popup-min-height: 450px;
+    --popup-height: 100%;
+    --popup-min-width: 350px;
+    --popup-width: 100%;
     overflow: hidden !important;
 }
 body {
+    min-width: var(--popup-min-width);
     width: var(--popup-width);
+    min-height: var(--popup-min-height);
     height: var(--popup-height);
     overflow: hidden;
 }
@@ -31,16 +35,24 @@ h2 {
     display: contents;
 }
 form {
+    display: -webkit-box;
+    display: -ms-flexbox;
     display: flex;
-    flex-direction: column;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
     height: 100vh;
 }
 .scroller {
     height: 0;
     overflow-y: auto;
-    flex-grow: 1;
-    padding: 6px;
-    box-sizing: border-box;
+    -webkit-box-flex: 1;
+        -ms-flex-positive: 1;
+            flex-grow: 1;
+    padding: 10px;
+    -webkit-box-sizing: border-box;
+            box-sizing: border-box;
 }
 fieldset {
     border: 0;
@@ -54,12 +66,18 @@ fieldset > h2, summary {
 .row {
     background-color: var(--highlight);
     padding: .8em;
-    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+    display: -webkit-box;
+    display: -ms-flexbox;
     display: flex;
-    flex-wrap: wrap;
+    -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
     margin-bottom: 2px;
     position: relative;
     gap: .4em;
+    -webkit-transition: background-color .1s;
+    -o-transition: background-color .1s;
     transition: background-color .1s;
 }
 .row:hover, .row:focus-within {
@@ -75,7 +93,9 @@ fieldset > h2, summary {
 }
 label {
     width: 0;
-    flex-grow: 9999;
+    -webkit-box-flex: 9999;
+        -ms-flex-positive: 9999;
+            flex-grow: 9999;
 }
 label::before { /* Make entire .row clickable */
     content: "";
@@ -96,8 +116,11 @@ input, textarea, select {
     padding: .7em;
     border-radius: calc(var(--radius) / 2);
     font-size: inherit;
-    flex-grow: 1;
-    box-sizing: border-box;
+    -webkit-box-flex: 1;
+        -ms-flex-positive: 1;
+            flex-grow: 1;
+    -webkit-box-sizing: border-box;
+            box-sizing: border-box;
     position: relative;
     z-index: 2;
 }
@@ -117,18 +140,28 @@ select {
     text-align: right;
 }
 .footer {
-    padding: 6px;
+    padding: 10px;
+    display: -webkit-box;
+    display: -ms-flexbox;
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
+    -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    -webkit-box-pack: justify;
+        -ms-flex-pack: justify;
+            justify-content: space-between;
     border-top: 1px dashed var(--border-2);
     position: relative;
     background-color: var(--highlight);
-    box-shadow: 0 0 24px rgba(0,0,0,0.1);
+    -webkit-box-shadow: 0 0 24px rgba(0,0,0,0.1);
+            box-shadow: 0 0 24px rgba(0,0,0,0.1);
 }
 [type="submit"] {
-    flex-grow: 0;
+    -webkit-box-flex: 0;
+        -ms-flex-positive: 0;
+            flex-grow: 0;
     padding-inline: 2em;
 }
 [type="submit"]:not(:hover):not(:focus) {
@@ -136,7 +169,9 @@ select {
 }
 .footer span {
     width: 0;
-    flex-grow: 1;
+    -webkit-box-flex: 1;
+        -ms-flex-positive: 1;
+            flex-grow: 1;
     text-align: right;
     padding-inline: 1em;
 }
@@ -146,11 +181,13 @@ select {
     color: inherit;
 }
 #indicator {
-    order: -1;
-    width: calc(100% + 12px);
+    -webkit-box-ordinal-group: 0;
+        -ms-flex-order: -1;
+            order: -1;
+    width: calc(100% + 20px);
     font-weight: 600;
     padding: .7em;
-    margin: -6px;
+    margin: -10px;
     margin-bottom: 8px;
     background-color: var(--confirmed);
     text-align: center;
