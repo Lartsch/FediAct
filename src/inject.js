@@ -7,7 +7,7 @@ const profileNamePaths = ["div.account__header__tabs__name small", "div.public-a
 const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/
 const handleExtractUrlRegex = /^(?<domain>https?:\/\/(?:\.?[a-z0-9-]+)+(?:\.[a-z]+){1})?\/?@(?<handle>\w+)(?:@(?<handledomain>(?:[\w-]+\.)+?\w+))?(?:\/(?<tootid>\d+))?\/?$/
 const handleExtractUriRegex = /^(?<domain>https?:\/\/(?:\.?[a-z0-9-]+)+(?:\.[a-z]+){1})(?:\/users\/)(?<handle>\w+)(?:(?:\/statuses\/)(?<tootid>\d+))?\/?$/
-const enableConsoleLog = false
+const enableConsoleLog = true
 const logPrepend = "[FediAct]"
 const instanceApi = "/api/v1/instance"
 const statusApi = "/api/v1/statuses"
@@ -549,7 +549,7 @@ function showModal(settings) {
 		$(appendTo).append($(append))
 	}
 	$("body").append($(baseEl))
-	$("body").on("click", function(e) {
+	function handleModalEvent(e) {
 		if (e.originalEvent.isTrusted) {
 			if ($(e.target).is(".fediactmodal li, .fediactmodal li a")) {
 				if ($(e.target).is(".fediactmodal li")) {
@@ -566,15 +566,29 @@ function showModal(settings) {
 				}
 			} else {
 				$(baseEl).remove()
-				$("body").off()
+				$("body").off("click", handleModalEvent)
 			}
 		}
-	})
+	}
+	$("body").on("click", handleModalEvent)
 }
 
 function addFediElements() {
-	if (!$(".fediactrunning").length) {
-		$("body").append("<div class='fediactrunning'><span>FediAct running</span> - <a target='" + settings.fediact_target + "' href='https://" + settings.fediact_homeinstance + "'>Go home</a></div>")
+	if (!$(".fediacticon").length) {
+		$("body").append("<div class='fediacticon'></div>")
+		$("body").append("<div class='fediactsettings_onsite'><div class='fediactsettings_onsite_inner'><a href='https://" + settings.fediact_homeinstance + "' target='" + settings.fediact_target + "'>Go home</a></div></div>")
+		function fediSettingsHandler(e) {
+			if (e.originalEvent.isTrusted) {
+				if ($(e.target).is("div.fediacticon")) {
+					$("div.fediacticon").hide()
+					$("div.fediactsettings_onsite").show()
+				} else {
+					$("div.fediactsettings_onsite").hide()
+					$("div.fediacticon").show()
+				}
+			}
+		}
+		$("body").on("click", fediSettingsHandler)
 	}
 }
 
@@ -1437,7 +1451,9 @@ async function backgroundProcessor() {
 			tmpSettings.processed = []
 			tmpSettings.processedFollow = []
 			tmpSettings.isProcessing = []
-			$(".fediactrunning").remove()
+			$(".fediacticon").remove()
+			$(".fediactsettings_onsite").remove()
+			$("body").off("click", fediSettingsHandler)
 			// rerun getSettings to keep mutes/blocks up to date while not reloading the page
 			if (!await getSettings()) {
 				// but reload if settings are invalid
