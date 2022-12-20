@@ -552,7 +552,7 @@ function showModal(settings) {
 		$(appendTo).append($(append))
 	}
 	$("body").append($(baseEl))
-	function handleModalEvent(e) {
+	async function handleModalEvent(e) {
 		if (e.originalEvent.isTrusted) {
 			if ($(e.target).is(".fediactmodal li, .fediactmodal li a")) {
 				if ($(e.target).is(".fediactmodal li")) {
@@ -562,10 +562,23 @@ function showModal(settings) {
 				var data = $(e.target).attr("fediactdata")
 				var done = executeAction(data, action, null)
 				if (done) {
+					$(e.target).append(document.createTextNode(" - Done!"))
+					await new Promise(resolve => {
+						setTimeout(function() {
+							resolve()
+						}, 1000)
+					})
 					$(baseEl).remove()
-					$("body").off()
+					$("body").off("click", handleModalEvent)
 				} else {
-					alert("Failed to " + action)
+					$(e.target).append(document.createTextNode(" - Failed!"))
+					await new Promise(resolve => {
+						setTimeout(function() {
+							resolve()
+						}, 1000)
+					})
+					$(baseEl).remove()
+					$("body").off("click", handleModalEvent)
 				}
 			} else {
 				$(baseEl).remove()
