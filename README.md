@@ -16,7 +16,7 @@ A Chrome/Firefox extension that simplifies follow and post interactions on Masto
 
 **Important notes**:
 - Data is processed locally only
-- Performance depends on your home server and to some degree on the external server you are browsing (read more [below](#additional-notes))
+- Performance depends on your home server and the external server you are browsing (read more [below](#additional-notes))
 - Some toots cannot be resolved to your home (in cases where searching for the post manually would not work either)
 
 ## Navigation
@@ -36,7 +36,7 @@ A Chrome/Firefox extension that simplifies follow and post interactions on Masto
 [link-firefox]: https://addons.mozilla.org/en-US/firefox/addon/fediact/ 'Version published on Mozilla Add-ons'
 
 [<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/chrome/chrome.svg" width="48" alt="Chrome" valign="middle">][link-chrome] [<img valign="middle" src="https://img.shields.io/chrome-web-store/v/lmpcajpkjcclkjbliapfjfolocffednm.svg?label=%20">][link-chrome]  
-and other Chromium browsers
+and other Chromium browsers (including Kiwi, Yandex on Android)
 
 [<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fediact.svg?label=%20%20">][link-firefox]  
 including Nightly for Android
@@ -45,6 +45,7 @@ including Nightly for Android
 > 
 > - **If webstore release is outdated, use the [manual installation method](#manual-installation) to install the latest version**  
 > - **Special installation steps for [Firefox on Android](#install-in-firefox-for-android)**
+> - Chrome store updates take 1-2 days longer
 
 If you like this addon, please consider donating: [paypal.me/lartsch](https://paypal.me/lartsch)
 
