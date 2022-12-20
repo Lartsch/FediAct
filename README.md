@@ -6,7 +6,7 @@ A Chrome/Firefox extension that simplifies follow and post interactions on Masto
 - Follow, boost, bookmark, reply, fav, vote polls and mute/block on external servers while only being logged in to your home server
 - Show following status and toot status (boosted, faved, bookmarked) on external servers
 - Single click to execute action only, double click to redirect to content on home server
-- Reply button on external servers always redirects to home instance and enters reply-mode
+- Reply button on external servers always redirects to home server and enters reply-mode
 - Hide muted content on external servers if enabled
 - Customizable
 
