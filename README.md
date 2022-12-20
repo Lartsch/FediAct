@@ -97,7 +97,7 @@ Feel free to create an issue here on GitHub and I will look into it.
 
 **Is this safe to use?**  
 This project is open source. Anyone with some programming knowledge can check out the source code, either here on GitHub or by extracting the addon file from the addon stores.  
-Considering the implementation, I am not aware of any noticable risks. Efforts were made to prevent instances from abusing this addon to perform actions on the users behalf (which already was a really specific and rather low risk). FediAct stores all data in your browser locally. The only sensitive data it stores is your API token, which is required for all features. This token is **only** sent to your home instance. No other data ever leaves your device by using FediAct. As far as I know, external instances cannot access the requests made by FediAct and can therefore not gain your token.
+Considering the implementation, I am not aware of any risks. Efforts were made to prevent instances from abusing this addon to perform actions on the user's behalf (which already was a really specific and rather low risk). All data is stored in your browser locally. The only sensitive data it stores is your API token. This token is **only** sent to your home instance. No other data ever leaves your device. As far as I know, external instances cannot access the requests made by FediAct and can therefore not gain your token.
 
 ## Screenshots / GIFs
 v0.8.0
