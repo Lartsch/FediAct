@@ -4,11 +4,11 @@ A Chrome/Firefox extension that simplifies follow and post interactions on Masto
 **Features**:
 - Supports Mastodon v3 + v4 (some features v4 only)
 - Follow, boost, bookmark, reply, fav, vote polls and mute/block on external servers while only being logged in to your home server
-- Show following status and toot status (boosted, faved, bookmarked) on external servers
+- Show following state and toot state (boosted, faved, bookmarked, voted) on external servers
 - Single click to execute action only, double click to redirect to content on home server
 - Reply button on external servers always redirects to home server and enters reply-mode
 - Hide muted content on external servers if enabled
-- Customizable
+- Needs nothing more than your home instance domain to work
 
 **Supported browsers**:
 - All up-to-date Chromium browsers, including Kiwi and Yandex browsers on Android
@@ -36,7 +36,7 @@ A Chrome/Firefox extension that simplifies follow and post interactions on Masto
 [link-firefox]: https://addons.mozilla.org/en-US/firefox/addon/fediact/ 'Version published on Mozilla Add-ons'
 
 [<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/chrome/chrome.svg" width="48" alt="Chrome" valign="middle">][link-chrome] [<img valign="middle" src="https://img.shields.io/chrome-web-store/v/lmpcajpkjcclkjbliapfjfolocffednm.svg?label=%20">][link-chrome]  
-and other Chromium browsers (including Kiwi, Yandex on Android)
+and other Chromium browsers, including Kiwi & Yandex on Android
 
 [<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fediact.svg?label=%20%20">][link-firefox]  
 including Nightly for Android
@@ -80,9 +80,10 @@ Currently not in a reliable way, but:
 
 Feel free to create an issue here on GitHub and I will look into it.
 
-**Is this safe to use?**  
+**Is this safe to use?**
+
 This project is open source. Anyone with some programming knowledge can check out the source code, either here on GitHub or by extracting the addon file from the addon stores.  
-Considering the implementation, I am not aware of any risks. Efforts were made to prevent servers from abusing this addon to perform actions on the user's behalf (which already was a really specific and rather low risk). All data is stored in your browser locally. The only sensitive data it stores is your API token. This token is **only** sent to your home server. No other data ever leaves your device. As far as I know, external servers cannot access the requests made by FediAct and can therefore not gain your token.
+Considering the implementation, I am not aware of any risks. Efforts were made to prevent servers from abusing this addon to perform actions on the user's behalf. It does not require your username or password. All data is stored in your browser locally. The only sensitive data it stores is your API token. This token is **only** sent to your home server. No other data ever leaves your device. As far as I know, external servers cannot access the requests made by FediAct and can therefore not gain your token.
 
 ## Screenshots / GIFs
 v0.8.0
