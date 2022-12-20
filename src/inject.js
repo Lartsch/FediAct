@@ -2,7 +2,7 @@
 // =-=-=-=-=-= CONSTANTS =-==-=-=-=
 // =-=-=-=-==-=-=-=-==-=-=-=-==-=-=
 
-const followButtonPaths = ["div.account__header button.logo-button","div.public-account-header a.logo-button","div.account-card a.logo-button","div.directory-card a.icon-button", "div.detailed-status a.logo-button", "button.remote-button", "div.account__header button.button--follow"]
+const followButtonPaths = ["div.account__header button.logo-button","div.public-account-header a.logo-button","div.account-card a.logo-button","div.directory-card a.icon-button", "div.directory__card a.icon-button", "div.detailed-status a.logo-button", "button.remote-button", "div.account__header button.button--follow"]
 const profileNamePaths = ["div.account__header__tabs__name small", "div.public-account-header__tabs__name small", "div.detailed-status span.display-name__account", "div.display-name > span", "a.user-screen-name", "div.profile-info-panel small"]
 const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/
 const handleExtractUrlRegex = /^(?<domain>https?:\/\/(?:\.?[a-z0-9-]+)+(?:\.[a-z]+){1})?\/?@(?<handle>\w+)(?:@(?<handledomain>(?:[\w-]+\.)+?\w+))?(?:\/(?<tootid>\d+))?\/?$/
@@ -550,24 +550,32 @@ function showModal(settings) {
 	}
 	$("body").append($(baseEl))
 	$("body").on("click", function(e) {
-		if ($(e.target).is(".fediactmodal li, .fediactmodal li a")) {
-			if ($(e.target).is(".fediactmodal li")) {
-				e.target = $(e.target).find("a")
-			}
-			var action = $(e.target).attr("fediactaction")
-			var id = $(e.target).attr("fediactid")
-			var done = executeAction(id, action, null)
-			if (done) {
+		if (e.originalEvent.isTrusted) {
+			if ($(e.target).is(".fediactmodal li, .fediactmodal li a")) {
+				if ($(e.target).is(".fediactmodal li")) {
+					e.target = $(e.target).find("a")
+				}
+				var action = $(e.target).attr("fediactaction")
+				var id = $(e.target).attr("fediactid")
+				var done = executeAction(id, action, null)
+				if (done) {
+					$(baseEl).remove()
+					$("body").off()
+				} else {
+					alert("Failed to " + action)
+				}
+			} else {
 				$(baseEl).remove()
 				$("body").off()
-			} else {
-				alert("Failed to " + action)
 			}
-		} else {
-			$(baseEl).remove()
-			$("body").off()
 		}
 	})
+}
+
+function addFediElements() {
+	if (!$(".fediactrunning").length) {
+		$("body").append("<div class='fediactrunning'><span>FediAct running</span> - <a target='" + settings.fediact_target + "' href='https://" + settings.fediact_homeinstance + "'>Go home</a></div>")
+	}
 }
 
 // trigger the reply button click - will only run when we are on a home instance url with fedireply parameter
@@ -742,6 +750,7 @@ async function processToots() {
 	}
 	// main function to process each detected toot element
 	async function process(el) {
+		addFediElements()
 		// extra step for detailed status elements to select the correct parent
 		if ($(el).is("div.detailed-status") && $(el).closest("div.focusable").length) {
 			el = $(el).closest("div.focusable")
@@ -897,30 +906,34 @@ async function processToots() {
 					// prevent default and immediate propagation
 					e.preventDefault()
 					e.stopImmediatePropagation()
-					// redirect to the resolved URL + fedireply parameter (so the extension can handle it after redirect)
-					redirectTo(tootdata[7]+"?fedireply")
+					if (e.originalEvent.isTrusted) {
+						// redirect to the resolved URL + fedireply parameter (so the extension can handle it after redirect)
+						redirectTo(tootdata[7]+"?fedireply")
+					}
 				})
 				$(moreButton).on("click", function(e){
 					// prevent default and immediate propagation
 					e.preventDefault()
 					e.stopImmediatePropagation()
-					var modalLinks = []
-					if (isBlocked(tootdata[1])) {
-						modalLinks.push(["unblock",tootdata[6]])
-					} else {
-						modalLinks.push(["block",tootdata[6]])
+					if (e.originalEvent.isTrusted) {
+						var modalLinks = []
+						if (isBlocked(tootdata[1])) {
+							modalLinks.push(["unblock",tootdata[6]])
+						} else {
+							modalLinks.push(["block",tootdata[6]])
+						}
+						if (isMuted(tootdata[1])) {
+							modalLinks.push(["unmute",tootdata[6]])
+						} else {
+							modalLinks.push(["mute",tootdata[6]])
+						}
+						if (isDomainBlocked(tootdata[1])) {
+							modalLinks.push(["domainunblock",domain])
+						} else {
+							modalLinks.push(["domainblock",domain])
+						}
+						showModal(modalLinks)
 					}
-					if (isMuted(tootdata[1])) {
-						modalLinks.push(["unmute",tootdata[6]])
-					} else {
-						modalLinks.push(["mute",tootdata[6]])
-					}
-					if (isDomainBlocked(tootdata[1])) {
-						modalLinks.push(["domainunblock",domain])
-					} else {
-						modalLinks.push(["domainblock",domain])
-					}
-					showModal(modalLinks)
 				})
 				// for all other buttons...
 				$([favButton, boostButton, bookmarkButton, voteButton]).each(function() {
@@ -938,12 +951,29 @@ async function processToots() {
 						// prevent default and immediate propagation
 						e.preventDefault()
 						e.stopImmediatePropagation()
-						// increase click counter
-						clicks++
-						// this will always run, but see below for double click handling
-						if (clicks == 1) {
-							timer = setTimeout(async function() {
-								if (isVote && !tootdata[10]) {
+						if (e.originalEvent.isTrusted) {
+							// increase click counter
+							clicks++
+							// this will always run, but see below for double click handling
+							if (clicks == 1) {
+								timer = setTimeout(async function() {
+									if (isVote && !tootdata[10]) {
+										var actionExecuted = pollAction(tootdata[9], tootdata[7], e)
+									} else {
+										// execute action on click and get result (fail/success)
+										var actionExecuted = await tootAction(tootdata[2], e)
+									}
+									if (!actionExecuted) {
+										log("Action failed.")
+									}
+									// reset clicks
+									clicks = 0
+								}, 350)
+							} else {
+								// if we get here, the element was clicked twice before the above timeout was over, so this is a double click
+								// reset the above timeout so it wont execute
+								clearTimeout(timer)
+								if (isVote) {
 									var actionExecuted = pollAction(tootdata[9], tootdata[7], e)
 								} else {
 									// execute action on click and get result (fail/success)
@@ -951,28 +981,13 @@ async function processToots() {
 								}
 								if (!actionExecuted) {
 									log("Action failed.")
+								} else {
+									// redirect to home instance with the resolved toot url
+									redirectTo(tootdata[7])
 								}
 								// reset clicks
 								clicks = 0
-							}, 350)
-						} else {
-							// if we get here, the element was clicked twice before the above timeout was over, so this is a double click
-							// reset the above timeout so it wont execute
-							clearTimeout(timer)
-							if (isVote) {
-								var actionExecuted = pollAction(tootdata[9], tootdata[7], e)
-							} else {
-								// execute action on click and get result (fail/success)
-								var actionExecuted = await tootAction(tootdata[2], e)
 							}
-							if (!actionExecuted) {
-								log("Action failed.")
-							} else {
-								// redirect to home instance with the resolved toot url
-								redirectTo(tootdata[7])
-							}
-							// reset clicks
-							clicks = 0
 						}
 					}).on("dblclick", function(e) {
 						// default dblclick event must be prevented
@@ -1118,11 +1133,12 @@ async function processToots() {
 	})
 }
 
-// main function to listen for the follow button pressed and open a new tab with the home instance
-async function processFollow() {
+// main function to process profile views / follow buttons
+async function processProfile() {
 	// for mastodon v3 - v4 does not show follow buttons / account cards on /explore
 	async function process(el) {
-		var fullHandle
+		addFediElements()
+		var fullHandle, icon
 		var action = "follow"
 		var moreButton = $(el).siblings("button:has(i.fa-ellipsis-fw,i.fa-ellipsis-v,i.fa-ellipsis-h)")
 		// wrapper for follow/unfollow action
@@ -1132,12 +1148,24 @@ async function processFollow() {
 				var response = await executeAction(id, action, null)
 				// if action was successful, update button text and action value according to performed action
 				if (action == "follow" && response) {
-					$(el).text("Unfollow")
+					if ($(icon).length) {
+						$(icon).removeClass("fa-user-plus").addClass("fa-user")
+						$(el).append("-")
+						$(el).attr("title","Unfollow")
+					} else {
+						$(el).text("Unfollow")
+					}
 					action = "unfollow"
 					return true
 				// repeat for unfollow action
 				} else if (action == "unfollow" && response) {
-					$(el).text("Follow")
+					if ($(icon).length) {
+						$(icon).removeClass("fa-user").addClass("fa-user-plus")
+						$(el).contents().filter((_, node) => node.nodeType === 3).remove();
+						$(el).attr("title","Follow")
+					} else {
+						$(el).text("Follow")
+					}
 					action = "follow"
 					return true
 				}
@@ -1149,6 +1177,9 @@ async function processFollow() {
 		// for mastodon v3 explore page
 		if ($(el).closest("div.account-card").length) {
 			fullHandle = $(el).closest("div.account-card").find("div.display-name > span").text().trim()
+		} else if($(el).closest("div.directory__card").length) {
+			fullHandle = $(el).closest("div.directory__card").find("div.display-name > span").text().trim()
+			icon = $(el).find("i").first()
 		} else {
 			// for all other pages, where only one of the selection elements is present
 			for (const selector of profileNamePaths) {
@@ -1179,30 +1210,38 @@ async function processFollow() {
 					var isFollowing = await isFollowingHomeInstance([resolvedHandle[0]])
 					// update button text and action if already following
 					if (isFollowing[0]) {
-						$(el).text("Unfollow")
+						if ($(icon).length) {
+							$(icon).removeClass("fa-user-plus").addClass("fa-user")
+							$(el).append("-")
+							$(el).attr("title","Unfollow")
+						} else {
+							$(el).text("Unfollow")
+						}
 						action = "unfollow"
 					}
 					$(moreButton).on("click", function(e){
 						// prevent default and immediate propagation
 						e.preventDefault()
 						e.stopImmediatePropagation()
-						var modalLinks = []
-						if (isBlocked(fullHandle)) {
-							modalLinks.push(["unblock",resolvedHandle[0]])
-						} else {
-							modalLinks.push(["block",resolvedHandle[0]])
+						if (e.originalEvent.isTrusted) {
+							var modalLinks = []
+							if (isBlocked(fullHandle)) {
+								modalLinks.push(["unblock",resolvedHandle[0]])
+							} else {
+								modalLinks.push(["block",resolvedHandle[0]])
+							}
+							if (isMuted(fullHandle)) {
+								modalLinks.push(["unmute",resolvedHandle[0]])
+							} else {
+								modalLinks.push(["mute",resolvedHandle[0]])
+							}
+							if (isDomainBlocked(fullHandle)) {
+								modalLinks.push(["domainunblock",domain])
+							} else {
+								modalLinks.push(["domainblock",domain])
+							}
+							showModal(modalLinks)
 						}
-						if (isMuted(fullHandle)) {
-							modalLinks.push(["unmute",resolvedHandle[0]])
-						} else {
-							modalLinks.push(["mute",resolvedHandle[0]])
-						}
-						if (isDomainBlocked(fullHandle)) {
-							modalLinks.push(["domainunblock",domain])
-						} else {
-							modalLinks.push(["domainblock",domain])
-						}
-						showModal(modalLinks)
 					})
 					// single and double click handling (see toot processing for explanation, is the same basically)
 					var clicks = 0
@@ -1211,27 +1250,38 @@ async function processFollow() {
 						// prevent default and immediate propagation
 						e.preventDefault()
 						e.stopImmediatePropagation()
-						clicks++
-						if (clicks == 1) {
-							timer = setTimeout(async function() {
-								execFollow(resolvedHandle[0])
-								clicks = 0
-							}, 350)
-						} else {
-							clearTimeout(timer)
-							var done = await execFollow(resolvedHandle[0])
-							if (done) {
-								var saveText = $(el).text()
-								var redirectUrl = 'https://' + settings.fediact_homeinstance + '/@' + resolvedHandle[1]
-								$(el).text("Redirecting...")
-								setTimeout(function() {
-									redirectTo(redirectUrl)
-									$(el).text(saveText)
-								}, 1000)
+						if (e.originalEvent.isTrusted) {
+							clicks++
+							if (clicks == 1) {
+								timer = setTimeout(async function() {
+									execFollow(resolvedHandle[0])
+									clicks = 0
+								}, 350)
 							} else {
-								log("Action failed.")
+								clearTimeout(timer)
+								var done = await execFollow(resolvedHandle[0])
+								if (done) {
+									var redirectUrl = 'https://' + settings.fediact_homeinstance + '/@' + resolvedHandle[1]
+									if ($(icon).length) {
+										var classes = $(icon).attr("class")
+										$(icon).removeClass("fa-user").removeClass("fa-user-plus").addClass("fa-arrow-right")
+									} else {
+										var saveText = $(el).text()
+										$(el).text("Redirecting...")
+									}
+									setTimeout(function() {
+										redirectTo(redirectUrl)
+										if ($(icon).length) {
+											$(icon).attr("class", classes)
+										} else {
+											$(el).text(saveText)
+										}
+									}, 1000)
+								} else {
+									log("Action failed.")
+								}
+								clicks = 0
 							}
-							clicks = 0
 						}
 					}).on("dblclick", function(e) {
 						e.preventDefault()
@@ -1387,6 +1437,7 @@ async function backgroundProcessor() {
 			tmpSettings.processed = []
 			tmpSettings.processedFollow = []
 			tmpSettings.isProcessing = []
+			$(".fediactrunning").remove()
 			// rerun getSettings to keep mutes/blocks up to date while not reloading the page
 			if (!await getSettings()) {
 				// but reload if settings are invalid
@@ -1447,7 +1498,7 @@ async function run() {
 			if (tmpSettings.fedireply) {
 				processReply()
 			} else {
-				processFollow()
+				processProfile()
 				processToots()
 			}
 		} else {

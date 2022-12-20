@@ -12,7 +12,7 @@ A Chrome/Firefox extension that simplifies follow and post interactions on Masto
 
 **Supported browsers**:
 - All up-to-date Chromium browsers, including Kiwi and Yandex browsers on Android
-- Up-to-date Firefox (v107+), including Firefox Nightly on Android, Orion on iOS
+- Up-to-date Firefox (v107+), including Firefox Nightly on Android
 
 **Important notes**:
 - Data is processed locally only
@@ -35,9 +35,11 @@ A Chrome/Firefox extension that simplifies follow and post interactions on Masto
 [link-chrome]: https://chrome.google.com/webstore/detail/fediact/lmpcajpkjcclkjbliapfjfolocffednm 'Version published on Chrome Web Store'
 [link-firefox]: https://addons.mozilla.org/en-US/firefox/addon/fediact/ 'Version published on Mozilla Add-ons'
 
-[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/chrome/chrome.svg" width="48" alt="Chrome" valign="middle">][link-chrome] [<img valign="middle" src="https://img.shields.io/chrome-web-store/v/lmpcajpkjcclkjbliapfjfolocffednm.svg?label=%20">][link-chrome] and other Chromium browsers
+[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/chrome/chrome.svg" width="48" alt="Chrome" valign="middle">][link-chrome] [<img valign="middle" src="https://img.shields.io/chrome-web-store/v/lmpcajpkjcclkjbliapfjfolocffednm.svg?label=%20">][link-chrome]  
+and other Chromium browsers
 
-[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fediact.svg?label=%20%20">][link-firefox] including Nightly for Android, Orion on iOS
+[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fediact.svg?label=%20%20">][link-firefox]  
+including Nightly for Android
 
 > **Note**
 > 
@@ -54,7 +56,7 @@ If you like this addon, please consider donating: [paypal.me/lartsch](https://pa
 4. Check out the other settings (optional)
 5. Click the "Submit" button to save
 
-If you have set your home instance correctly, you can now interact on other Mastodon instances.
+If you have set your home instance correctly, you can now interact on other Mastodon instances. If FediAct is running, a small box will be displayed in the bottom right corner. Also, it is indicated while content is resolving / could not be resolved.
 
 ### Options explained
 
@@ -85,11 +87,17 @@ Yes! There are three options that I am aware of: Kiwi Browser (Chromium with add
 
 **Can I use this on iOS?**
 
-There is only one way to use FediAct on iOS: [Orion Browser](https://apps.apple.com/gb/app/orion-browser-by-kagi/id1484498200). As of now, this addon does **not** support Safari. Safari support will not happen at this time since Apple wants 99$ per year for the [Developer Program membership](https://developer.apple.com/support/compare-memberships), which is a requirement.
+Currently not in a reliable way, but:
+- It's possible that Orion Browser can soon be used (see issue [#16](https://github.com/Lartsch/FediAct/issues/16))
+- There are plans for Safari support (see issue [#17](https://github.com/Lartsch/FediAct/issues/17))
 
 **Can you add feature XY?**
 
 Feel free to create an issue here on GitHub and I will look into it.
+
+**Is this safe to use?**  
+This project is open source. Anyone with some programming knowledge can check out the source code, either here on GitHub or by extracting the addon file from the addon stores.  
+Considering the implementation, I am not aware of any risks. Efforts were made to prevent instances from abusing this addon to perform actions on the user's behalf (which already was a really specific and rather low risk). All data is stored in your browser locally. The only sensitive data it stores is your API token. This token is **only** sent to your home instance. No other data ever leaves your device. As far as I know, external instances cannot access the requests made by FediAct and can therefore not gain your token.
 
 ## Screenshots / GIFs
 v0.8.0

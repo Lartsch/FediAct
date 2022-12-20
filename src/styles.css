@@ -69,6 +69,25 @@
     color: orange
 }
 
+.fediactrunning {
+    position: fixed;
+    z-index: 99998;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.7);
+    color: white !important;
+    margin: 0;
+    padding: 10px 15px;
+}
+
+.fediactrunning span {
+    color: green !important;
+}
+
+.fediactrunning a {
+    color: white !important;
+}
+
 
 /*  
     We insert these styles for the DOMNodeAppeared function as separate stylesheet (see manifest) to fix
