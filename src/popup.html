@@ -240,17 +240,21 @@
 					<fieldset>
 						<h2>Mode</h2>
 						<div class="row">
-							<label for="runifloggedin">Enable Actions when logged in on other servers</label>
+							<label for="runifloggedin">Ignore sessions
+								<span>
+									Run FediAct on instances where I'm logged in
+								</span>
+							</label>
 							<input type="checkbox" id="runifloggedin" name="runifloggedin">
 						</div>
 					</fieldset>
 					<fieldset>
 						<h2>Filtered servers</h2>
 						<div class="row">
-							<label for="mode">Use...</label>
+							<label for="mode">Mode</label>
 							<select name="mode" id="mode" selected="blacklist">
-								<option id="blacklist" value="blacklist">Blacklist</option>
-								<option id="whitelist" value="whitelist">Whitelist</option>
+								<option id="blacklist" value="blacklist">Allowlist</option>
+								<option id="whitelist" value="whitelist">Denylist</option>
 							</select>
 						</div>
 						<div class="row">
