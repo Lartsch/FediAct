@@ -58,23 +58,7 @@ If you like this addon, please consider donating: [paypal.me/lartsch](https://pa
 
 If you have set your home instance correctly, you can now interact on other Mastodon instances. If FediAct is running, a small box will be displayed in the bottom right corner. Also, it is indicated while content is resolving / could not be resolved.
 
-### Options explained
-
-**Redirect settings**
-
-- Enable (default: on): Set if redirects (when replying or double-clicking) should be performed at all
-- Prompt (default: off): Set if a prompt should be displayed before redirecting, including the URL
-- Open in (default: same tab): Set if redirects should happen in the same or a new tab
-
-**Other**
-
-- Actions (default: on): Set if actions (following, boosting, etc.) should be performed when clicking or double clicking - _**Usage tip:** Disable this if you only want redirects on double click or when replying without automatically performing the action_
-- Hide muted/blocked (default: off): If enabled, your blocked/muted users/instances will be synched every 60 seconds and all matching toots, boosts and toots with mentions will be hidden - _**Note:** There are cases where hiding can fail and this is disabled by default because it can decrease performance_
-- API delay (default: on): If enabled, there can only be one API request to your home instance per 500ms - _**Note:** Disabling this will likely result in the extension not working because your home instance uses rate limiting if too many requests come from your IP. 500ms has proven to prevent error 429 for the instances I have tested_
-
-**Mode**
-- Run if logged in (default: off): Enable FediAct on external instances if you are logged in there as well
-- Blacklist (default) / Whitelist: Run the extension on _all_ domains except those on the blacklist / Run the extension on _no_ domains except those on the whitelist
+**Please note:** It is NOT recommended to disable the API delay, since most instances use rate limiting and might block your requests if they happen too frequent, which will lead to FediAct not working anymore.
 
 ## FAQ
 **Why does it need permission for all websites?**
