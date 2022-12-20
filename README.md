@@ -45,6 +45,7 @@ including Nightly for Android
 > 
 > - **If webstore release is outdated, use the [manual installation method](#manual-installation) to install the latest version**  
 > - **Special installation steps for [Firefox on Android](#install-in-firefox-for-android)**
+> - Chrome store updates take 1-2 days longer
 
 If you like this addon, please consider donating: [paypal.me/lartsch](https://paypal.me/lartsch)
 
