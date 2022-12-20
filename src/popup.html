@@ -1,62 +1,274 @@
 <!DOCTYPE html>
 <html>
   <head>
+		<link rel="stylesheet" href="chrome://browser/content/extension.css">
+		<meta name="color-scheme" content="dark light">
 		<style>
+			html, body {
+				margin: 0;
+			}
+			html {
+				--highlight: rgba(130,130,150,0.1);
+				--hover: rgba(120,120,130,0.15);
+				--border: rgba(120,120,130,0.3);
+				--border-2: rgba(130,130,150,0.3);
+				--radius: 12px;
+				--popup-height: 400px;
+				overflow: hidden !important;
+				height: var(--popup-height);
+			}
+			body {
+				width: 300px;
+				overflow: hidden;
+			}
 			.hide {
 				display: none;
 			}
-			label.pad {
-				margin-bottom: 4px;
-				display: block;
+			h1 {
+				font-size: 1em;
+				margin-block: .2em;
 			}
-			p {
-				margin-bottom: 5px;
+			h2 {
+				font-size: 1em;
+			}
+			#mhi-wrapper, #mhi-containers {
+				display: contents;
+			}
+			form {
+				display: flex;
+				flex-direction: column;
+				height: 100vh;
+			}
+			.scroller {
+				height: 0;
+				overflow-y: auto;
+				flex-grow: 1;
+				padding: 6px;
+				box-sizing: border-box;
+			}
+			fieldset {
+				border: 0;
+				padding: 0;
+				margin: 0;
+			}
+			fieldset > h2, summary {
+				margin-inline: .6em;
+				margin-bottom: .4em;
+			}
+			.row {
+				background-color: var(--highlight);
+				padding: .8em;
+				box-sizing: border-box;
+				display: flex;
+				flex-wrap: wrap;
+				margin-bottom: 2px;
+				position: relative;
+				gap: .4em;
+				transition: background-color .1s;
+			}
+			.row:hover, .row:focus-within {
+				background: var(--hover);
+			}
+			.row:first-of-type {
+				border-top-left-radius: var(--radius);
+				border-top-right-radius: var(--radius);
+			}
+			.row:last-of-type {
+				border-bottom-left-radius: var(--radius);
+				border-bottom-right-radius: var(--radius);
+			}
+			label {
+				width: 0;
+				flex-grow: 9999;
+			}
+			label::before { /* Make entire .row clickable */
+				content: "";
+				position: absolute;
+				inset: 0;
+			}
+			label span {
+				display: block;
+				font-size: .9em;
+				opacity: .7;
+				margin-top: .2em;
+			}
+			input[type="text"] {
+				width: 100%;
+			}
+			input, textarea, select {
+				border: 1px solid var(--border);
+				padding: .7em;
+				border-radius: calc(var(--radius) / 2);
+				font-size: inherit;
+				flex-grow: 1;
+				box-sizing: border-box;
+				position: relative;
+				z-index: 2;
+			}
+			.textarea-container {
+				width: calc(100% - .14em);
+				border-radius: inherit;
+			}
+			textarea {
+				resize: vertical;
+				width: 100%;
+			}
+			select {
+				margin-block: -.8em;
+				padding-block: .4em;
+				border: 0;
+				background: none;
+				text-align: right;
+			}
+			.footer {
+				padding: 6px;
+				display: flex;
+				flex-wrap: wrap;
+				align-items: center;
+				justify-content: space-between;
+				border-top: 1px dashed var(--border-2);
+				position: relative;
+				background-color: var(--highlight);
+				box-shadow: 0 0 24px rgba(0,0,0,0.1);
+			}
+			[type="submit"] {
+				flex-grow: 0;
+				padding-inline: 2em;
+			}
+			[type="submit"]:not(:hover):not(:focus) {
+				background: none;
+			}
+			.footer span {
+				width: 0;
+				flex-grow: 1;
+				text-align: right;
+				padding-inline: 1em;
+			}
+			.footer a {	
+				opacity: .7;
+				text-underline-offset: .2em;
+				color: inherit;
+			}
+			#indicator {
+				order: -1;
+				width: calc(100% + 12px);
+				font-weight: 600;
+				padding: .7em;
+				margin: -6px;
+				margin-bottom: 8px;
+				background-color: var(--highlight);
+				text-align: center;
+			}
+			@media (prefers-color-scheme: dark) {
+				body {
+					color: white;
+				}
 			}
 		</style>
 		<script src="lib/jquery-3.6.1.min.js"></script>
 		<script src="popup.min.js"></script>
   </head>
-  <body style="min-width: 350px; font-size:12px; padding: 10px">
-   <div id="mhi-wrapper">
-    <div id="mhi-containers">
+  <body>
+	<div id="mhi-wrapper">
+		<div id="mhi-containers">
 			<form id="fediact-settings">
-				<p><b>Home instance</b></p>
-				<label class="pad" for="homeinstance">Make sure you are logged in to the instance you set here:</label>
-				<input type="text" id="homeinstance" name="homeinstance" placeholder="example.social"><br>
-				<p><b>Redirect settings</b></p>
-				<input type="checkbox" id="redirects" name="redirects">
-				<label for="redirects">Enable</label><br>
-				<input type="checkbox" id="alert" name="alert">
-				<label for="alert">Prompt</label><br>
-				<label style="padding-right: 5px" for="target">Open in...</label>
-				<select style="margin-top: 5px;" name="target" id="target" selected="_blank">
-					<option id="target_blank" value="_blank">New tab</option>
-					<option id="target_self" value="_self">Same tab</option>
-				</select><br>
-				<p><b>Other</b></p>
-				<input type="checkbox" id="autoaction" name="autoaction">
-				<label for="autoaction">Actions</label><br>
-				<input type="checkbox" id="hidemuted" name="hidemuted">
-				<label for="hidemuted">Hide muted/blocked</label><br>
-				<input type="checkbox" id="delay" name="delay">
-				<label for="delay">API delay</label><br>
-				<p><b>Mode</b></p>
-				<input type="checkbox" id="runifloggedin" name="runifloggedin">
-				<label for="runifloggedin">Run if logged in</label><br>
-				<label style="padding-right: 5px" for="mode">Use...</label>
-				<select style="margin-top: 5px;" name="mode" id="mode" selected="blacklist">
-					<option id="blacklist" value="blacklist">Blacklist</option>
-					<option id="whitelist" value="whitelist">Whitelist</option>
-				</select><br>
-				<div style="margin-top: 5px;" class="hide" id="blacklist_input">
-					<textarea id="blacklist_content" name="blacklist_content" placeholder="example.social&#10;example2.social"></textarea><br>
+				<div class="scroller">
+					<fieldset>
+						<div class="row">
+							<label for="homeinstance">
+								<h1>Home Server Domain</h1>
+								<span>
+									Make sure you are logged into your home server
+								</span>
+							</label>
+							<input type="text" id="homeinstance" name="homeinstance" placeholder="example.social">
+						</div>
+					</fieldset>
+					<fieldset>
+						<h2>Redirect Settings</h2>
+						<div class="row">
+							<label for="redirects">Enable
+								<span>
+									Redirect to home server on double-click
+								</span>
+							</label>
+							<input type="checkbox" id="redirects" name="redirects">
+						</div>
+						<div class="row">
+							<label for="alert">Prompt
+								<span>
+									Show confirmation dialog before redirecting
+								</span>
+							</label>
+							<input type="checkbox" id="alert" name="alert">
+						</div>
+						<div class="row">
+							<label for="target">Open in...</label>
+							<select name="target" id="target" selected="_blank">
+								<option id="target_blank" value="_blank">New tab</option>
+								<option id="target_self" value="_self">Same tab</option>
+							</select>
+						</div>
+					</fieldset>
+					<fieldset>
+						<h2>Other Settings</h2>
+						<div class="row">
+							<label for="autoaction">Actions
+								<span>
+									Enable following, boosting, etc. from logged out servers 
+								</span>
+							</label>
+							<input type="checkbox" id="autoaction" name="autoaction">
+						</div>
+						<div class="row">
+							<label for="hidemuted">Hide muted/blocked
+								<span>
+									Note: May fail / decrease performance
+								</span>
+							</label>
+							<input type="checkbox" id="hidemuted" name="hidemuted">
+						</div>
+						<div class="row">
+							<label for="delay">API delay
+								<span>
+									Only allow one API request every 500ms
+								</span>
+							</label>
+							<input type="checkbox" id="delay" name="delay">
+						</div>
+					</fieldset>
+					<fieldset>
+						<h2>Mode</h2>
+						<div class="row">
+							<label for="runifloggedin">Enable Actions when logged in on other servers</label>
+							<input type="checkbox" id="runifloggedin" name="runifloggedin">
+						</div>
+					</fieldset>
+					<fieldset>
+						<h2>Filtered servers</h2>
+						<div class="row">
+							<label for="mode">Use...</label>
+							<select name="mode" id="mode" selected="blacklist">
+								<option id="blacklist" value="blacklist">Blacklist</option>
+								<option id="whitelist" value="whitelist">Whitelist</option>
+							</select>
+						</div>
+						<div class="row">
+							<div class="hide textarea-container" id="blacklist_input">
+								<textarea id="blacklist_content" name="blacklist_content" placeholder="example.social&#10;example2.social"></textarea>
+							</div>
+							<div class="hide textarea-container" id="whitelist_input">
+								<textarea id="whitelist_content" name="whitelist_content" placeholder="example.social&#10;example2.social"></textarea>
+							</div>
+						</div>
+					</fieldset>
 				</div>
-				<div style="margin-top: 5px;" class="hide" id="whitelist_input">
-					<textarea id="whitelist_content" name="whitelist_content" placeholder="example.social&#10;example2.social"></textarea><br>
-				</div><br>
-				<input type="submit" value="Submit">
-				<span id="indicator" style="display:none">Settings saved!</span>
-				<br><br><span>Information and help at <a target="_blank" href="https://github.com/lartsch/FediAct">github.com/lartsch/FediAct</a></span><br>
+				<div class="footer">
+					<input type="submit" value="Save">
+					<span id="indicator" style="display:none">Settings saved!</span>
+					<span><a target="_blank" href="https://github.com/lartsch/FediAct">More info / help on Github</a></span>
+
+				</div>
 			</form>
     </div>
    </div>
