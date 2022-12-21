@@ -887,7 +887,7 @@ async function processToots() {
 				// is the toot unresolved?
 				if (!tootdata[1]) {
 					// yes, then add the Unresolved indicator
-					$("<span class='fediactunresolved'>Unresolved</span>").insertAfter($(favButton))
+					$("<span class='fediactunresolved'>X</span>").insertAfter($(favButton))
 				} else {
 					// otherwise start processing button styles (if enabled OR if the toot was already interacted with, to restore the state while still on the same page)
 					// first enable the bookmark button (is disabled on external instances)

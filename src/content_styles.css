@@ -65,6 +65,7 @@
 
 .fediactunresolved {
     color: orange;
+    font-weight: bold;
     padding-right: 10px;
     padding-left: 10px
 }
