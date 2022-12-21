@@ -8,7 +8,7 @@ A Chrome/Firefox extension that simplifies follow and post interactions on Masto
 - Single click to execute action only, double click to redirect to content on home server
 - Reply button on external servers always redirects to home server and enters reply-mode
 - Hide muted content on external servers if enabled
-- Needs nothing more than your home instance domain to work
+- Needs nothing more than your home server domain to work
 
 **Supported browsers**:
 - All up-to-date Chromium browsers, including Kiwi and Yandex browsers on Android
