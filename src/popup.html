@@ -91,7 +91,14 @@
 					<fieldset>
 						<h2>Filtered servers</h2>
 						<div class="row">
-							<label for="mode">Mode</label>
+							<label for="mode">Mode
+								<span class="hide" id="allowlabel">
+									Only run on the following domains...
+								</span>
+								<span class="hide" id="denylabel">
+									Run on all domains except the following...
+								</span>
+							</label>
 							<select name="mode" id="mode" selected="blacklist">
 								<option id="blacklist" value="blacklist">Denylist&nbsp;</option>
 								<option id="whitelist" value="whitelist">Allowlist&nbsp;</option>

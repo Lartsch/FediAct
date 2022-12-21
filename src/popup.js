@@ -76,17 +76,23 @@ function popupTasks() {
 		// both containers are hidden by default
 		if ($("select#mode").val() == "whitelist") {
 			$("div#whitelist_input").removeClass("hide")
+			$("span#allowlabel").removeClass("hide")
 		} else {
 			$("div#blacklist_input").removeClass("hide")
+			$("span#denylabel").removeClass("hide")
 		}
 		// check changes of the select to update whitelist/blacklist input
 		$("select#mode").change(function() {
 			if ($("select#mode").val() == "whitelist") {
 				$("div#blacklist_input").addClass("hide")
+				$("span#denylabel").addClass("hide")
 				$("div#whitelist_input").removeClass("hide")
+				$("span#allowlabel").removeClass("hide")
 			} else {
 				$("div#whitelist_input").addClass("hide")
+				$("span#allowlabel").addClass("hide")
 				$("div#blacklist_input").removeClass("hide")
+				$("span#denylabel").removeClass("hide")
 			}
 		})
 	}
