@@ -8,7 +8,7 @@ A Chrome/Firefox extension that simplifies follow and post interactions on Masto
 - Single click to execute action only, double click to redirect to content on home server
 - Reply button on external servers always redirects to home server and enters reply-mode
 - Hide muted content on external servers if enabled
-- Needs nothing more than your home instance domain to work
+- Needs nothing more than your home server domain to work
 
 **Supported browsers**:
 - All up-to-date Chromium browsers, including Kiwi and Yandex browsers on Android
@@ -86,7 +86,7 @@ This project is open source. Anyone with some programming knowledge can check ou
 Considering the implementation, I am not aware of any risks. Efforts were made to prevent servers from abusing this addon to perform actions on the user's behalf. It does not require your username or password. All data is stored in your browser locally. The only sensitive data it stores is your API token. This token is **only** sent to your home server. No other data ever leaves your device. As far as I know, external servers cannot access the requests made by FediAct and can therefore not gain your token.
 
 ## Screenshots / GIFs
-v0.8.0
+v0.8.0 (outdated - and too lazy to make new screenshots/GIF)
 <details>
   <summary>Extension popup / settings</summary>
   <img src="https://github.com/lartsch/FediAct/blob/main/img/settings.png?raw=true">
