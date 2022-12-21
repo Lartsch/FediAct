@@ -76,8 +76,8 @@
 }
 
 .fediactvoted > a {
-    font-weight: bold;
-    color: orange
+    font-weight: bold !important;
+    color: orange !important;
 }
 
 /* Inserted in the bottom right of any external instance where FediAct is running */

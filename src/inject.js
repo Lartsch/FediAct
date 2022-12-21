@@ -7,7 +7,7 @@ const profileNamePaths = ["div.account__header__tabs__name small", "div.public-a
 const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/
 const handleExtractUrlRegex = /^(?<domain>https?:\/\/(?:\.?[a-z0-9-]+)+(?:\.[a-z]+){1})?\/?@(?<handle>\w+)(?:@(?<handledomain>(?:[\w-]+\.)+?\w+))?(?:\/(?<tootid>\d+))?\/?$/
 const handleExtractUriRegex = /^(?<domain>https?:\/\/(?:\.?[a-z0-9-]+)+(?:\.[a-z]+){1})(?:\/users\/)(?<handle>\w+)(?:(?:\/statuses\/)(?<tootid>\d+))?\/?$/
-const enableConsoleLog = true
+const enableConsoleLog = false
 const logPrepend = "[FediAct]"
 const instanceApi = "/api/v1/instance"
 const statusApi = "/api/v1/statuses"
@@ -20,7 +20,6 @@ const pollsApi = "/api/v1/polls"
 const apiDelay = 500
 const maxTootCache = 200
 const modalHtml = '<div class="fediactmodal"><div class="fediactmodalinner"><ul class="fediactmodallist"></ul></div></div>'
-const timeout = 15000
 
 // settings keys with defauls
 var settings = {}
@@ -145,47 +144,22 @@ async function makeRequest(method, url, extraheaders, jsonbody) {
 		// TODO: move this to the top? or get new Date.now() here?
 		tmpSettings.lasthomerequest = currenttime
 	}
-	// return a new promise...
-    return new Promise(function (resolve) {
-		// create xhr
-        let xhr = new XMLHttpRequest()
-		// open it with the method and url specified
-        xhr.open(method, url)
-		// set timeout
-        xhr.timeout = timeout
-		// set extra headers if any were given
-		if (extraheaders) {
-			for (var key in extraheaders) {
-				xhr.setRequestHeader(key, extraheaders[key])
-			}
+	return new Promise(async function(resolve) {
+		try {
+			await chrome.runtime.sendMessage({requestdata: [method, url, extraheaders, jsonbody]}, function(response) {
+				if(response) {
+					resolve(response)
+				} else {
+					resolve(false)
+				}
+			})
+		} catch (e) {
+			// if we encounter an error here, it is likely since the extension context got invalidated, so reload the page
+			log(e)
+			log("Reloading page, extension likely got updated or reloaded.")
+			location.reload()
 		}
-		// on load, check if status is OK...
-        xhr.onload = function () {
-            if (this.status >= 200 && this.status < 300) {
-				// is ok, resolve promise with response
-                resolve(xhr.responseText)
-            } else {
-				// nope, resolve false
-                resolve(false)
-            }
-        }
-		xhr.ontimeout = function() {
-			log("Timed out")
-			resolve(false)
-		}
-		// on any error, resolve false
-		xhr.onerror = function() {
-			log("Request to " + url + " failed.")
-			resolve(false)
-		}
-		// send the request
-		if (jsonbody) {
-			xhr.setRequestHeader("Content-Type","application/json")
-			xhr.send(JSON.stringify(jsonbody))
-		} else {
-			xhr.send()
-		}
-    })
+	})
 }
 
 // Escape characters used for regex
@@ -447,7 +421,7 @@ function resolveTootToExternalHome(tooturl) {
 	if (tooturl) {
 		return new Promise(async function(resolve) {
 			try {
-				await chrome.runtime.sendMessage({url: tooturl}, function(response) {
+				await chrome.runtime.sendMessage({externaltoot: tooturl}, function(response) {
 					if(response) {
 						resolve(response)
 					} else {
@@ -524,23 +498,28 @@ function addToProcessedToots(toot) {
 }
 
 async function updateMutedBlocked() {
-	// set empty initially
-	[settings.fediact_mutes, settings.fediact_blocks, settings.fediact_domainblocks] = [[],[],[]]
-	var [mutes, blocks, domainblocks] = await Promise.all([
-		fetch("https://" + settings.fediact_homeinstance + mutesApi, {headers: {"Authorization": "Bearer "+settings.fediact_token}}).then((response) => response.json()),
-		fetch("https://" + settings.fediact_homeinstance + blocksApi, {headers: {"Authorization": "Bearer "+settings.fediact_token}}).then((response) => response.json()),
-		fetch("https://" + settings.fediact_homeinstance + domainBlocksApi, {headers: {"Authorization": "Bearer "+settings.fediact_token}}).then((response) => response.json())
-	])
-	if (mutes.length) {
-		settings.fediact_mutes.push(...mutes.map(acc => acc.acct))
+	var res = await new Promise(async function(resolve) {
+		try {
+			await chrome.runtime.sendMessage({updatemutedblocked: true}, function(response) {
+				if (response) {
+					resolve(response)
+				} else {
+					resolve(false)
+				}
+			})
+		} catch (e) {
+			// if we encounter an error here, it is likely since the extension context got invalidated, so reload the page
+			log(e)
+			log("Reloading page, extension likely got updated or reloaded.")
+			location.reload()
+		}
+	})
+	if (res) {
+		if (!await getSettings()) {
+			// but reload if settings are invalid
+			location.reload()
+		}
 	}
-	if (blocks.length) {
-		settings.fediact_blocks.push(...blocks.map(acc => acc.acct))
-	}
-	if (domainblocks.length) {
-		settings.fediact_domainblocks = domainblocks
-	}
-	updateSettings()
 }
 
 function showModal(settings) {
@@ -594,14 +573,18 @@ function addFediElements() {
 		$("body").append("<div class='fediacticon'></div>")
 		$("body").append("<div class='fediactsettings_onsite'><div class='fediactsettings_onsite_inner'><a href='https://" + settings.fediact_homeinstance + "' target='" + settings.fediact_target + "'>Go home</a></div></div>")
 		function fediSettingsHandler(e) {
-			if (e.originalEvent.isTrusted) {
-				if ($(e.target).is("div.fediacticon")) {
-					$("div.fediacticon").hide()
-					$("div.fediactsettings_onsite").show()
-				} else {
-					$("div.fediactsettings_onsite").hide()
-					$("div.fediacticon").show()
+			try {
+				if (e.originalEvent.isTrusted) {
+					if ($(e.target).is("div.fediacticon")) {
+						$("div.fediacticon").hide()
+						$("div.fediactsettings_onsite").show()
+					} else {
+						$("div.fediactsettings_onsite").hide()
+						$("div.fediacticon").show()
+					}
 				}
+			} catch {
+				$.noop()
 			}
 		}
 		$("body").on("click", fediSettingsHandler)
@@ -799,6 +782,7 @@ async function processToots() {
 		// do we have one of those?
 		if (internalIdentifier) {
 			var homeResolveStrings = []
+			var hasHiddenPoll = false
 			// check if id is already cached
 			var cacheIndex = isInProcessedToots(internalIdentifier)
 			// get all button elements of this toot
@@ -813,7 +797,15 @@ async function processToots() {
 			}
 			var bookmarkButton = $(el).find("button:has(i.fa-bookmark)").first()
 			var replyButton = $(el).find("button:has(i.fa-reply), button:has(i.fa-reply-all), a.icon-button:has(i.fa-reply), a.icon-button:has(i.fa-reply-all)").first()
+			var spoilerButton = $(el).find('button[class*="show-more"]').first()
 			var voteButton = $(el).find("div.poll button").first()
+			if ($(spoilerButton).length) {
+				$(spoilerButton).click()
+				if ($(el).find("div.poll").length) {
+					hasHiddenPoll = true
+				}
+				$(spoilerButton).click()
+			}
 			var moreButton = $(el).find("button:has(i.fa-ellipsis-h,i.fa-ellipsis-fw,i.fa-ellipsis-v)").first()
 			// handles process when a vote button is clicked
 			async function pollAction(id, redirect, e) {
@@ -901,6 +893,31 @@ async function processToots() {
 					// first enable the bookmark button (is disabled on external instances)
 					$(bookmarkButton).removeClass("disabled").removeAttr("disabled")
 					$(moreButton).removeClass("disabled").removeAttr("disabled")
+					// special care for polls that are hidden behind a CW
+					if (tootdata[13]) {
+						// click initially to show content
+						$(spoilerButton).click()
+						$(spoilerButton).find("span").text("Show less")
+						// set voteButton
+						voteButton = $(el).find("div.poll button").first()
+						// set handling for all new clicks
+						$(spoilerButton).on("click", function(e) {
+							// prevent default etc.
+							e.preventDefault()
+							e.stopImmediatePropagation()
+							var spanText = $(spoilerButton).find("span")
+							if ($(spanText).text() == "Show less") {
+								$(spanText).text("Show more")
+							} else {
+								$(spanText).text("Show less")
+							}
+							// toggle the css manually to hide/show the content/poll
+							toggleInlineCss($(el).find("div.poll").first(),[["display","block","none"]], "fedihideshow")
+							toggleInlineCss($(el).find("div.status__content__text").first(),[["display","block","none"]], "fedihideshow")
+						})
+						// click again so it is hidden by default, like usually
+						$(spoilerButton).click()
+					}
 					$(voteButton).removeAttr("disabled")
 					// set the toot buttons to active, depending on the state of the resolved toot and if the element already has the active class
 					if (tootdata[4]) {
@@ -1110,8 +1127,9 @@ async function processToots() {
 								// set the redirect to home instance URL in @ format
 								var redirectUrl = 'https://' + settings.fediact_homeinstance + "/@" + resolvedToot[0] + "/" + resolvedToot[1]
 								// prepare the cache entry / toot data entry
-								var fullEntry = [internalIdentifier, ...resolvedToot, redirectUrl, true, ...poll, false, homeResolveString]
-								// 0: internal identifier; 1: toot home acct / false 2: toot home id 3: toot reblogged 4: toot favourited 5: toot bookmarked 6: home account id 7: redirect url 8: ??? crap! 9: poll id / false 10: poll voted 11: interacted 12: original URL that was resolved
+								var fullEntry = [internalIdentifier, ...resolvedToot, redirectUrl, true, ...poll, false, homeResolveString, hasHiddenPoll]
+								// 0: internal identifier; 1: toot home acct / false 2: toot home id 3: toot reblogged 4: toot favourited 5: toot bookmarked 6: home account id
+								// 7: redirect url 8: ??? crap! 9: poll id / false 10: poll voted 11: interacted 12: original URL that was resolved 13: has hidden poll?
 							}
 						}
 					}
@@ -1432,6 +1450,7 @@ async function checkSite() {
 	var requestUrl = location.protocol + '//' + location.hostname + instanceApi
 	// call instance api to confirm its mastodon and get normalized handle uri
 	var response = await makeRequest("GET", requestUrl, null, null)
+	// todo: add basic check for "mastodon" string in response
 	if (response) {
 		var uri = JSON.parse(response).uri
 		if (uri) {
@@ -1472,7 +1491,11 @@ async function backgroundProcessor() {
 			tmpSettings.isProcessing = []
 			$(".fediacticon").remove()
 			$(".fediactsettings_onsite").remove()
-			$("body").off("click", fediSettingsHandler)
+			try {
+				$("body").off("click", fediSettingsHandler)
+			} catch {
+				$.noop()
+			}
 			// rerun getSettings to keep mutes/blocks up to date while not reloading the page
 			if (!await getSettings()) {
 				// but reload if settings are invalid
@@ -1514,14 +1537,6 @@ function getSettings() {
 			resolve(false)
 		}
 	})
-}
-
-async function updateSettings() {
-	await (browser || chrome).storage.local.set(settings)
-	if (!await getSettings()) {
-		// but reload if settings are invalid
-		location.reload()
-	}
 }
 
 // run wrapper

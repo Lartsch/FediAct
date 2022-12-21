@@ -6,9 +6,7 @@ const mutesApi = "/api/v1/mutes"
 const blocksApi = "/api/v1/blocks"
 const domainBlocksApi = "/api/v1/domain_blocks"
 const timeout = 15000
-
 const tokenRegex = /"access_token":".*?",/gm
-
 // required settings keys with defauls
 const settingsDefaults = {
 	fediact_homeinstance: null
@@ -22,7 +20,7 @@ function log(text) {
 }
 
 // get redirect url (it will be the url on the toot authors home instance)
-async function resolveToot(url) {
+async function resolveExternalTootHome(url) {
     return new Promise(async function(resolve) {
         try {
             const controller = new AbortController()
@@ -34,6 +32,49 @@ async function resolveToot(url) {
             clearTimeout(timeoutId)
             if (res.redirected) {
                 resolve(res.url)
+            } else {
+                resolve(false)
+            }
+        } catch(e) {
+            log(e)
+            resolve(false)
+        }
+    })
+}
+
+// get redirect url (it will be the url on the toot authors home instance)
+async function generalRequest(data) {
+    return new Promise(async function(resolve) {
+        try {
+            const controller = new AbortController()
+            const timeoutId = setTimeout(() => {
+                log("Timed out")
+                controller.abort()
+            }, timeout)
+            if (data[3]) {
+                data[2]["Content-Type"] = "application/json"
+                var res = await fetch(data[1], {
+                    method: data[0],
+                    signal: controller.signal,
+                    headers: data[2],
+                    body: JSON.stringify(data[3])
+                })
+            } else if (data[2]) {
+                var res = await fetch(data[1], {
+                    method: data[0],
+                    signal: controller.signal,
+                    headers: data[2]
+                })
+            } else {
+                var res = await fetch(data[1], {
+                    method: data[0],
+                    signal: controller.signal
+                })
+            }
+            clearTimeout(timeoutId)
+            if (res.status  >= 200 && res.status < 300) {
+                var restext = await res.text()
+                resolve(restext)
             } else {
                 resolve(false)
             }
@@ -155,13 +196,22 @@ chrome.alarms.onAlarm.addListener(fetchData)
 // different listeners for inter-script communication
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     // the content script gave us an url to perform a 302 redirect with
-    if(request.url) {
-        resolveToot(request.url).then(sendResponse)
+    if(request.externaltoot) {
+        resolveExternalTootHome(request.externaltoot).then(sendResponse)
+        return true
+    }
+    // the content script gave us an url to perform a 302 redirect with
+    if(request.requestdata) {
+        generalRequest(request.requestdata).then(sendResponse)
         return true
     }
     // immediately fetch api token after settings are updated
     if (request.updatedsettings) {
         fetchData().then(reloadListeningScripts)
+        return true
+    }
+    if (request.updatemutedblocked) {
+        fetchMutesAndBlocks().then((browser || chrome).storage.local.set(settings)).then(sendResponse)
         return true
     }
     // when the content script starts to process on a site, listen for tab changes (url)
