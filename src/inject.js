@@ -527,7 +527,7 @@ function showModal(settings) {
 	var baseEl = $(modalHtml)
 	var appendTo = $(baseEl).find("ul")
 	for (const entry of settings) {
-		var append = "<li class='fediactmodalitem'><a class='fediactmodallink' fediactaction='" + entry[0] + "' fediactdata='" + entry[1] + "'>" + entry[2] + "</a></li>"
+		var append = "<li class='fediactmodalitem'><a class='fediactmodallink' fediactaction='" + entry[0] + "' fediactdata='" + entry[1] + "'><span>" + entry[2] + "</span></a></li>"
 		$(appendTo).append($(append))
 	}
 	$("body").append($(baseEl))
@@ -541,7 +541,10 @@ function showModal(settings) {
 				var data = $(e.target).attr("fediactdata")
 				var done = executeAction(data, action, null)
 				if (done) {
-					$(e.target).append(document.createTextNode(" - Done!"))
+					$(e.target).addClass("activated")
+					$(e.target).append("<span>Done!</span>")
+					$(baseEl).css("animation", "fadeOut .2s .7s forwards")
+					$(baseEl).find(".fediactmodalinner").css("animation", "scaleInFade .2s .7s forwards reverse")
 					await new Promise(resolve => {
 						setTimeout(function() {
 							resolve()
@@ -550,7 +553,11 @@ function showModal(settings) {
 					$(baseEl).remove()
 					$("body").off("click", handleModalEvent)
 				} else {
-					$(e.target).append(document.createTextNode(" - Failed!"))
+					$(e.target).css("--confirmation", "red")
+					$(e.target).addClass("activated")
+					$(e.target).append("<span>Failed</span>")
+					$(baseEl).css("animation", "fadeOut .2s .7s forwards")
+					$(baseEl).find(".fediactmodalinner").css("animation", "scaleInFade .2s .7s forwards reverse")
 					await new Promise(resolve => {
 						setTimeout(function() {
 							resolve()
