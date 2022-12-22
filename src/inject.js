@@ -553,6 +553,8 @@ function showModal(settings) {
 					$(baseEl).remove()
 					$("body").off("click", handleModalEvent)
 				} else {
+					$(e.target).css("--confirmation", "red")
+					$(e.target).addClass("activated")
 					$(e.target).append("<span>Failed</span>")
 					$(baseEl).css("animation", "fadeOut .2s .7s forwards")
 					$(baseEl).find(".fediactmodalinner").css("animation", "scaleInFade .2s .7s forwards reverse")
