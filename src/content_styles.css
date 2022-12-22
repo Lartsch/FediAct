@@ -154,6 +154,11 @@
     color: blue !important;
 }
 
+/* Needed for pleroma to grab external source href */
+body div#popovers {
+    display: none !important;
+}
+
 /* Keyframes */
 
 @keyframes fadeIn {
@@ -230,7 +235,8 @@ div.account-card a.logo-button,
 div.directory-card a.icon-button,
 div.detailed-status a.logo-button,
 button.remote-button,
-script#initial-state { 
+script#initial-state,
+div.Status { 
     -webkit-animation-name: nodeInserted !important;
     -webkit-animation-duration: 0.001s !important;
     -ms-animation-name: nodeInserted !important;

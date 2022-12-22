@@ -7,7 +7,7 @@ const profileNamePaths = ["div.account__header__tabs__name small", "div.public-a
 const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/
 const handleExtractUrlRegex = /^(?<domain>https?:\/\/(?:\.?[a-z0-9-]+)+(?:\.[a-z]+){1})?\/?@(?<handle>\w+)(?:@(?<handledomain>(?:[\w-]+\.)+?\w+))?(?:\/(?<tootid>\d+))?\/?$/
 const handleExtractUriRegex = /^(?<domain>https?:\/\/(?:\.?[a-z0-9-]+)+(?:\.[a-z]+){1})(?:\/users\/)(?<handle>\w+)(?:(?:\/statuses\/)(?<tootid>\d+))?\/?$/
-const enableConsoleLog = false
+const enableConsoleLog = true
 const logPrepend = "[FediAct]"
 const instanceApi = "/api/v1/instance"
 const statusApi = "/api/v1/statuses"
@@ -687,6 +687,8 @@ async function processToots() {
 		// find the element containing the display name and return text if found
 		if ($(el).find("span.display-name__account").length) {
 			return $(el).find("span.display-name__account").first().text().trim()
+		} else if ($(el).find("a.account-name").length) {
+			return $(el).find("a.account-name").first().text().trim()
 		}
 	}
 	// check elements that can contain the local toot id and return it if found
@@ -703,6 +705,11 @@ async function processToots() {
 		// otherwise do the same for any closest article or div with the data-id attribute
 		} else if ($(el).closest("article[data-id], div[data-id]").length) {
 			return $(el).closest("article[data-id], div[data-id]").first().attr("data-id").split("-").slice(-1)[0]
+		// pleroma
+		} else if ($(el).find("span.heading-right a[href].timeago").length) {
+			var temp = $(el).find("span.heading-right a[href].timeago").first().attr("href").split("/")
+			return (temp.pop() || temp.pop())
+		// v3 stuff
 		} else if ($(el).find("a.icon-button:has(i.fa-star), a.detailed-status__link:has(i.fa-star)").length) {
 			var hrefEl = $(el).find("a.icon-button:has(i.fa-star), a.detailed-status__link:has(i.fa-star)").first()
 			if ($(hrefEl).attr("href")) {
@@ -724,6 +731,18 @@ async function processToots() {
 			return tootHrefCheck($(el).find("a.detailed-status__datetime").first().attr("href").split("?")[0])
 		} else if ($(el).find("a.modal-button").length) {
 			return tootHrefCheck($(el).find("a.modal-button").first().attr("href").split("?")[0])
+		// pleroma
+		} else if ($(el).find("span.ExtraButtons button.popover-trigger-button").length) {
+			var tmpMore = $(el).find("span.ExtraButtons button.popover-trigger-button").first()
+			$(tmpMore).click()
+			var extLink = $("body").find("div#popovers div.dropdown-menu a")
+			console.log($(extLink))
+			if ($(extLink).length) {
+				var hrefAttr = $(extLink).attr("href")
+				$(tmpMore).click()
+				return [true, hrefAttr]
+			}
+			$(tmpMore).click()
 		}
 		return [false,undefined]
 	}
@@ -770,6 +789,7 @@ async function processToots() {
 	}
 	// main function to process each detected toot element
 	async function process(el) {
+		console.log($(el))
 		addFediElements()
 		// extra step for detailed status elements to select the correct parent
 		if ($(el).is("div.detailed-status") && $(el).closest("div.focusable").length) {
@@ -777,12 +797,14 @@ async function processToots() {
 		}
 		// get toot data
 		var tootAuthor = getTootAuthor($(el))
+		console.log(tootAuthor)
 		// check if mutes apply and return if so
 		if (processMutes(el, tootAuthor)) {
 			return
 		}
 		var tootInternalId = getTootInternalId($(el))
 		var [tootHrefIsExt, tootHrefOrId] = getTootExtIntHref($(el))
+		console.log(tootInternalId, tootHrefIsExt, tootHrefOrId)
 		// we will always need an internal reference to the toot, be it an actual internal toot id or the href of a toot already resolved to its home
 		// tootInternalId will be preferred if both are set
 		var internalIdentifier = tootInternalId || tootHrefOrId
@@ -793,19 +815,22 @@ async function processToots() {
 			// check if id is already cached
 			var cacheIndex = isInProcessedToots(internalIdentifier)
 			// get all button elements of this toot
-			var favButton = $(el).find("button:has(i.fa-star)").first()
+			var favButton = $(el).find("div.FavoriteButton a, button:has(i.fa-star)").first()
+			// separate if for other identifiers to prevent selecting the wrong element in some versions
 			if (!$(favButton).length) {
 				favButton = $(el).find("a.icon-button:has(i.fa-star), a.detailed-status__link:has(i.fa-star)")
 			}
 			$("<span class='fediactprocessing'>Resolving...</span>").insertAfter($(favButton))
-			var boostButton = $(el).find("button:has(i.fa-retweet)").first()
+			var boostButton = $(el).find("div.RetweetButton a, button:has(i.fa-retweet)").first()
+			// separate if for other identifiers to prevent selecting the wrong element in some versions
 			if (!$(boostButton).length) {
 				boostButton = $(el).find("a.icon-button:has(i.fa-retweet), a.detailed-status__link:has(i.fa-retweet)")
 			}
 			var bookmarkButton = $(el).find("button:has(i.fa-bookmark)").first()
-			var replyButton = $(el).find("button:has(i.fa-reply), button:has(i.fa-reply-all), a.icon-button:has(i.fa-reply), a.icon-button:has(i.fa-reply-all)").first()
+			var replyButton = $(el).find("div.ReplyButton a, button:has(i.fa-reply), button:has(i.fa-reply-all), a.icon-button:has(i.fa-reply), a.icon-button:has(i.fa-reply-all)").first()
 			var spoilerButton = $(el).find('button[class*="show-more"]').first()
 			var voteButton = $(el).find("div.poll button").first()
+			// polls behind cw: click spoiler button, check for poll, click spoiler button again
 			if ($(spoilerButton).length) {
 				$(spoilerButton).click()
 				if ($(el).find("div.poll").length) {
@@ -813,7 +838,7 @@ async function processToots() {
 				}
 				$(spoilerButton).click()
 			}
-			var moreButton = $(el).find("button:has(i.fa-ellipsis-h,i.fa-ellipsis-fw,i.fa-ellipsis-v)").first()
+			var moreButton = $(el).find("span.ExtraButtons button.popover-trigger-button, button:has(i.fa-ellipsis-h,i.fa-ellipsis-fw,i.fa-ellipsis-v)").first()
 			// handles process when a vote button is clicked
 			async function pollAction(id, redirect, e) {
 				if (settings.fediact_autoaction) {
@@ -1064,10 +1089,12 @@ async function processToots() {
 					var matches = tootAuthor.match(handleExtractUrlRegex)
 					var [isExternalHandle, extHomeResolved] = [false, false]
 					// if we have a handledomain...
-					if (matches.groups.handledomain) {
-						// check if the current hostname includes that handle domain...
-						if (!(~location.hostname.indexOf(matches.groups.handledomain))) {
-							isExternalHandle = true
+					if (matches) {
+						if (matches.groups.handledomain) {
+							// check if the current hostname includes that handle domain...
+							if (!(~location.hostname.indexOf(matches.groups.handledomain))) {
+								isExternalHandle = true
+							}
 						}
 					}
 					// add ids
@@ -1180,9 +1207,9 @@ async function processToots() {
 			tmpSettings.isProcessing.push($(e.target).get(0))
 			process($(e.target))
 		}
-	}, "div.status, div.detailed-status")
+	}, "div.status, div.detailed-status, div.Status")
 	// try to find all existing elements (fixes some elements not being detected by DOMNodeAppear in rare cases, esp. v3)
-	$(document).find("div.status, div.detailed-status").each(function(){
+	$(document).find("div.status, div.detailed-status, div.Status").each(function(){
 		if (!tmpSettings.isProcessing.includes($(this).get(0))) {
 			tmpSettings.isProcessing.push($(this).get(0))
 			process($(this))
