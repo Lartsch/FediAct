@@ -20,16 +20,15 @@ A Chrome/Firefox extension that simplifies follow and post interactions on Masto
 - Some toots cannot be resolved to your home (in cases where searching for the post manually would not work either)
 
 ## Navigation
-- [FediAct (v0.9.8)](#fediact-v098)
-  - [Installation](#installation)
-  - [Setup](#setup)
-  - [FAQ](#faq)
-  - [Screenshots / GIFs](#screenshots--gifs)
-  - [Manual installation](#manual-installation)
-    - [Install in Firefox for Android](#install-in-firefox-for-android)
-  - [Additional notes](#additional-notes)
-  - [Todos / Planned features](#todos--planned-features)
-  - [Contributing](#contributing)
+- [Installation](#installation)
+- [Setup](#setup)
+- [FAQ](#faq)
+- [Screenshots / GIFs](#screenshots--gifs)
+- [Manual installation](#manual-installation)
+  - [Install in Firefox for Android](#install-in-firefox-for-android)
+- [Additional notes](#additional-notes)
+- [Todos / Planned features](#todos--planned-features)
+- [Contributing](#contributing)
 
 ## Installation
 
