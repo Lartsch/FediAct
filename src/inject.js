@@ -797,7 +797,7 @@ async function processToots() {
 			if (!$(favButton).length) {
 				favButton = $(el).find("a.icon-button:has(i.fa-star), a.detailed-status__link:has(i.fa-star)")
 			}
-			$("<span class='fediactprocessing'>Resolving...</span>").insertAfter($(favButton))
+			$("<span class='fediactprocessing'></span>").insertAfter($(favButton))
 			var boostButton = $(el).find("button:has(i.fa-retweet)").first()
 			if (!$(boostButton).length) {
 				boostButton = $(el).find("a.icon-button:has(i.fa-retweet), a.detailed-status__link:has(i.fa-retweet)")
@@ -1252,7 +1252,7 @@ async function processProfile() {
 		// do we have a full handle?
 		if (fullHandle) {
 			if (!tmpSettings.processedFollow.includes(fullHandle)) {
-				$("<span class='fediactprocessing'>Resolving...&nbsp;&nbsp;</span>").insertBefore($(el))
+				$("<span class='fediactprocessing'></span>").insertBefore($(el))
 				// yes, so resolve it to a user id on our homeinstance
 				var resolvedHandle = await resolveHandleToHome(fullHandle)
 				if (resolvedHandle) {
