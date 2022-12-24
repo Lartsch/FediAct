@@ -21,19 +21,15 @@ A Chrome/Firefox extension that simplifies follow and post interactions on Masto
 
 ## Navigation
 - [FediAct (v0.9.8)](#fediact-v098)
-  - [Navigation](#navigation)
   - [Installation](#installation)
   - [Setup](#setup)
   - [FAQ](#faq)
   - [Screenshots / GIFs](#screenshots--gifs)
   - [Manual installation](#manual-installation)
-    - [Chrome](#chrome)
-    - [Firefox](#firefox)
     - [Install in Firefox for Android](#install-in-firefox-for-android)
   - [Additional notes](#additional-notes)
   - [Todos / Planned features](#todos--planned-features)
   - [Contributing](#contributing)
-  - [Thanks to...](#thanks-to)
 
 ## Installation
 
