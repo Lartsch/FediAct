@@ -86,11 +86,29 @@
 }
 
 /* Styles for "resolving..." indicator */
-
 .fediactprocessing {
-    color: white;
-	padding-right: 10px;
-	padding-left: 10px
+    display: inline-block;
+    margin: auto 10px;
+    animation: spin 2s infinite linear;
+    width: 1em;
+    height: 1em;
+    border-radius: 1em;
+    border: 2px solid currentColor;
+    border-left-color: transparent;
+    border-top-color: transparent;
+    position: relative;
+    box-sizing: border-box;
+    opacity: .8;
+}
+.fediactprocessing::after {
+    content: "";
+    border: inherit;
+    border-radius: inherit;
+    animation: inherit;
+    animation-duration: 1.5s;
+    animation-timing-function: ease;
+    position: absolute;
+    inset: -2px;
 }
 
 /* Styles for unresolved indicator */
@@ -175,6 +193,11 @@
     from {
         transform: scale(.98);
         filter: opacity(0);
+    }
+}
+@keyframes spin {
+    to {
+        transform: rotate(1turn);
     }
 }
 
