@@ -20,15 +20,20 @@ A Chrome/Firefox extension that simplifies follow and post interactions on Masto
 - Some toots cannot be resolved to your home (in cases where searching for the post manually would not work either)
 
 ## Navigation
-  * [Installation](#installation)
-  * [Setup](#setup)
-  * [FAQ](#faq)
-  * [Screenshots / GIFs](#screenshots--gifs)
-  * [Manual installation](#manual-installation)
-      * [Install in Firefox for Android](#install-in-firefox-for-android)
-  * [Additional notes](#additional-notes)
-  * [Todos / Planned features](#todos--planned-features)
-  * [Contributing](#contributing)
+- [FediAct (v0.9.8)](#fediact-v098)
+  - [Navigation](#navigation)
+  - [Installation](#installation)
+  - [Setup](#setup)
+  - [FAQ](#faq)
+  - [Screenshots / GIFs](#screenshots--gifs)
+  - [Manual installation](#manual-installation)
+    - [Chrome](#chrome)
+    - [Firefox](#firefox)
+    - [Install in Firefox for Android](#install-in-firefox-for-android)
+  - [Additional notes](#additional-notes)
+  - [Todos / Planned features](#todos--planned-features)
+  - [Contributing](#contributing)
+  - [Thanks to...](#thanks-to)
 
 ## Installation
 
@@ -86,7 +91,7 @@ This project is open source. Anyone with some programming knowledge can check ou
 Considering the implementation, I am not aware of any risks. Efforts were made to prevent servers from abusing this addon to perform actions on the user's behalf. It does not require your username or password. All data is stored in your browser locally. The only sensitive data it stores is your API token. This token is **only** sent to your home server. No other data ever leaves your device. As far as I know, external servers cannot access the requests made by FediAct and can therefore not gain your token.
 
 ## Screenshots / GIFs
-v0.8.0 (outdated - and too lazy to make new screenshots/GIF)
+v0.9.8
 <details>
   <summary>Extension popup / settings</summary>
   <img src="https://github.com/lartsch/FediAct/blob/main/img/settings.png?raw=true">
