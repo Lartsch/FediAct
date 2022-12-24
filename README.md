@@ -55,7 +55,7 @@ If you like this addon, please consider donating: [paypal.me/lartsch](https://pa
 2. Click the extension icon or open its settings page
 3. Set your home server domain (required)
 4. Check out the other settings (optional)
-5. Click the "Submit" button to save
+5. Click the "Save" button to save
 
 If you have set your home server correctly, you can now interact on other Mastodon servers. If FediAct is running, a small icon will be displayed in the bottom right corner. Also, it is indicated while content is resolving / could not be resolved.
 
