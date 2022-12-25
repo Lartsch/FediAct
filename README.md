@@ -57,7 +57,7 @@ If you like this addon, please consider donating: [paypal.me/lartsch](https://pa
 4. Check out the other settings (optional)
 5. Click the "Save" button to save
 
-If you have set your home server correctly, you can now interact on other Mastodon servers. If FediAct is running, a small icon will be displayed in the bottom right corner. Also, it is indicated while content is resolving / could not be resolved.
+If you have set your home server correctly, you can now interact on other Mastodon servers. If FediAct is running, a small icon will be displayed in the bottom right corner. Also, it is indicated while content is resolving or when it could not be resolved.
 
 **Please note:** It is NOT recommended to disable the API delay, since most servers use rate limiting and might block your IP if requests happen too frequent, which will lead to FediAct not working anymore.
 
@@ -144,6 +144,7 @@ I included all of the default add-ons in the custom collection, so you will not 
     - That a toot is set to unlisted on its original server may play a role
 3. There can be delays because API calls have to be made and it is tries to avoid error 429 (too many requests). Especially if a page has many toots or you are scrolling through a feed really fast.
 4. If the extension fails to resolve content, the affected buttons will behave as if the extension weren't active (popup modal) and a notice ("Unresolved") is added to the toot
+5. If "Collect errors" is enabled (Chrome), there can be uncatched errors being displayed for FediAct. This is not relevant to functionality.
 
 ## Todos / Planned features 
 Check out the [GitHub project](https://github.com/users/Lartsch/projects/2) to see planned features and todos. They are sorted from most important to least important.
