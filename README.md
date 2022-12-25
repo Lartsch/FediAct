@@ -10,15 +10,6 @@ A Chrome/Firefox extension that simplifies follow and post interactions on Masto
 - Hide muted content on external servers if enabled
 - Needs nothing more than your home server domain to work
 
-**Supported browsers**:
-- All up-to-date Chromium browsers, including Kiwi and Yandex browsers on Android
-- Up-to-date Firefox (v107+), including Firefox Nightly on Android
-
-**Important notes**:
-- Data is processed locally only
-- Performance depends on your home server and the external server you are browsing (read more [below](#additional-notes))
-- Some toots cannot be resolved to your home (in cases where searching for the post manually would not work either)
-
 ## Navigation
 - [Installation](#installation)
 - [Setup](#setup)
@@ -35,19 +26,17 @@ A Chrome/Firefox extension that simplifies follow and post interactions on Masto
 [link-chrome]: https://chrome.google.com/webstore/detail/fediact/lmpcajpkjcclkjbliapfjfolocffednm 'Version published on Chrome Web Store'
 [link-firefox]: https://addons.mozilla.org/en-US/firefox/addon/fediact/ 'Version published on Mozilla Add-ons'
 
-[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/chrome/chrome.svg" width="48" alt="Chrome" valign="middle">][link-chrome] [<img valign="middle" src="https://img.shields.io/chrome-web-store/v/lmpcajpkjcclkjbliapfjfolocffednm.svg?label=%20">][link-chrome]  
-and other Chromium browsers, including Kiwi & Yandex on Android
+[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/chrome/chrome.svg" width="48" alt="Chrome" valign="middle">][link-chrome] [<img valign="middle" src="https://img.shields.io/chrome-web-store/v/lmpcajpkjcclkjbliapfjfolocffednm.svg?label=%20">&nbsp;&nbsp;Chrome Webstore][link-chrome]  
+All up-to-date Chromium browsers, including Kiwi and Yandex browsers on Android
 
-[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fediact.svg?label=%20%20">][link-firefox]  
-including Nightly for Android
+[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fediact.svg?label=%20%20">&nbsp;&nbsp;Mozilla Addon Store][link-firefox]  
+Up-to-date Firefox (v107+), including Firefox Nightly on Android
 
-> **Note**
-> 
-> - **If webstore release is outdated, use the [manual installation method](#manual-installation) to install the latest version**  
-> - **Special installation steps for [Firefox on Android](#install-in-firefox-for-android)**
-> - Chrome store updates take 1-2 days longer
-
-If you like this addon, please consider donating: [paypal.me/lartsch](https://paypal.me/lartsch)
+**Note:**  
+- If webstore release is outdated, use the [manual installation method](#manual-installation) to install the latest version  
+- Special installation steps for [Firefox on Android](#install-in-firefox-for-android)  
+- Chrome store updates take 1-2 days longer  
+- If you like this addon, please consider donating: [paypal.me/lartsch](https://paypal.me/lartsch)
 
 ## Setup
 
@@ -57,33 +46,38 @@ If you like this addon, please consider donating: [paypal.me/lartsch](https://pa
 4. Check out the other settings (optional)
 5. Click the "Save" button to save
 
-If you have set your home server correctly, you can now interact on other Mastodon servers. If FediAct is running, a small icon will be displayed in the bottom right corner. Also, it is indicated while content is resolving or when it could not be resolved.
+If you have set your home server correctly, you can now interact on other Mastodon servers.
 
-**Please note:** It is NOT recommended to disable the API delay, since most servers use rate limiting and might block your IP if requests happen too frequent, which will lead to FediAct not working anymore.
+**Note:**   
+- If FediAct is running, a small icon will be displayed in the bottom right corner  
+- Also, it is indicated while content is resolving or when it could not be resolved  
+- Performance depends on your home server and the external server you are browsing (read more [below](#additional-notes))  
+- Some toots cannot be resolved to your home (in cases where searching for the post manually would not work either)  
+- It is NOT recommended to disable the API delay (most servers use rate limiting and might block your IP if requests happen too frequent)
 
 ## FAQ
 **Why does it need permission for all websites?**
 
-The addon needs to determine whether or not the site you are currently browsing is a Mastodon server. For that to work, it requires access to all sites. Otherwise, each existing Mastodon server would have to be explicitly added.
+> The addon needs to determine whether or not the site you are currently browsing is a Mastodon server. For that to work, it requires access to all sites. Otherwise, each existing Mastodon server would have to be explicitly added.
 
 **Can I use this on Android?**
 
-Yes! There are three options that I am aware of: Kiwi Browser (Chromium with add-on support), Yandex Browser and Firefox Nightly (see [below](#install-in-firefox-for-android))
+> Yes! There are three options that I am aware of: Kiwi Browser, Yandex Browser and Firefox Nightly (see [below](#install-in-firefox-for-android))
 
 **Can I use this on iOS?**
 
-Currently not in a reliable way, but:
-- It's possible that Orion Browser can soon be used (see issue [#16](https://github.com/Lartsch/FediAct/issues/16))
-- There are plans for Safari support (see issue [#17](https://github.com/Lartsch/FediAct/issues/17))
+> Currently not in a reliable way, but:  
+> - It's possible that Orion Browser can soon be used (see issue [#16](https://github.com/Lartsch/FediAct/issues/16))  
+> - There are plans for Safari support (see issue [#17](https://github.com/Lartsch/FediAct/issues/17))
 
 **Can you add feature XY?**
 
-Feel free to create an issue here on GitHub and I will look into it.
+> Feel free to create an issue here on GitHub and I will look into it.
 
 **Is this safe to use?**
 
-This project is open source. Anyone with some programming knowledge can check out the source code, either here on GitHub or by extracting the addon file from the addon stores.  
-Considering the implementation, I am not aware of any risks. Efforts were made to prevent servers from abusing this addon to perform actions on the user's behalf. It does not require your username or password. All data is stored in your browser locally, with the API token being the only sensitive data. This token is **only** sent to your home server. No other data ever leaves your device. All requests are made from the background script, out-of-scope for for websites you visit.
+> This project is open source. Anyone with some programming knowledge can check out the source code, either here on GitHub or by extracting the addon file from the addon stores.  
+> Considering the implementation, I am not aware of any risks. Efforts were made to prevent servers from abusing this addon to perform actions on the user's behalf. It does not require your username or password. All data is stored in your browser locally, with the API token being the only sensitive data. This token is **only** sent to your home server. No other data ever leaves your device. All requests are made from the background script, out-of-scope for for websites you visit.
 
 ## Screenshots / GIFs
 v0.9.8
