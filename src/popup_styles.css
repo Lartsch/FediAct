@@ -70,7 +70,7 @@ legend {
 }
 fieldset > legend, summary {
     margin-inline: .6em;
-    margin-top: 1em;
+    padding-top: .6em;
     margin-bottom: .4em;
     font-weight: 700;
 }
