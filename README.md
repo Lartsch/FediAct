@@ -147,5 +147,6 @@ Check out the [GitHub project](https://github.com/users/Lartsch/projects/2) to s
 Feel free to create [issues](https://github.com/Lartsch/FediAct/issues) for bugs and feature suggestions. Even better: Create pull requests for whatever improvements you can make! :)
 
 ## Thanks to...
-@raikasdev because I stole his fix for cross-browser storage API support  
-@rosemarydotworld because I customized and use his awesome jQuery.DOMNodeAppear where MutationObservers and delegation failed
+- @raikasdev because I stole his fix for cross-browser storage API support  
+- @rosemarydotworld because I customized and use his awesome jQuery.DOMNodeAppear where MutationObservers and delegation failed
+- All the direct [contributors](https://github.com/Lartsch/FediAct/graphs/contributors) to this repository!
