@@ -1,5 +1,5 @@
 var browser, chrome, settings
-const enableConsoleLog = true
+const enableConsoleLog = false
 const logPrepend = "[FediAct]"
 const tokenInterval = 1 // minutes
 const mutesApi = "/api/v1/mutes"
@@ -197,10 +197,10 @@ async function reloadListeningScripts() {
 }
 
 // fetch api token right after install (mostly for debugging, when the ext. is reloaded)
-chrome.runtime.onInstalled.addListener(fetchData(true, true))
+chrome.runtime.onInstalled.addListener(function(){fetchData(true, true)})
 // and also every 3 minutes
 chrome.alarms.create('refresh', { periodInMinutes: tokenInterval })
-chrome.alarms.onAlarm.addListener(fetchData(true, true))
+chrome.alarms.onAlarm.addListener(function(){fetchData(true, true)})
 
 // different listeners for inter-script communication
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
