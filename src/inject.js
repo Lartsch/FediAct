@@ -125,26 +125,26 @@ var getUrlParameter = function getUrlParameter(sParam) {
 }
 
 // promisified xhr for api calls
-async function makeRequest(method, url, extraheaders, jsonbody) {
-	// try to prevent error 429 too many request by delaying home instance requests
-	if (~url.indexOf(settings.fediact_homeinstance) && settings.fediact_enabledelay) {
-		// get current time
-		var currenttime = Date.now()
-		// get difference of current time and time of last request
-		var difference = currenttime - tmpSettings.lasthomerequest
-		// if difference is smaller than our set api delay value...
-		if (difference < apiDelay) {
-			// ... then wait the time required to reach the api delay value...
-			await new Promise(resolve => {
-				setTimeout(function() {
-					resolve()
-				}, apiDelay-difference)
-			})
-		}
-		// TODO: move this to the top? or get new Date.now() here?
-		tmpSettings.lasthomerequest = currenttime
-	}
+function makeRequest(method, url, extraheaders, jsonbody) {
 	return new Promise(async function(resolve) {
+		// try to prevent error 429 too many request by delaying home instance requests
+		if (~url.indexOf(settings.fediact_homeinstance) && settings.fediact_enabledelay) {
+			// get current time
+			var currenttime = Date.now()
+			// get difference of current time and time of last request
+			var difference = currenttime - tmpSettings.lasthomerequest
+			// if difference is smaller than our set api delay value...
+			if (difference < apiDelay) {
+				// ... then wait the time required to reach the api delay value...
+				await new Promise(resolve => {
+					setTimeout(function() {
+						resolve()
+					}, apiDelay-difference)
+				})
+			}
+			// TODO: move this to the top? or get new Date.now() here?
+			tmpSettings.lasthomerequest = currenttime
+		}
 		try {
 			await chrome.runtime.sendMessage({requestdata: [method, url, extraheaders, jsonbody]}, function(response) {
 				if(response) {
@@ -209,37 +209,37 @@ async function executeAction(data, action, polldata) {
 		case 'copy':
 			// special action. only copy to clipboard and return
 			navigator.clipboard.writeText(data)
-			return
+			return true
 		case 'domainblock':
 			requestUrl = 'https://' + settings.fediact_homeinstance + domainBlocksApi + "?domain=" + data
 			condition = function(response) {if(response){return true}}
-			after = function() {updateMutedBlocked()}
+			after = async function() {await updateMutedBlocked()}
 			break
 		case 'domainunblock':
 			requestUrl = 'https://' + settings.fediact_homeinstance + domainBlocksApi + "?domain=" + data
 			condition = function(response) {if(response){return true}}
 			method = "DELETE"
-			after = function() {updateMutedBlocked()}
+			after = async function() {await updateMutedBlocked()}
 			break
 		case 'mute':
 			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + data + "/mute"
 			condition = function(response) {return response.muting}
-			after = function() {updateMutedBlocked()}
+			after = async function() {await updateMutedBlocked()}
 			break
 		case 'unmute':
 			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + data + "/unmute"
 			condition = function(response) {return !response.muting}
-			after = function() {updateMutedBlocked()}
+			after = async function() {await updateMutedBlocked()}
 			break
 		case 'block':
 			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + data + "/block"
 			condition = function(response) {return response.blocking}
-			after = function() {updateMutedBlocked()}
+			after = async function() {await updateMutedBlocked()}
 			break
 		case 'unblock':
 			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + data + "/unblock"
 			condition = function(response) {return !response.blocking}
-			after = function() {updateMutedBlocked()}
+			after = async function() {await updateMutedBlocked()}
 			break
 		case 'vote':
 			requestUrl = 'https://' + settings.fediact_homeinstance + pollsApi + "/" + data + "/votes"
@@ -279,7 +279,8 @@ async function executeAction(data, action, polldata) {
 			condition = function(response) {return !response.bookmarked}
 			break
 		default:
-			log("No valid action specified."); break
+			log("No valid action specified.")
+			return
 	}
 	if (requestUrl) {
 		var response = await makeRequest(method, requestUrl, tmpSettings.tokenheader, jsonbody)
@@ -288,7 +289,7 @@ async function executeAction(data, action, polldata) {
 			response = JSON.parse(response)
 			if (condition(response)) {
 				if (after !== undefined) {
-					after()
+					await after()
 				}
 				return true
 			}
@@ -497,12 +498,17 @@ function addToProcessedToots(toot) {
 	return tmpSettings.processed.length - 1
 }
 
-async function updateMutedBlocked() {
-	var res = await new Promise(async function(resolve) {
+function updateMutedBlocked() {
+	return new Promise(async function(resolve) {
 		try {
-			await chrome.runtime.sendMessage({updatemutedblocked: true}, function(response) {
+			await chrome.runtime.sendMessage({updatemutedblocked: true}, async function(response) {
 				if (response) {
-					resolve(response)
+					if (!await getSettings()) {
+						// but reload if settings are invalid
+						location.reload()
+					} else {
+						resolve(true)
+					}
 				} else {
 					resolve(false)
 				}
@@ -514,12 +520,6 @@ async function updateMutedBlocked() {
 			location.reload()
 		}
 	})
-	if (res) {
-		if (!await getSettings()) {
-			// but reload if settings are invalid
-			location.reload()
-		}
-	}
 }
 
 function showModal(settings) {
@@ -533,13 +533,17 @@ function showModal(settings) {
 	$("body").append($(baseEl))
 	async function handleModalEvent(e) {
 		if (e.originalEvent.isTrusted) {
-			if ($(e.target).is(".fediactmodal li, .fediactmodal li a")) {
-				if ($(e.target).is(".fediactmodal li")) {
-					e.target = $(e.target).find("a")
+			if ($(e.target).is(".fediactmodal li, .fediactmodal li *")) {
+				if (!$(e.target).is(".fediactmodal li a")) {
+					if ($(e.target).find("a").length) {
+						e.target = $(e.target).find("a")
+					} else {
+						e.target = $(e.target).closest("a")
+					}
 				}
 				var action = $(e.target).attr("fediactaction")
 				var data = $(e.target).attr("fediactdata")
-				var done = executeAction(data, action, null)
+				var done = await executeAction(data, action, null)
 				if (done) {
 					$(e.target).addClass("activated")
 					$(e.target).append("<span>Done!</span>")
@@ -566,6 +570,8 @@ function showModal(settings) {
 					$(baseEl).remove()
 					$("body").off("click", handleModalEvent)
 				}
+			} else if ($(e.target).is(".fediactmodalinner")) {
+				$.noop()
 			} else {
 				$(baseEl).remove()
 				$("body").off("click", handleModalEvent)
@@ -1532,6 +1538,7 @@ function getSettings() {
 		} catch(e) {
 			log(e)
 			resolve(false)
+			return
 		}
 		if (settings) {
 			// validate settings

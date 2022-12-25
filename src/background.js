@@ -9,7 +9,8 @@ const timeout = 15000
 const tokenRegex = /"access_token":".*?",/gm
 // required settings keys with defauls
 const settingsDefaults = {
-	fediact_homeinstance: null
+	fediact_homeinstance: null,
+    fediact_token: null
 }
 
 // wrapper to prepend to log messages
@@ -126,51 +127,59 @@ async function fetchBearerToken() {
 // this is only done here in the bg script so we have data available on load of pages without first performing 3 (!) requests
 // otherwise this would lead to problems with element detection / low performance (espcially v3 instances)
 // mutes/blocks are updated in content script on page context changes and after performing mutes/block actions
-async function fetchMutesAndBlocks() {
+function fetchMutesAndBlocks() {
     return new Promise(async function(resolve) {
-        // set empty initially
-        [settings.fediact_mutes, settings.fediact_blocks, settings.fediact_domainblocks] = [[],[],[]]
-        var [mutes, blocks, domainblocks] = await Promise.all([
-            fetch("https://" + settings.fediact_homeinstance + mutesApi, {headers: {"Authorization": "Bearer "+settings.fediact_token}}).then((response) => response.json()),
-            fetch("https://" + settings.fediact_homeinstance + blocksApi, {headers: {"Authorization": "Bearer "+settings.fediact_token}}).then((response) => response.json()),
-            fetch("https://" + settings.fediact_homeinstance + domainBlocksApi, {headers: {"Authorization": "Bearer "+settings.fediact_token}}).then((response) => response.json())
-        ])
-        if (mutes.length) {
-            settings.fediact_mutes.push(...mutes.map(acc => acc.acct))
+        try {
+            // set empty initially
+            [settings.fediact_mutes, settings.fediact_blocks, settings.fediact_domainblocks] = [[],[],[]]
+            var [mutes, blocks, domainblocks] = await Promise.all([
+                fetch("https://" + settings.fediact_homeinstance + mutesApi, {headers: {"Authorization": "Bearer "+settings.fediact_token}}).then((response) => response.json()),
+                fetch("https://" + settings.fediact_homeinstance + blocksApi, {headers: {"Authorization": "Bearer "+settings.fediact_token}}).then((response) => response.json()),
+                fetch("https://" + settings.fediact_homeinstance + domainBlocksApi, {headers: {"Authorization": "Bearer "+settings.fediact_token}}).then((response) => response.json())
+            ])
+            if (mutes.length) {
+                settings.fediact_mutes.push(...mutes.map(acc => acc.acct))
+            }
+            if (blocks.length) {
+                settings.fediact_blocks.push(...blocks.map(acc => acc.acct))
+            }
+            if (domainblocks.length) {
+                settings.fediact_domainblocks = domainblocks
+            }
+            resolve(true)
+        } catch {
+            resolve(false)
         }
-        if (blocks.length) {
-            settings.fediact_blocks.push(...blocks.map(acc => acc.acct))
-        }
-        if (domainblocks.length) {
-            settings.fediact_domainblocks = domainblocks
-        }
-        resolve(true)
     })
 }
 
-async function fetchData() {
+async function fetchData(token, mutesblocks) {
     return new Promise(async function(resolve) {
+        var resolved = false
         try {
             settings = await (browser || chrome).storage.local.get(settingsDefaults)
+            if (settings.fediact_homeinstance) {
+                if (token || mutesblocks) {
+                    if (token || !(settings.fediact_token)) {
+                        await fetchBearerToken()
+                    }
+                    if (mutesblocks) {
+                        await fetchMutesAndBlocks()
+                    }
+                    try {
+                        await (browser || chrome).storage.local.set(settings)
+                        resolved = true
+                    } catch {
+                        log(e)
+                    }
+                }
+            } else {
+                log("Home instance not set")
+            }
         } catch(e) {
             log(e)
-            resolve(false)
-            return
         }
-        if (settings.fediact_homeinstance) {
-            await fetchBearerToken()
-            await fetchMutesAndBlocks()
-        } else {
-            log("Home instance not set")
-            resolve(false)
-            return
-        }
-        try {
-            await (browser || chrome).storage.local.set(settings)
-            resolve(true)
-        } catch {
-            log(e)
-        }
+        resolve(resolved)
     })
 }
 
@@ -188,10 +197,10 @@ async function reloadListeningScripts() {
 }
 
 // fetch api token right after install (mostly for debugging, when the ext. is reloaded)
-chrome.runtime.onInstalled.addListener(fetchData)
+chrome.runtime.onInstalled.addListener(fetchData(true, true))
 // and also every 3 minutes
 chrome.alarms.create('refresh', { periodInMinutes: tokenInterval })
-chrome.alarms.onAlarm.addListener(fetchData)
+chrome.alarms.onAlarm.addListener(fetchData(true, true))
 
 // different listeners for inter-script communication
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -207,11 +216,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
     // immediately fetch api token after settings are updated
     if (request.updatedsettings) {
-        fetchData().then(reloadListeningScripts)
+        fetchData(true, true).then(reloadListeningScripts)
         return true
     }
     if (request.updatemutedblocked) {
-        fetchMutesAndBlocks().then((browser || chrome).storage.local.set(settings)).then(sendResponse)
+        fetchData(false, true).then(sendResponse)
         return true
     }
     // when the content script starts to process on a site, listen for tab changes (url)
