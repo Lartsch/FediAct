@@ -13,10 +13,10 @@
 		<div id="mhi-containers">
 			<form id="fediact-settings">
 				<div class="scroller">
-					<fieldset>
+					<fieldset aria-labelledby="homeServerDomainLabel">
 						<div class="row">
 							<label for="homeinstance">
-								<h1>Home Server Domain</h1>
+								<legend id="homeServerDomainLabel"><h1>Home Server Domain</h1></legend>
 								<span>
 									Make sure you are logged in to your home server
 								</span>
@@ -25,7 +25,7 @@
 						</div>
 					</fieldset>
 					<fieldset>
-						<h2>Redirect Settings</h2>
+						<legend>Redirect Settings</legend>
 						<div class="row">
 							<label for="redirects">Enable
 								<span>
@@ -51,7 +51,7 @@
 						</div>
 					</fieldset>
 					<fieldset>
-						<h2>Other Settings</h2>
+						<legend>Other Settings</legend>
 						<div class="row">
 							<label for="autoaction">Actions
 								<span>
@@ -78,7 +78,7 @@
 						</div>
 					</fieldset>
 					<fieldset>
-						<h2>Mode</h2>
+						<legend>Mode</legend>
 						<div class="row">
 							<label for="runifloggedin">Ignore sessions
 								<span>
@@ -89,7 +89,7 @@
 						</div>
 					</fieldset>
 					<fieldset>
-						<h2>Filtered servers</h2>
+						<legend>Filtered servers</legend>
 						<div class="row">
 							<label for="mode">Mode
 								<span class="hide" id="allowlabel">
@@ -118,7 +118,6 @@
 					<input type="submit" value="Save">
 					<span id="indicator" style="display:none">Settings saved!</span>
 					<span><a target="_blank" href="https://github.com/lartsch/FediAct">More info / help on Github</a></span>
-
 				</div>
 			</form>
     </div>
