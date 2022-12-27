@@ -52,8 +52,8 @@ If you have set your home server correctly, you can now interact on other Mastod
 - If FediAct is running, a small icon will be displayed in the bottom right corner  
 - Also, it is indicated while content is resolving or when it could not be resolved  
 - Performance depends on your home server and the external server you are browsing (read more [below](#additional-notes))  
-- Some toots cannot be resolved to your home (in cases where searching for the post manually would not work either)  
-- It is NOT recommended to disable the API delay (most servers use rate limiting and might block your IP if requests happen too frequent)
+- Some toots can't be resolved to your home (e.g. when searching for the post manually wouldn't work either)  
+- It's NOT recommended to disable the API delay (servers use rate limiting and might block your IP)
 
 ## FAQ
 **Why does it need permission for all websites?**
@@ -76,8 +76,8 @@ If you have set your home server correctly, you can now interact on other Mastod
 
 **Is this safe to use?**
 
-> This project is open source. Anyone with some programming knowledge can check out the source code, either here on GitHub or by extracting the addon file from the addon stores.  
-> Considering the implementation, I am not aware of any risks. Efforts were made to prevent servers from abusing this addon to perform actions on the user's behalf. It does not require your username or password. All data is stored in your browser locally, with the API token being the only sensitive data. This token is **only** sent to your home server. No other data ever leaves your device. All requests are made from the background script, out-of-scope for for websites you visit.
+> This project is open source. Anyone with some programming knowledge can check out the source code, either here on GitHub or by extracting the addon file from the addon stores. You can also make improvements. 
+> Considering the implementation, I am not aware of any risks. Efforts were made to prevent servers from abusing this addon to perform actions on the user's behalf. It does not require your username or password. All data is stored in your browser locally, with the API token being the only sensitive data. This token is **only** sent to your home server. No other data ever leaves your device. All requests are made from the background script, out-of-scope for websites you visit.
 
 ## Screenshots / GIFs
 v0.9.8
