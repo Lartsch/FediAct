@@ -32,7 +32,7 @@ All up-to-date Chromium browsers, including Kiwi and Yandex browsers on Android
 [<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" valign="middle">][link-firefox] [<img valign="middle" src="https://img.shields.io/amo/v/fediact.svg?label=%20%20">&nbsp;&nbsp;Mozilla Addon Store][link-firefox]  
 Up-to-date Firefox (v107+), including Firefox Nightly on Android
 
-**Note:**  
+**Please note:**  
 - If webstore release is outdated, use the [manual installation method](#manual-installation) to install the latest version  
 - Special installation steps for [Firefox on Android](#install-in-firefox-for-android)  
 - Chrome store updates take 1-2 days longer  
@@ -48,11 +48,11 @@ Up-to-date Firefox (v107+), including Firefox Nightly on Android
 
 If you have set your home server correctly, you can now interact on other Mastodon servers.
 
-**Note:**   
+**Please note:**   
 - If FediAct is running, a small icon will be displayed in the bottom right corner  
 - Also, it is indicated while content is resolving or when it could not be resolved  
 - Performance depends on your home server and the external server you are browsing (read more [below](#additional-notes))  
-- Some toots can't be resolved to your home (e.g. when searching for the post manually wouldn't work either)  
+- Some toots can't be resolved to your home (e.g. when searching the post manually wouldn't work either)  
 - It's NOT recommended to disable the API delay (servers use rate limiting and might block your IP)
 
 ## FAQ
