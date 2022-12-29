@@ -392,7 +392,6 @@ async function resolveHandleToHome(handle) {
 
 // resolve a toot to the users home instance
 async function resolveTootToHome(searchstring) {
-	return [false, false]
 	var requestUrl = 'https://' + settings.fediact_homeinstance + searchApi + "/?q=" + searchstring + "&resolve=true&limit=1&exclude_unreviewed=false"
 	var response = await makeRequest("GET", requestUrl, tmpSettings.tokenheader, null)
 	if (response) {
