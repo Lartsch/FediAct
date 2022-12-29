@@ -17,7 +17,7 @@ const mutesApi = "/api/v1/mutes"
 const blocksApi = "/api/v1/blocks"
 const domainBlocksApi = "/api/v1/domain_blocks"
 const pollsApi = "/api/v1/polls"
-const apiDelay = 600
+const apiDelay = 650
 const maxTootCache = 200
 const modalHtml = '<div class="fediactmodal"><div class="fediactmodalinner"><ul class="fediactmodallist"></ul></div></div>'
 
@@ -143,7 +143,7 @@ function makeRequest(method, url, extraheaders, jsonbody) {
 				})
 			}
 			// TODO: move this to the top? or get new Date.now() here?
-			tmpSettings.lasthomerequest = currenttime
+			tmpSettings.lasthomerequest = Date.now()
 		}
 		try {
 			await chrome.runtime.sendMessage({requestdata: [method, url, extraheaders, jsonbody]}, function(response) {
