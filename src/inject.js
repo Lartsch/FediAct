@@ -142,10 +142,10 @@ const asyncLimit = (fn, n) => {
 // promisified xhr for api calls
 function makeRequest(method, url, extraheaders, jsonbody) {
 	return new Promise(async function(resolve) {
-		// get current time
-		var currenttime = Date.now()
 		// try to prevent error 429 too many request by delaying home instance requests
 		if (~url.indexOf(settings.fediact_homeinstance) && settings.fediact_enabledelay) {
+			// get current time
+			var currenttime = Date.now()
 			// get difference of current time and time of last request
 			var difference = currenttime - tmpSettings.lasthomerequest
 			// if difference is smaller than our set api delay value...
@@ -157,7 +157,6 @@ function makeRequest(method, url, extraheaders, jsonbody) {
 					}, apiDelay-difference)
 				})
 			}
-			// TODO: move this to the top? or get new Date.now() here?
 			tmpSettings.lasthomerequest = Date.now()
 		}
 		try {
