@@ -53,14 +53,19 @@ async function generalRequest(data) {
                 controller.abort()
             }, timeout)
             if (data[3]) {
+                // json body provided, post as body to target
+                data[2]["User-Agent"] = "FediAct Service"
                 data[2]["Content-Type"] = "application/json"
                 var res = await fetch(data[1], {
                     method: data[0],
                     signal: controller.signal,
+                    // if json body is provided, there is also header data
                     headers: data[2],
                     body: JSON.stringify(data[3])
                 })
             } else if (data[2]) {
+                // header data provided
+                data[2]["User-Agent"] = "FediAct Service"
                 var res = await fetch(data[1], {
                     method: data[0],
                     signal: controller.signal,
@@ -69,7 +74,8 @@ async function generalRequest(data) {
             } else {
                 var res = await fetch(data[1], {
                     method: data[0],
-                    signal: controller.signal
+                    signal: controller.signal,
+                    headers: {"User-Agent": "FediAct Service"}
                 })
             }
             clearTimeout(timeoutId)

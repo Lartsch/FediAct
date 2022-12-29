@@ -17,9 +17,10 @@ const mutesApi = "/api/v1/mutes"
 const blocksApi = "/api/v1/blocks"
 const domainBlocksApi = "/api/v1/domain_blocks"
 const pollsApi = "/api/v1/polls"
-const apiDelay = 650
+const apiDelay = 600
 const maxTootCache = 200
 const modalHtml = '<div class="fediactmodal"><div class="fediactmodalinner"><ul class="fediactmodallist"></ul></div></div>'
+const maxAsyncRequests = 10
 
 // settings keys with defauls
 var settings = {}
@@ -124,13 +125,27 @@ var getUrlParameter = function getUrlParameter(sParam) {
     return false
 }
 
+const asyncLimit = (fn, n) => {
+	let pendingPromises = []
+	return async function (...args) {
+	  while (pendingPromises.length >= n) {
+		await Promise.race(pendingPromises).catch(() => {})
+	  }
+	  const p = fn.apply(this, args)
+	  pendingPromises.push(p)
+	  await p.catch(() => {})
+	  pendingPromises = pendingPromises.filter(pending => pending !== p)
+	  return p
+	}
+  }
+
 // promisified xhr for api calls
 function makeRequest(method, url, extraheaders, jsonbody) {
 	return new Promise(async function(resolve) {
+		// get current time
+		var currenttime = Date.now()
 		// try to prevent error 429 too many request by delaying home instance requests
 		if (~url.indexOf(settings.fediact_homeinstance) && settings.fediact_enabledelay) {
-			// get current time
-			var currenttime = Date.now()
 			// get difference of current time and time of last request
 			var difference = currenttime - tmpSettings.lasthomerequest
 			// if difference is smaller than our set api delay value...
@@ -161,6 +176,9 @@ function makeRequest(method, url, extraheaders, jsonbody) {
 		}
 	})
 }
+
+// wrap so there are never more than 10 concurrent requests
+const requestAsyncLimited = asyncLimit(makeRequest, maxAsyncRequests)
 
 // Escape characters used for regex
 function escapeRegExp(string) {
@@ -283,7 +301,7 @@ async function executeAction(data, action, polldata) {
 			return
 	}
 	if (requestUrl) {
-		var response = await makeRequest(method, requestUrl, tmpSettings.tokenheader, jsonbody)
+		var response = await requestAsyncLimited(method, requestUrl, tmpSettings.tokenheader, jsonbody)
 		if (response) {
 			// convert to json object
 			response = JSON.parse(response)
@@ -307,7 +325,7 @@ async function isFollowingHomeInstance(ids) {
 		requestUrl += "id[]=" + id.toString() + "&"
 	}
 	// make the request
-	var responseFollowing = await makeRequest("GET", requestUrl, tmpSettings.tokenheader, null)
+	var responseFollowing = await requestAsyncLimited("GET", requestUrl, tmpSettings.tokenheader, null)
 	// fill response array according to id amount with false
 	const follows = Array(ids.length).fill(false)
 	// parse the response
@@ -379,7 +397,7 @@ function checkAllMutedBlocked(handle) {
 // Return the user id on the users home instance
 async function resolveHandleToHome(handle) {
 	var requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/search?q=" + handle + "&resolve=true&limit=1&exclude_unreviewed=false"
-	var searchResponse = await makeRequest("GET", requestUrl, tmpSettings.tokenheader, null)
+	var searchResponse = await requestAsyncLimited("GET", requestUrl, tmpSettings.tokenheader, null)
 	if (searchResponse) {
 		searchResponse = JSON.parse(searchResponse)
 		if (searchResponse[0].id) {
@@ -393,7 +411,7 @@ async function resolveHandleToHome(handle) {
 // resolve a toot to the users home instance
 async function resolveTootToHome(searchstring) {
 	var requestUrl = 'https://' + settings.fediact_homeinstance + searchApi + "/?q=" + searchstring + "&resolve=true&limit=1&exclude_unreviewed=false"
-	var response = await makeRequest("GET", requestUrl, tmpSettings.tokenheader, null)
+	var response = await requestAsyncLimited("GET", requestUrl, tmpSettings.tokenheader, null)
 	if (response) {
 		response = JSON.parse(response)
 		// do we have a status as result?
@@ -1471,7 +1489,7 @@ async function checkSite() {
 	// last check - and probably the most accurate to determine if it actually is mastadon
 	var requestUrl = location.protocol + '//' + location.hostname + instanceApi
 	// call instance api to confirm its mastodon and get normalized handle uri
-	var response = await makeRequest("GET", requestUrl, null, null)
+	var response = await requestAsyncLimited("GET", requestUrl, null, null)
 	// todo: add basic check for "mastodon" string in response
 	if (response) {
 		var uri = JSON.parse(response).uri
