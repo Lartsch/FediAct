@@ -2,6 +2,7 @@ html, body {
     margin: 0;
     height: var(--popup-height);
     min-width: 300px;
+    max-height: 900px;
 }
 html {
     --highlight: rgba(130,130,150,0.1);
@@ -10,8 +11,7 @@ html {
     --border: rgba(120,120,130,0.3);
     --border-2: rgba(130,130,150,0.3);
     --radius: 12px;
-    --popup-height: 400px;
-    overflow: hidden !important;
+    --popup-height: 450px;
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
@@ -26,7 +26,6 @@ body {
         -ms-flex-positive: 1;
             flex-grow: 1;
     min-height: var(--popup-height);
-    overflow: hidden;
 }
 .hide {
     display: none;
@@ -207,5 +206,6 @@ select {
 @media (prefers-color-scheme: dark) {
     body {
         color: white;
+        background-color: #1c1b22;
     }
 }
