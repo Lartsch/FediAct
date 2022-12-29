@@ -392,6 +392,7 @@ async function resolveHandleToHome(handle) {
 
 // resolve a toot to the users home instance
 async function resolveTootToHome(searchstring) {
+	return [false, false]
 	var requestUrl = 'https://' + settings.fediact_homeinstance + searchApi + "/?q=" + searchstring + "&resolve=true&limit=1&exclude_unreviewed=false"
 	var response = await makeRequest("GET", requestUrl, tmpSettings.tokenheader, null)
 	if (response) {
@@ -779,6 +780,7 @@ async function processToots() {
 		addFediElements()
 		// extra step for detailed status elements to select the correct parent
 		if ($(el).is("div.detailed-status") && $(el).closest("div.focusable").length) {
+			var isDetailed = true
 			el = $(el).closest("div.focusable")
 		}
 		// get toot data
@@ -803,7 +805,11 @@ async function processToots() {
 			if (!$(favButton).length) {
 				favButton = $(el).find("a.icon-button:has(i.fa-star), a.detailed-status__link:has(i.fa-star)")
 			}
-			$("<span class='fediactprocessing'></span>").insertAfter($(favButton))
+			if (isDetailed) {
+				$("<div class='detailed-status__button fediactprocessingdetailed'><span class='fediactprocessing'></span></div>").insertAfter($(favButton).parent())
+			} else {
+				$("<span class='fediactprocessing'></span>").insertAfter($(favButton))
+			}
 			var boostButton = $(el).find("button:has(i.fa-retweet)").first()
 			if (!$(boostButton).length) {
 				boostButton = $(el).find("a.icon-button:has(i.fa-retweet), a.detailed-status__link:has(i.fa-retweet)")
@@ -895,12 +901,16 @@ async function processToots() {
 			// handles initialization of element styles
 			function initStyles(tootdata) {
 				// always remove any existing "Unresolved" indicator from the element first
-				$(el).find(".fediactunresolved").remove()
-				$(el).find(".fediactprocessing").remove()
+				$(el).find(".fediactunresolveddetailed, .fediactunresolved").remove()
+				$(el).find(".fediactprocessingdetailed, .fediactprocessing").remove()
 				// is the toot unresolved?
 				if (!tootdata[1]) {
 					// yes, then add the Unresolved indicator
-					$("<span class='fediactunresolved'>X</span>").insertAfter($(favButton))
+					if (isDetailed) {
+						$("<div class='detailed-status__button fediactunresolveddetailed'><span class='fediactunresolved'>X</span></div>").insertAfter($(favButton).parent())
+					} else {
+						$("<span class='fediactunresolved'>X</span>").insertAfter($(favButton))
+					}
 				} else {
 					// otherwise start processing button styles (if enabled OR if the toot was already interacted with, to restore the state while still on the same page)
 					// first enable the bookmark button (is disabled on external instances)
