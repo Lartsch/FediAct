@@ -17,7 +17,7 @@ const mutesApi = "/api/v1/mutes"
 const blocksApi = "/api/v1/blocks"
 const domainBlocksApi = "/api/v1/domain_blocks"
 const pollsApi = "/api/v1/polls"
-const apiDelay = 500
+const apiDelay = 600
 const maxTootCache = 200
 const modalHtml = '<div class="fediactmodal"><div class="fediactmodalinner"><ul class="fediactmodallist"></ul></div></div>'
 
