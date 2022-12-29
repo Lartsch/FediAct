@@ -194,6 +194,16 @@ function replaceAll(str, find, replace) {
 function redirectTo(url) {
 	// check if redirects are enabled at all
 	if (settings.fediact_redirects) {
+		if (settings.fediact_target == "_self") {
+			/* If browser back button was used, flush cache */
+			(function () {
+				window.onpageshow = function(event) {
+					if (event.persisted) {
+						window.location.reload();
+					}
+				};
+			})()
+		}
 		// check if alert before redirect is enabled and show the prompt if so
 		if (settings.fediact_alert) {
 			if (!confirm("Redirecting to " + url)) {
@@ -878,6 +888,9 @@ async function processToots() {
 						var actionExecuted = await executeAction(id, action, null)
 						if (actionExecuted) {
 							if (cacheIndex) {
+								console.log(cacheIndex)
+								console.log(tmpSettings.processed[cacheIndex])
+								console.log(tmpSettings.processed)
 								// set interacted to true
 								tmpSettings.processed[cacheIndex][11] = true
 							}
