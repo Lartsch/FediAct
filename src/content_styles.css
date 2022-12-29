@@ -9,6 +9,7 @@
     --hover: rgba(100,100,130,0.2);
     --confirmation: rgb(38, 133, 0);
 }
+
 @media (prefers-color-scheme: dark) {
     :root {
         --bg: #24262d;
@@ -29,9 +30,12 @@
     background-color: rgba(0,0,0,0.4);
     margin: 0;
     padding: 0;
+    display: -webkit-box;
+    display: -ms-flexbox;
     display: flex;
     font-size: 1rem;
-    animation: fadeIn .2s;
+    -webkit-animation: fadeIn .2s;
+            animation: fadeIn .2s;
 }
 
 .fediactmodalinner {
@@ -42,7 +46,8 @@
 	margin: auto;
 	padding: .4em;
     border-radius: 8px;
-    animation: scaleInSmall .2s;
+    -webkit-animation: scaleInSmall .2s;
+            animation: scaleInSmall .2s;
 }
 .fediactmodalitem {
     position: relative;
@@ -52,22 +57,33 @@
     cursor: pointer;
 	-webkit-box-sizing: border-box;
 	        box-sizing: border-box;
+    -webkit-transition: background-color .4s;
+    -o-transition: background-color .4s;
     transition: background-color .4s;
 }
 .fediactmodalitem:hover, .fediactmodalitem:focus-within {
     background-color: var(--hover);
 }
 .fediactmodallink {
+    display: -webkit-box;
+    display: -ms-flexbox;
     display: flex;
-    align-items: center;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
     cursor: pointer;
 	text-decoration: none;
 	color: var(--fg);
     margin: -.7em;
     padding: .7em;
     border-radius: inherit;
-    box-shadow: inset 0 0 0 var(--confirmation);
+    -webkit-box-shadow: inset 0 0 0 var(--confirmation);
+            box-shadow: inset 0 0 0 var(--confirmation);
+    -webkit-transition: padding .2s, color .2s, -webkit-box-shadow .2s cubic-bezier(.2,.2,0,1);
+    transition: padding .2s, color .2s, -webkit-box-shadow .2s cubic-bezier(.2,.2,0,1);
+    -o-transition: padding .2s, color .2s, box-shadow .2s cubic-bezier(.2,.2,0,1);
     transition: padding .2s, color .2s, box-shadow .2s cubic-bezier(.2,.2,0,1);
+    transition: padding .2s, color .2s, box-shadow .2s cubic-bezier(.2,.2,0,1), -webkit-box-shadow .2s cubic-bezier(.2,.2,0,1);
 }
 .fediactmodallink span:not(:first-of-type) {
     position: absolute;
@@ -77,10 +93,12 @@
     border-radius: 4px;
     background-color: white;
     color: var(--confirmation);
-    animation: scaleInFadeSmall .2s;
+    -webkit-animation: scaleInFadeSmall .2s;
+            animation: scaleInFadeSmall .2s;
 }
 .fediactmodallink.activated {
-    box-shadow: inset 300px 0 0 var(--confirmation);
+    -webkit-box-shadow: inset 300px 0 0 var(--confirmation);
+            box-shadow: inset 300px 0 0 var(--confirmation);
     color: white;
     font-weight: 600;
 }
@@ -89,7 +107,8 @@
 .fediactprocessing {
     display: inline-block;
     margin: auto 10px;
-    animation: spin 2s infinite linear;
+    -webkit-animation: spin 2s infinite linear;
+            animation: spin 2s infinite linear;
     width: 1em;
     height: 1em;
     border-radius: 1em;
@@ -97,16 +116,20 @@
     border-left-color: transparent;
     border-top-color: transparent;
     position: relative;
-    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+            box-sizing: border-box;
     opacity: .8;
 }
 .fediactprocessing::after {
     content: "";
     border: inherit;
     border-radius: inherit;
-    animation: inherit;
-    animation-duration: 1.5s;
-    animation-timing-function: ease;
+    -webkit-animation: inherit;
+            animation: inherit;
+    -webkit-animation-duration: 1.5s;
+            animation-duration: 1.5s;
+    -webkit-animation-timing-function: ease;
+            animation-timing-function: ease;
     position: absolute;
     inset: -2px;
 }
@@ -174,30 +197,68 @@
 
 /* Keyframes */
 
+@-webkit-keyframes fadeIn {
+    from {
+        -webkit-filter: opacity(0);
+                filter: opacity(0);
+    }
+}
 @keyframes fadeIn {
     from {
-        filter: opacity(0);
+        -webkit-filter: opacity(0);
+                filter: opacity(0);
+    }
+}
+@-webkit-keyframes fadeOut {
+    to {
+        -webkit-filter: opacity(0);
+                filter: opacity(0);
     }
 }
 @keyframes fadeOut {
     to {
-        filter: opacity(0);
+        -webkit-filter: opacity(0);
+                filter: opacity(0);
+    }
+}
+@-webkit-keyframes scaleInSmall {
+    from {
+        -webkit-transform: scale(.98);
+                transform: scale(.98);
     }
 }
 @keyframes scaleInSmall {
     from {
-        transform: scale(.98);
+        -webkit-transform: scale(.98);
+                transform: scale(.98);
+    }
+}
+@-webkit-keyframes scaleInFadeSmall {
+    from {
+        -webkit-transform: scale(.98);
+                transform: scale(.98);
+        -webkit-filter: opacity(0);
+                filter: opacity(0);
     }
 }
 @keyframes scaleInFadeSmall {
     from {
-        transform: scale(.98);
-        filter: opacity(0);
+        -webkit-transform: scale(.98);
+                transform: scale(.98);
+        -webkit-filter: opacity(0);
+                filter: opacity(0);
+    }
+}
+@-webkit-keyframes spin {
+    to {
+        -webkit-transform: rotate(1turn);
+                transform: rotate(1turn);
     }
 }
 @keyframes spin {
     to {
-        transform: rotate(1turn);
+        -webkit-transform: rotate(1turn);
+                transform: rotate(1turn);
     }
 }
 

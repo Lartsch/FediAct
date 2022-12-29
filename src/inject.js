@@ -1475,7 +1475,7 @@ async function checkSite() {
 			}
 			// at this point, we know that it's mastodon and the background processor should start running
 			if (!backgroundProcessor()) {
-				log("Could not start background process")
+				log("Could not start background processor.")
 				return false
 			}
 			// if option is enabled, check if logged in on that instance and stop

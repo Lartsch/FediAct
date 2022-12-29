@@ -73,9 +73,14 @@ async function generalRequest(data) {
                 })
             }
             clearTimeout(timeoutId)
-            if (res.status  >= 200 && res.status < 300) {
-                var restext = await res.text()
-                resolve(restext)
+            if (res.status  >= 200 && res.status < 300 ) {
+                const contentType = res.headers.get("content-type")
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    var restext = await res.text()
+                    resolve(restext)
+                } else {
+                    resolve(false)
+                }
             } else {
                 resolve(false)
             }
