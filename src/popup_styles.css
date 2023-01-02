@@ -118,8 +118,24 @@ label span {
     opacity: .7;
     margin-top: .2em;
 }
-input[type="text"] {
+.text-input-container {
     width: 100%;
+    display: flex;
+    border: 1px solid var(--border);
+    border-radius: calc(var(--radius) / 2);
+    overflow: hidden;
+}
+.text-input-container span {
+    padding: .7em;
+    background-color: var(--highlight);
+}
+.text-input-container input {
+    border: 0 !important;
+    border-radius: 0 !important;
+    outline: 0;
+}
+.text-input-container:focus-within {
+    outline: auto; /* This is the browser's default focus outline */
 }
 input, textarea, select {
     border: 1px solid var(--border);
