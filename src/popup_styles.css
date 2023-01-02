@@ -135,7 +135,7 @@ label span {
     outline: 0;
 }
 .text-input-container:focus-within {
-    outline: 5px auto; /* This is the browser's default focus outline */
+    outline: auto; /* This is the browser's default focus outline */
 }
 input, textarea, select {
     border: 1px solid var(--border);
