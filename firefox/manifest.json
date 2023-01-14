@@ -37,7 +37,7 @@
   "browser_action": {
     "default_popup": "src/popup.html",
     "default_icon": "src/icon/48.png",
-    "default_title": "FediFollow settings"
+    "default_title": "FediAct settings"
   },
   "icons": {
     "48": "src/icon/48.png"
