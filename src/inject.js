@@ -79,7 +79,7 @@ function log(text) {
 	  // catch all animationstart events
       $(document).on('animationstart webkitAnimationStart oanimationstart MSAnimationStart', function(e){
 		// check if the animatonname equals our animation and if the element is one of our selectors
-        if (e.originalEvent.animationName == 'nodeInserted' && $(e.target).is(selector)) {
+        if (e.originalEvent.animationName == 'fa_nodeInserted' && $(e.target).is(selector)) {
           if (typeof callback == 'function') {
 			// return the complete object in the callback
             callback(e)

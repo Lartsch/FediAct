@@ -34,8 +34,8 @@
     display: -ms-flexbox;
     display: flex;
     font-size: 1rem;
-    -webkit-animation: fadeIn .2s;
-            animation: fadeIn .2s;
+    -webkit-animation: fa_fadeIn .2s;
+        animation: fa_fadeIn .2s;
 }
 
 .fediactmodalinner {
@@ -46,8 +46,8 @@
 	margin: auto;
 	padding: .4em;
     border-radius: 8px;
-    -webkit-animation: scaleInSmall .2s;
-            animation: scaleInSmall .2s;
+    -webkit-animation: fa_scaleInSmall .2s;
+        animation: fa_scaleInSmall .2s;
 }
 .fediactmodalitem {
     position: relative;
@@ -93,8 +93,8 @@
     border-radius: 4px;
     background-color: white;
     color: var(--confirmation);
-    -webkit-animation: scaleInFadeSmall .2s;
-            animation: scaleInFadeSmall .2s;
+    -webkit-animation: fa_scaleInFadeSmall .2s;
+        animation: fa_scaleInFadeSmall .2s;
 }
 .fediactmodallink.activated {
     -webkit-box-shadow: inset 300px 0 0 var(--confirmation);
@@ -178,45 +178,45 @@
     color: blue !important;
 }
 
-/* Keyframes */
+/* keyframes fa_*/
 
-@-webkit-keyframes fadeIn {
+@-webkit-keyframes fa_fadeIn {
     from {
         -webkit-filter: opacity(0);
                 filter: opacity(0);
     }
 }
-@keyframes fadeIn {
+@keyframes fa_fadeIn {
     from {
         -webkit-filter: opacity(0);
                 filter: opacity(0);
     }
 }
-@-webkit-keyframes fadeOut {
+@-webkit-keyframes fa_fadeOut {
     to {
         -webkit-filter: opacity(0);
                 filter: opacity(0);
     }
 }
-@keyframes fadeOut {
+@keyframes fa_fadeOut {
     to {
         -webkit-filter: opacity(0);
                 filter: opacity(0);
     }
 }
-@-webkit-keyframes scaleInSmall {
+@-webkit-keyframes fa_scaleInSmall {
     from {
         -webkit-transform: scale(.98);
                 transform: scale(.98);
     }
 }
-@keyframes scaleInSmall {
+@keyframes fa_scaleInSmall {
     from {
         -webkit-transform: scale(.98);
                 transform: scale(.98);
     }
 }
-@-webkit-keyframes scaleInFadeSmall {
+@-webkit-keyframes fa_scaleInFadeSmall {
     from {
         -webkit-transform: scale(.98);
                 transform: scale(.98);
@@ -224,7 +224,7 @@
                 filter: opacity(0);
     }
 }
-@keyframes scaleInFadeSmall {
+@keyframes fa_scaleInFadeSmall {
     from {
         -webkit-transform: scale(.98);
                 transform: scale(.98);
@@ -234,41 +234,41 @@
 }
 
 
-/*  
+/*
     We insert these styles for the DOMNodeAppeared function as separate stylesheet (see manifest) to fix
     Firefox blocking script-inserted <style> elements due to the site's CSP (long time bug)
 */
 
-@-moz-keyframes nodeInserted { 
+@-moz-keyframes fa_nodeInserted {
     from {
         opacity: 1;
     } to {
         opacity: 1;
     }
 }
-@-webkit-keyframes nodeInserted { 
+@-webkit-keyframes fa_nodeInserted {
     from {
         opacity: 1;
     } to {
         opacity: 1;
     }
 }
-@-ms-keyframes nodeInserted { 
+@-ms-keyframes fa_nodeInserted {
     from {
         opacity: 1;
     } to {
         opacity: 1;
     }
 }
-@-o-keyframes nodeInserted {
+@-o-keyframes fa_nodeInserted {
     from {
         opacity: 1;
     } to {
         opacity: 1;
     }
 }
-@keyframes nodeInserted { 
-  from { 
+@keyframes fa_nodeInserted {
+    from {
       opacity: 1;
   } to {
       opacity: 1;
@@ -285,15 +285,15 @@ div.account-card a.logo-button,
 div.directory-card a.icon-button,
 div.detailed-status a.logo-button,
 button.remote-button,
-script#initial-state { 
-    -webkit-animation-name: nodeInserted !important;
+script#initial-state {
+    -webkit-animation-name: fa_nodeInserted !important;
     -webkit-animation-duration: 0.001s !important;
-    -ms-animation-name: nodeInserted !important;
+    -ms-animation-name: fa_nodeInserted !important;
     -ms-animation-duration: 0.001s !important;
-    -moz-animation-name: nodeInserted !important;
+    -moz-animation-name: fa_nodeInserted !important;
     -moz-animation-duration: 0.001s !important;
-    -o-animation-name: nodeInserted !important;
+    -o-animation-name: fa_nodeInserted !important;
     -o-animation-duration: 0.001s !important;
-    animation-name: nodeInserted !important;
+    animation-name: fa_nodeInserted !important;
     animation-duration: 0.001s !important;
 }
