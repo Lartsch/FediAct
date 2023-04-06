@@ -1,3 +1,6 @@
+> **Note**
+> I am currently busy with work. For the time being, I will not push major updates but might find some time for important fixes - and also for approving pull requests. So, if you feel comfortable doing so, **please create pull requests**. This should be a community effort, not a one-person-show.
+
 # FediAct (v0.9.8)
 A Chrome/Firefox extension that simplifies follow and post interactions on Mastodon servers other than your own.
 
