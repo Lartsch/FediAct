@@ -1,5 +1,5 @@
 > **Note**  
-> LOOKING FOR AN ACTIVE MAINTAINER TO TAKE CARE OF THIS PROJECT!
+> LOOKING FOR AN ACTIVE MAINTAINER TO TAKE CARE OF THIS PROJECT!  
 > FediAct requires some major updates/rewriting to resolve issues, increase performance/reliability and to be easier to maintain, for which I do not have time currently. Please leave a message/issue.
 
 # FediAct (v0.9.8)
