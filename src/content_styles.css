@@ -3,17 +3,17 @@
 */
 
 :root { /* Modal Vars */
-    --bg: #eee;
-    --fg: #494949;
-    --border: rgba(120,120,130,0.3);
-    --hover: rgba(100,100,130,0.2);
-    --confirmation: rgb(38, 133, 0);
+    --fediact-bg: #eee;
+    --fediact-fg: #494949;
+    --fediact-border: rgba(120,120,130,0.3);
+    --fediact-hover: rgba(100,100,130,0.2);
+    --fediact-confirmation: rgb(38, 133, 0);
 }
 
 @media (prefers-color-scheme: dark) {
     :root {
-        --bg: #24262d;
-        --fg: white;
+        --fediact-bg: #24262d;
+        --fediact-fg: white;
     }
 }
 
@@ -39,8 +39,8 @@
 }
 
 .fediactmodalinner {
-    background-color: var(--bg);
-    border: 1px solid var(--border);
+    background-color: var(--fediact-bg);
+    border: 1px solid var(--fediact-border);
 	width: 80%;
 	max-width: 300px;
 	margin: auto;
@@ -62,7 +62,7 @@
     transition: background-color .4s;
 }
 .fediactmodalitem:hover, .fediactmodalitem:focus-within {
-    background-color: var(--hover);
+    background-color: var(--fediact-hover);
 }
 .fediactmodallink {
     display: -webkit-box;
@@ -73,12 +73,12 @@
             align-items: center;
     cursor: pointer;
 	text-decoration: none;
-	color: var(--fg);
+	color: var(--fediact-fg);
     margin: -.7em;
     padding: .7em;
     border-radius: inherit;
-    -webkit-box-shadow: inset 0 0 0 var(--confirmation);
-            box-shadow: inset 0 0 0 var(--confirmation);
+    -webkit-box-shadow: inset 0 0 0 var(--fediact-confirmation);
+            box-shadow: inset 0 0 0 var(--fediact-confirmation);
     -webkit-transition: padding .2s, color .2s, -webkit-box-shadow .2s cubic-bezier(.2,.2,0,1);
     transition: padding .2s, color .2s, -webkit-box-shadow .2s cubic-bezier(.2,.2,0,1);
     -o-transition: padding .2s, color .2s, box-shadow .2s cubic-bezier(.2,.2,0,1);
@@ -92,13 +92,13 @@
     padding: .2em .4em;
     border-radius: 4px;
     background-color: white;
-    color: var(--confirmation);
+    color: var(--fediact-confirmation);
     -webkit-animation: fa_scaleInFadeSmall .2s;
         animation: fa_scaleInFadeSmall .2s;
 }
 .fediactmodallink.activated {
-    -webkit-box-shadow: inset 300px 0 0 var(--confirmation);
-            box-shadow: inset 300px 0 0 var(--confirmation);
+    -webkit-box-shadow: inset 300px 0 0 var(--fediact-confirmation);
+            box-shadow: inset 300px 0 0 var(--fediact-confirmation);
     color: white;
     font-weight: 600;
 }
